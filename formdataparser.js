@@ -350,12 +350,14 @@ function FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post
                 }
             } else {
                 cur_size_accumulator += end_index - start_index + 1;
-                if (start_index < 0) {
-                    // console.log('remaining in progress!!!!', start_index);
-                    cur_writestream.write(content_boundary_buffer.slice(0, - start_index));
-                    ok = cur_writestream.write(cur_chunk.slice(0, end_index+1));
-                } else {
-                    ok = cur_writestream.write(cur_chunk.slice(start_index, end_index+1));
+                if (start_index !== end_index + 1) {
+                    if (start_index < 0) {
+                        // console.log('remaining in progress!!!!', start_index);
+                        cur_writestream.write(content_boundary_buffer.slice(0, - start_index));
+                        ok = cur_writestream.write(cur_chunk.slice(0, end_index+1));
+                    } else {
+                        ok = cur_writestream.write(cur_chunk.slice(start_index, end_index+1));
+                    }
                 }
             }
             start_index = - pointer;
@@ -368,13 +370,6 @@ function FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post
         success = success_cb;
         fail = fail_cb;
         request.body = data;
-
-        if (boundary_str.length > 100) {
-            request.destroy();
-            fail('Boundary is too long!');
-            return;
-        }
-
         request.on('data', function(chunk) {
             try{
                 var ok = self.parse_chunk(chunk);
