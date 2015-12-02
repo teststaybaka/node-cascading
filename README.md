@@ -50,7 +50,7 @@ dispatcher.get('/^\/.*$/', function(request, response, match) {
 });
 ```
 
-Two additional fields are available: `request.pathname` and `request.params`. `request.pathname` is a part of the url, between domain and query string. `request.params` is a dictionary of key-value pairs parsed from query string.
+Two additional fields are available for request object: `request.pathname` and `request.params`. `request.pathname` is a part of the url, between domain and query string, which is the target when trying to match your regular expression/url pattern. `request.params` is a dictionary of key-value pairs parsed from query string.
 
 ## Cookies
 The module parses cookies only when you need it.
