@@ -121,7 +121,7 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
                         cur_writestream.end(cur_chunk.slice(start_index, end_index+1));
                     }
                 }
-                
+
                 if (data[name].filename.length == 0) {
                     console.log(data[name])
                     fs.unlink(data[name].tmp_filepath);
@@ -368,6 +368,13 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
         success = success_cb;
         fail = fail_cb;
         request.body = data;
+        
+        if (boundary_str.length > 100) {
+            request.destroy();
+            fail('Boundary is too long!');
+            return;
+        }
+
         request.on('data', function(chunk) {
             try{
                 var ok = self.parse_chunk(chunk);
