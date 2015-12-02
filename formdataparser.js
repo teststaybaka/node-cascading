@@ -32,6 +32,9 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
     var name_prefix = string2array('name="');
     var filename_prefix = string2array('filename="');
     var content_type_prefix = string2array('Content-Type:');
+    
+    var success, fail;
+    var writestream_waiting_list_length = 0;
     var data = {};
     var buffer = [];
     var cur_name;
@@ -43,6 +46,7 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
     var start_index, end_index;
     var isFile;
     var in_progress = false;
+    var read_complete = false;
     var total = 0;
     var pointer = 0;
 
@@ -60,7 +64,9 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
     }
 
     this.value_boundary_state = function(idx, value) {
-        if (value === returnline || value === newline) {
+        if (value !== returnline) {
+            end_index = idx;
+        } else {
             in_progress = false;
             if (pre_chunk) {
                 if (pre_chunk.length + end_index - start_index + 1 > post_max) {
@@ -74,8 +80,6 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
             }
             cur_state = self.pure_boundary_state;
             cur_state(idx, value);
-        } else {
-            end_index = idx;
         }
     }
 
@@ -84,7 +88,7 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
             pointer += 1;
             if (pointer === content_boundary.length) {
                 pointer = 0;
-                cur_state = self.end_state;
+                cur_state = self.newline_state1;
             }
         } else {
             throw 'Form parse error: Expecting boudnary string.'
@@ -92,12 +96,20 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
     }
 
     this.content_boundary_state = function(idx, value) {
-        if (value === content_boundary[pointer]) {
+        if (value !== content_boundary[0] && (pointer === 0 || value !== content_boundary[pointer])) {
+            pointer = 0;
+            end_index = idx;
+        } else if (pointer !== 0 && value === content_boundary[0]) {
+            pointer = 1;
+            end_index = idx - 1;
+        } else{
             // console.log(idx, value, pointer, content_boundary[pointer], ('\r\n'+boundary_str)[pointer], end_index);
             pointer += 1;
             if (pointer === content_boundary.length) {
                 pointer = 0;
                 in_progress = false;
+                data[cur_name].size = cur_size_accumulator + end_index - start_index + 1;
+                cur_size_accumulator = 0;
                 if (start_index === end_index + 1) {
                     cur_writestream.end();
                 } else {
@@ -109,22 +121,14 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
                         cur_writestream.end(cur_chunk.slice(start_index, end_index+1));
                     }
                 }
-                data[cur_name].size = cur_size_accumulator + end_index - start_index + 1;
-                if (data[cur_name].filename.length == 0) {
-                    console.log(data[cur_name])
-                    fs.unlink(data[cur_name].tmp_filepath);
-                    delete data[cur_name];
+                
+                if (data[name].filename.length == 0) {
+                    console.log(data[name])
+                    fs.unlink(data[name].tmp_filepath);
+                    delete data[name];
                 }
-                cur_size_accumulator = 0;
                 cur_state = self.newline_state1;
             }
-        } else if (pointer !== 0 && value === content_boundary[0]) {
-            pointer = 1;
-            end_index = idx - 1;
-            // console.log(idx, value, 0, content_boundary[0], ('\r\n'+boundary_str)[0], end_index);
-        } else {
-            pointer = 0;
-            end_index = idx;
         }
     }
 
@@ -181,7 +185,11 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
 
     this.extract_name_state = function(idx, value) {
         if (value !== quote) {
-            buffer.push(value);
+            if (buffer.length < fieldname_max) {
+                buffer.push(value);
+            } else {
+                throw 'Form parse error: Name is too long'
+            }
         } else {
             cur_name = array2string(buffer);
             buffer.length = 0;
@@ -216,7 +224,11 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
 
     this.extract_filename_state = function(idx, value) {
         if (value !== returnline) {
-            buffer.push(value);
+            if (buffer.length < fieldname_max) {
+                buffer.push(value);
+            } else {
+                throw 'Form parse error: Filename is too long'
+            }
         } else {
             buffer.pop();
             cur_filename = array2string(buffer);
@@ -257,7 +269,11 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
 
     this.extract_content_type_state = function(idx, value) {
         if (value != returnline) {
-            buffer.push(value);
+            if (buffer.length < fieldname_max) {
+                buffer.push(value);
+            } else {
+                throw 'Form parse error: Content type is too long'
+            }
         } else {
             cur_content_type = array2string(buffer);
             buffer.length = 0;
@@ -278,6 +294,9 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
                 if (isFile) {
                     var tmp_filepath = './tmp/tmpfile'+Date.now();
                     cur_writestream = fs.createWriteStream(tmp_filepath, {defaultEncoding: 'binary'});
+                    writestream_waiting_list_length += 1;
+                    cur_writestream.on('finish', self.writestream_finished);
+
                     data[cur_name] = {
                         filename: cur_filename,
                         content_type: cur_content_type,
@@ -293,13 +312,20 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
         }
     }
 
+    this.writestream_finished = function() {
+        writestream_waiting_list_length -= 1;
+        if (writestream_waiting_list_length === 0 && read_complete && !request.closed) {
+            success();
+        }
+    }
+
     this.end_state = function() {
         // ignore everthing behind
     }
 
     this.parse_chunk = function(chunk) {
-        // console.log(chunk.toString('ascii'));
         // console.log('parsing', chunk.length);
+        // console.log(chunk.toString('ascii'));
         total += chunk.length;
         if (total > post_multipart_max) {
             throw 'Exceed size limit.'
@@ -338,7 +364,9 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
         return ok;
     }
 
-    this.parse = function(success, fail) {
+    this.parse = function(success_cb, fail_cb) {
+        success = success_cb;
+        fail = fail_cb;
         request.body = data;
         request.on('data', function(chunk) {
             try{
@@ -378,7 +406,10 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
         });
 
         request.on('end', function() {
-            success();
+            read_complete = true;
+            if (writestream_waiting_list_length === 0 && !request.closed) {
+                success();
+            }
         });
     }
 

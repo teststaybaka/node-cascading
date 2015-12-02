@@ -81,10 +81,7 @@ function Router() {
                     if (content_type === 'multipart/form-data' && content_type_parts.length === 2 && form_boundary_reg.test(content_type_parts[1])) {
                         var boundary_str = '--'+content_type_parts[1].match(form_boundary_reg)[1];
                         new FormdataParser(request, boundary_str, fieldname_max, post_max, post_multipart_max).parse(function() {
-                            if (!request.closed) {
-                                console.log('finished');
-                                rule.callback(request, response, match);
-                            }
+                            rule.callback(request, response, match);
                         }, function(e) {
                             self.notAllowed(response);
                         });
