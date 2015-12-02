@@ -37,7 +37,7 @@ dispatcher.delete('/^\/$/', function(request, response, match) {
 ```
 However, the module handles request body for you only on POST request. You may need to deal with the data comes with the other 3 methods.  
 
-Also the order of those routes are important. With multiple matches, the module will pass the request to the first one.  
+Also the order of those routes is important. With multiple matches, the module will pass the request to the first one.  
 ```javascript
 // This will match "/something" first
 dispatcher.get('/^\/something$/', function(request, response, match) {
