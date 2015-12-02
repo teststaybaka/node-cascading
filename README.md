@@ -130,7 +130,8 @@ dispatcher.post(/^\/upload$/, function(request, response) {
 ```
 
 ## Post data size limit
-By default the total amount of data can be received through POST is 2147483648 bytes (or 2GB). Each non-file field can not exceed 1048576 bytes (or 1MB). Field name can not exceed 1024 bytes.  
+By default, for urlencoded data, the total amout of data that can be received through POST is 1048576 bytes (or 1MB).
+For multipart and binary file data, the total amount is 2147483648 bytes (or 2GB). Each non-file field can not exceed 1048576 bytes (or 1MB). Field name can not exceed 1024 bytes.  
 
 To change those limits:
 ```javascript
