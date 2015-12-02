@@ -1,11 +1,14 @@
 var Router = require('../router.js');
 
 var router = new Router();
-router.setStatic('/static', './static');
-router.setTemplateDir('./static');
+router.setStatic('/static', './test/static');
+router.setTemplateDir('./test/static');
+router.setTempfileDir('./test2/tmp2')
 router.listen(80);
 
 router.get(/^\/$/, function(request, response) {
+    console.log(request.pathname);
+    console.log(request.params);
     router.render(response, 'index.html');
 });
 

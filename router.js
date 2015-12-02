@@ -3,10 +3,31 @@ var https = require('https');
 var fs = require('fs');
 var querystring = require('querystring');
 var stream = require('stream');
+var path = require('path');
 var FormdataParser = require('./formdataparser.js');
 
 Array.prototype.last = function(index) {
     return this[this.length - index];
+}
+
+function mkdir(dir, callback) {
+    fs.stat(dir, function(error, stats) {
+        if (error) {
+            mkdir(path.dirname(dir), function() {
+                fs.mkdir(dir, 0777, function(error) {
+                    if (error) {
+                        throw error;
+                    } else {
+                        callback();
+                    }
+                });
+            });
+        } else if (stats.isDirectory()) {
+            callback();
+        } else {
+            throw dir + ' is not a directory.';
+        }
+    });
 }
 
 module.exports = function() {
@@ -40,6 +61,8 @@ module.exports = function() {
         if (url_parts.length === 2) {
             params = querystring.parse(url_parts[1], null, null, {maxKeys: 0});
         }
+        request.params = params;
+        request.pathname = pathname;
 
         //match static
         for (var i = 0; i < static_dirs.length; i++) {
@@ -71,8 +94,6 @@ module.exports = function() {
                 return;
             }
         }
-        // console.log(pathname);
-        // console.log(params);
 
         //match url rules
         for (var i = 0; i < rules.length; i++) {
@@ -179,30 +200,12 @@ module.exports = function() {
     }
 
     this.setTempfileDir = function(dir) {
-        fs.stat(dir, function(error, stats) {
-            if (error) {
-                self.createDir(dir);
-            } else if (stats.isDirectory()) {
-                tempfile_dir = dir+'/';
-            }
+        var directory = path.resolve(dir);
+        mkdir(directory, function() {
+            tempfile_dir = dir+'/';
         });
     }
     this.setTempfileDir('./tmp');
-
-    //recursively
-    this.createDir = function(dir) {
-        fs.mkdir(dir, 0777, function(error) {
-            if (error) {
-                if (error.code == 'EEXIST') {
-                    tempfile_dir = './'+dir+'/';
-                } else {
-                    throw error;
-                }
-            } else {
-                tempfile_dir = './'+dir+'/';
-            }
-        });
-    }
 
     this.getCookie = function(request, name) {
         if (!request.cookies) {

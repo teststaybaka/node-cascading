@@ -50,15 +50,17 @@ dispatcher.get('/^\/.*$/', function(request, response, match) {
 });
 ```
 
+Two additional fields are available: `request.pathname` and `request.params`. `request.pathname` is a part of the url, between domain and query string. `request.params` is a dictionary of key-value pairs parsed from query string.
+
 ## Cookies
-The module parses cookies lazily once you need it.
+The module parses cookies only when you need it.
 ```javascript
 function handler(request, response) {
     dispatcher.getCookie(request, 'my-cookie-name');
     dispatcher.setCookie(response, 'test-cookie-name', 'value-here')
 }
 ```
-You can also set cookie with `dispathcer.setCookie(response, name, value, path, max_age)`. The last two are optional. `path='/'` means available through the whole domain. `max_age` is the milliseconds to expire.  
+You can also set cookie with `dispathcer.setCookie(response, name, value, path, max_age)`. The last two are optional. `path='/'` means available through the whole domain. `max_age` is in milliseconds.  
 
 To delete a cookie, set the `max_age` to `0`.  
 
@@ -127,6 +129,9 @@ dispatcher.post(/^\/upload$/, function(request, response) {
 }
 ```
 
+## Post data size limit
+
+
 ## Temporary directory
 Temporary directory is used to store uploaded files. The default is `./tmp`, but you can set it to other directory.
 ```javascript
@@ -135,7 +140,7 @@ dispatcher.setTempfileDir('./temp2');
 It will throw an error if it failes to create a directory. If you create the directory yourself, make sure the program is able to read and write under it.
 
 ## Handles 404 and 403
-Two default way of handling 404 and 403 are provided when url doesn't match any url pattern, the file requested is not found, or file exceeded size limit, etc. You can as well rewrite them if you want.
+Two default way of handling 404 and 403 are provided when url doesn't match any url pattern, the file requested is not found, or file exceeds size limit, etc. You can as well rewrite them if you want.
 ```javascript
 dispatcher.notFound = function(response) {
     // how to respond to 404?
