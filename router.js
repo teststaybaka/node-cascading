@@ -9,7 +9,7 @@ Array.prototype.last = function(index) {
     return this[this.length - index];
 }
 
-function Router() {
+module.exports = function() {
     var self = this;
     var static_dirs = [];
     var rules = [];
@@ -179,7 +179,19 @@ function Router() {
     }
 
     this.setTempfileDir = function(dir) {
-        fs.mkdir('./'+dir, 0777, function(error) {
+        fs.stat(dir, function(error, stats) {
+            if (error) {
+                self.createDir(dir);
+            } else if (stats.isDirectory()) {
+                tempfile_dir = dir+'/';
+            }
+        });
+    }
+    this.setTempfileDir('./tmp');
+
+    //recursively
+    this.createDir = function(dir) {
+        fs.mkdir(dir, 0777, function(error) {
             if (error) {
                 if (error.code == 'EEXIST') {
                     tempfile_dir = './'+dir+'/';
@@ -191,7 +203,6 @@ function Router() {
             }
         });
     }
-    this.setTempfileDir('tmp');
 
     this.getCookie = function(request, name) {
         if (!request.cookies) {
@@ -218,7 +229,7 @@ function Router() {
         }
         if (max_age) {
             var now = Date.now();
-            var expires = new Date(now*1000 + max_age);
+            var expires = new Date(now + max_age);
             cookie_str += '; expires='+expires.toGMTString();
         }
         response.setHeader('Set-Cookie', cookie_str);
@@ -271,5 +282,3 @@ function Router() {
 
     this.server = http.createServer(this.dispatcher);
 };
-
-module.exports = Router;

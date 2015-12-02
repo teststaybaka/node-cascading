@@ -1,0 +1,27 @@
+{
+  "name": "node-dispatch",
+  "version": "0.0.1",
+  "description": "Web dispatcher for nodejs",
+  "main": "router.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node test/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teststaybaka/node-dispatch.git"
+  },
+  "keywords": [
+    "Node",
+    "Router",
+    "Dispatcher"
+  ],
+  "author": "Yuxuan Xie <teststaybaka@gmail.com> (http://yuxuanxie.com)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/teststaybaka/node-dispatch/issues"
+  },
+  "homepage": "https://github.com/teststaybaka/node-dispatch#readme"
+}
