@@ -48,25 +48,31 @@ function Router() {
             var match = pathname.match(exp);
             if (match) {
                 var file_path = match.last(1);
-                fs.readFile(local_pre+'/'+file_path, function (err, data) {
-                    if (err) {
-                        console.log(err);
-                        self.notFound(response);
-                    } else {
-                        var suffix = file_path.match(suffix_reg);
-                        if (suffix && (suffix[1] in mimeTypes)) {
-                            var mimeType = mimeTypes[suffix[1]];
-                            response.writeHead(200, {'Content-Type': mimeType});
+                if (file_path.indexOf('..') !== -1) {
+                    self.notAllowed(response);
+                } else {
+                    fs.readFile(local_pre+'/'+file_path, function (err, data) {
+                        if (err) {
+                            console.log(err);
+                            self.notFound(response);
                         } else {
-                            response.writeHead(200, {'Content-Type': 'application/octet-stream'});
+                            var suffix = file_path.match(suffix_reg);
+                            if (suffix && (suffix[1] in mimeTypes)) {
+                                var mimeType = mimeTypes[suffix[1]];
+                                response.writeHead(200, {'Content-Type': mimeType});
+                            } else {
+                                response.writeHead(200, {'Content-Type': 'application/octet-stream'});
+                            }
+                            response.write(data);
+                            response.end();
                         }
-                        response.write(data);
-                        response.end();
-                    }
-                });
+                    });
+                }
                 return;
             }
         }
+        // console.log(pathname);
+        // console.log(params);
 
         //match url rules
         for (var i = 0; i < rules.length; i++) {
