@@ -15,6 +15,7 @@ function Router() {
     var rules = [];
     var templateDir = './';
 
+    var tempfile_dir;
     var fieldname_max = 1024;
     var post_max = 1<<20;
     var post_multipart_max = 2147483648;
@@ -39,8 +40,6 @@ function Router() {
         if (url_parts.length === 2) {
             params = querystring.parse(url_parts[1], null, null, {maxKeys: 0});
         }
-        console.log(pathname)
-        console.log(params)
 
         //match static
         for (var i = 0; i < static_dirs.length; i++) {
@@ -80,7 +79,7 @@ function Router() {
                     request.content_type = content_type;
                     if (content_type === 'multipart/form-data' && content_type_parts.length === 2 && form_boundary_reg.test(content_type_parts[1])) {
                         var boundary_str = '--'+content_type_parts[1].match(form_boundary_reg)[1];
-                        new FormdataParser(request, boundary_str, fieldname_max, post_max, post_multipart_max).parse(function() {
+                        new FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max).parse(function() {
                             rule.callback(request, response, match);
                         }, function(e) {
                             self.notAllowed(response);
@@ -102,7 +101,7 @@ function Router() {
                             rule.callback(request, response, match);
                         });
                     } else {
-                        var tmp_filepath = './tmp/tmpfile'+Date.now();
+                        var tmp_filepath = tempfile_dir+'tmpfile'+Date.now();
                         var writestream = fs.createWriteStream(tmp_filepath, {defaultEncoding: 'binary'});
                         var size = 0;
                         request.on('data', function(chunk) {
@@ -149,6 +148,22 @@ function Router() {
         rules.push({exp: exp, callback: callback, method: 'POST'});
     }
 
+    this.put = function(exp, callback) {
+        rules.push({exp: exp, callback: callback, method: 'PUT'});
+    }
+
+    this.patch = function(exp, callback) {
+        rules.push({exp: exp, callback: callback, method: 'PATCH'});
+    }
+
+    this.delete = function(exp, callback) {
+        rules.push({exp: exp, callback: callback, method: 'DELETE'});
+    }
+
+    this.setFieldnameMax = function(max_value) {
+        fieldname_max = max_value;
+    }
+
     this.setPostMax = function(max_value) {
         post_max = max_value;
     }
@@ -156,6 +171,21 @@ function Router() {
     this.setPostMultipartMax = function(max_value) {
         post_multipart_max = max_value;
     }
+
+    this.setTempfileDir = function(dir) {
+        fs.mkdir('./'+dir, 0777, function(error) {
+            if (error) {
+                if (error.code == 'EEXIST') {
+                    tempfile_dir = './'+dir+'/';
+                } else {
+                    throw error;
+                }
+            } else {
+                tempfile_dir = './'+dir+'/';
+            }
+        });
+    }
+    this.setTempfileDir('tmp');
 
     this.getCookie = function(request, name) {
         if (!request.cookies) {

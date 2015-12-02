@@ -17,7 +17,7 @@ function array2string(bytes) {
     return new Buffer(bytes).toString('utf8');
 }
 
-function FormdataParser(request, boundary_str, fieldname_max, post_max, post_multipart_max) {
+function FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max) {
     var self = this;
     var start_boundary = string2array(boundary_str);
     var content_boundary = string2array('\r\n'+boundary_str);
@@ -292,7 +292,7 @@ function FormdataParser(request, boundary_str, fieldname_max, post_max, post_mul
                 start_index = idx+1;
                 end_index = idx;
                 if (isFile) {
-                    var tmp_filepath = './tmp/tmpfile'+Date.now();
+                    var tmp_filepath = tempfile_dir+'tmpfile'+Date.now();
                     cur_writestream = fs.createWriteStream(tmp_filepath, {defaultEncoding: 'binary'});
                     writestream_waiting_list_length += 1;
                     cur_writestream.on('finish', self.writestream_finished);
