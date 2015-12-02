@@ -237,7 +237,7 @@ function Router() {
 
     this.notAllowed = function(response) {
         response.writeHead(403, {'Content-Type': 'text/html'});
-        response.end('done');
+        response.end('403 Not Allowed\n');
     }
 
     this.setTemplateDir = function(dir) {
