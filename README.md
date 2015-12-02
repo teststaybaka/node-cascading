@@ -130,7 +130,14 @@ dispatcher.post(/^\/upload$/, function(request, response) {
 ```
 
 ## Post data size limit
+By default the total amount of data can be received through POST is 2147483648 bytes (or 2GB). Each non-file field can not exceed 1048576 bytes (or 1MB). Field name can not exceed 1024 bytes.  
 
+To change those limits:
+```javascript
+dispatcher.setFieldnameMax(max_value);
+dispatcher.setPostMax(max_value);
+dispatcher.setPostMultipartMax(max_value);
+```
 
 ## Temporary directory
 Temporary directory is used to store uploaded files. The default is `./tmp`, but you can set it to other directory.
