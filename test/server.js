@@ -1,23 +1,36 @@
 var Router = require('../router.js');
 
-var router = new Router();
-router.setStatic('/static', './test/static');
-router.setTemplateDir('./test/static');
-router.setTempfileDir('./test2/tmp2')
-router.listen(80);
+var secret_key = 'blKNv0912zvSfvpsmbzm=v_xvikmv1ncvf9zMFx81mvizxlkOV7jnbs_=_=MM1Qp';
+var dispatcher = new Router();
+dispatcher.enableSecureCookieSession(secret_key);
+dispatcher.setStatic('/static', './test/static');
+dispatcher.setTemplateDir('./test/static');
+dispatcher.listen(80);
 
-router.get(/^\/$/, function(request, response) {
+dispatcher.get(/^\/$/, function(request, response) {
     console.log(request.pathname);
     console.log(request.params);
-    router.render(response, 'index.html');
+    console.log(dispatcher.getCookie(request, 'test'))
+    var session = dispatcher.getSession(request);
+    session.test = '123123';
+    session.keep = true;
+    console.log(session);
+    dispatcher.render(response, 'index.html');
+    dispatcher.saveSession(response, session);
 });
 
-router.get(/^\/test$/, function(request, response) {
-    router.render(response, 'test.html');
+dispatcher.get(/^\/test$/, function(request, response) {
+    dispatcher.setCookie(response, 'test', '=xcv=');
+    dispatcher.render(response, 'test.html');
 });
 
-router.post(/^\/upload$/, function(request, response) {
+dispatcher.get('/test2', function(request, response) {
+    console.log('hahah');
+    dispatcher.render(response, 'test.html');
+});
+
+dispatcher.post('/upload', function(request, response) {
     console.log(request.content_type);
     console.log(request.body);
-    router.redirect(response, '/');
+    dispatcher.redirect(response, '/');
 });

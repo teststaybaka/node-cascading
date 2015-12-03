@@ -13,25 +13,49 @@ It will start receiving http request only.
 Access the nodejs http server by `dispatcher.server` to do whatever you want.
 
 ## Basic routing
-Mapping a url to a handler is done by matching regular expression.  
-```javascript
-dispatcher.get('/^\/$/', function(request, response, match) {
+Mapping a url to a handler is done by matching regular expression. You could provide a RegExp object explicitly or use a string which is gonna be converted to a RegExp laterly.  
+```javascript 
+dispatcher.get('/url', function(request, response, match) {
+    // something to do here
+});
+// or
+dispatcher.get(/^\/url$/, function(request, response, match) {
+    // something to do here
+});
+
+// This will match "/url2/1", "/url2/2", "/url2/anything"...
+dispatcher.get('/url2/.*', function(request, response, match) {
+    // something to do here
+});
+// or
+dispatcher.get(/^\/url2\/.*$/, function(request, response, match) {
+    // something to do here
+});
+
+// This will catch anything within the parenthesis
+dispatcher.get('/url3/(.*)', function(request, response, match) {
+    match[0] // is the original string
+    match[1] // is the catch within the first parenthesis
+    // Please check RegExp for more details of how match works
+});
+// or
+dispatcher.get(/^\/url3\/(.*)$/, function(request, response, match) {
     // something to do here
 });
 ```
 
 You need to specify a method for each url you want to match.  
 ```javascript
-dispatcher.post('/^\/$/', function(request, response, match) {
+dispatcher.post('/', function(request, response, match) {
     // something to do here
 });
-dispatcher.put('/^\/$/', function(request, response, match) {
+dispatcher.put('/', function(request, response, match) {
     // something to do here
 });
-dispatcher.patch('/^\/$/', function(request, response, match) {
+dispatcher.patch('/', function(request, response, match) {
     // something to do here
 });
-dispatcher.delete('/^\/$/', function(request, response, match) {
+dispatcher.delete('/', function(request, response, match) {
     // something to do here
 });
 ```
@@ -40,12 +64,12 @@ However, the module handles request body for you only on POST request. You may n
 Also the order of those routes is important. With multiple matches, the module will pass the request to the first one.  
 ```javascript
 // This will match "/something" first
-dispatcher.get('/^\/something$/', function(request, response, match) {
+dispatcher.get('/something', function(request, response, match) {
     // something to do here
 });
 
 // This matches "/something" as well but will not handle it.
-dispatcher.get('/^\/.*$/', function(request, response, match) {
+dispatcher.get('/.*', function(request, response, match) {
     // something to do here
 });
 ```
@@ -60,9 +84,37 @@ function handler(request, response) {
     dispatcher.setCookie(response, 'test-cookie-name', 'value-here')
 }
 ```
-You can also set cookie with `dispathcer.setCookie(response, name, value, path, max_age)`. The last two are optional. `path='/'` means available through the whole domain. `max_age` is in milliseconds.  
+You can also set cookie with `dispathcer.setCookie(response, name, value, options)`. `options` could be a dictonary of options, including `path` and `max_age`. `options.path='/'` means available through the whole domain. `options.max_age` is in milliseconds.  
 
 To delete a cookie, set the `max_age` to `0`.  
+
+Note: For special characters like `=` and `"`, it is recommanded to escape the string yourself before set it in the cookie. For example, use `encodeURIComponent(str)` to encode. 
+
+## Session
+The module provides a secured way to store session in cookies. To use it, you need to enable it with a secret key  
+```javascript
+dispatcher.enableSecureCookieSession(secret_key);
+```
+The `secret_key` could be a 64-bytes length of unguessable string and you should never expose it to others.  
+
+Then get, save and clear session:  
+```javascript
+function handler(request, response) {
+    var session = dispatcher.getSession(request);
+    
+    session.user_id = 123456
+    session.keep = true;
+    delete session['user_id'];
+
+    dispatcher.saveSession(response, session);
+    dispatcher.clearSession(response);
+}
+```
+The `session` you get is essentially a dictionary. Once a user login, you can set his id in the session and save it. Unfortunately, I couldn't figure out a way to save the session automatically, so you have to save it manually if you have made any changes.  
+
+`session.keep` is a special mark used to determine whether the session or the cookie should persist when browser closes. Set it to `true` to keep the session.  
+
+More advanced, the time that a session could persist is not infinite. It will expire 30 days later. But it's rarely that someone will only come back 30 days later.    
 
 ## Redirect
 The module provides a shortcut to redirect request.  
@@ -91,12 +143,14 @@ function handler(request, response) {
     dispatcher.render(response, "test.html");
 }
 ```
-The render method takes response as the first argument and a template file name as the second. The module will try to file the file name under the template files directory.  
+The render method takes response as the first argument and a template file name as the second. The module will try to find the file name under the template files directory.  
+
+Also note that this will end response, so don't write more stuff after `render()` is called.  
 
 ## Post data
 The module provides highly efficient multipart/form-data parsing function. To use the parsing result:  
 ```javascript
-dispatcher.post(/^\/upload$/, function(request, response) {
+dispatcher.post('/upload', function(request, response) {
     console.log(request.content_type);
     console.log(request.body);
     
@@ -120,7 +174,7 @@ The `request.body` contains all the data parsed from the request. For web forms,
 
 But sometimes, you may want to upload raw binary file without any form encoding. Then check the `request.content_type` which is the raw content type in the request headers. If it is either `application/x-www-form-urlencoded` or `multipart/form-data` then, the module parsed the data as a web form. If not, request.body contains the information about the binary file.  
 ```javascript
-dispatcher.post(/^\/upload$/, function(request, response) {
+dispatcher.post('/upload', function(request, response) {
     if (request.content_type !== 'multipart/form-data' && request.content_type !== 'application/x-www-form-urlencoded') {
         request.body.content_type
         request.body.tmp_filepath

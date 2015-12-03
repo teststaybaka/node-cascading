@@ -4,7 +4,21 @@ var fs = require('fs');
 var querystring = require('querystring');
 var stream = require('stream');
 var path = require('path');
+var crypto = require('crypto');
 var FormdataParser = require('./formdataparser.js');
+
+var key_value_reg = /^(.*?)=(.*)$/;
+var form_boundary_reg = /^.*boundary=(.*)$/;
+var suffix_reg = /\.(.*?)$/;
+var mimeTypes = {
+    "html": "text/html",
+    "jpeg": "image/jpeg",
+    "jpg": "image/jpeg",
+    "png": "image/png",
+    "gif": 'image/gif',
+    "js": "text/javascript",
+    "css": "text/css"
+};
 
 Array.prototype.last = function(index) {
     return this[this.length - index];
@@ -30,28 +44,28 @@ function mkdir(dir, callback) {
     });
 }
 
+function getURLPattern(url) {
+    if (url instanceof RegExp) {
+        return url;
+    } else {
+        return new RegExp('^'+url+'$');
+    }
+}
+
 module.exports = function() {
     var self = this;
     var static_dirs = [];
     var rules = [];
     var templateDir = './';
-
+    var useSecureCookieSession = false;
+    var secureCookieName = 's_session';
+    var algorithm = 'sha256';
+    var secret_key;
     var tempfile_dir;
+    var session_max_age = 2592000000;
     var fieldname_max = 1024;
     var post_max = 1<<20;
     var post_multipart_max = 2147483648;
-    var key_value_reg = /^(.*?)=(.*)$/;
-    var form_boundary_reg = /^.*boundary=(.*)$/;
-    var suffix_reg = /\.(.*?)$/;
-    var mimeTypes = {
-        "html": "text/html",
-        "jpeg": "image/jpeg",
-        "jpg": "image/jpeg",
-        "png": "image/png",
-        "gif": 'image/gif',
-        "js": "text/javascript",
-        "css": "text/css"
-    };
 
     this.dispatcher = function(request, response) {
         //parse url
@@ -168,23 +182,23 @@ module.exports = function() {
     }
 
     this.get = function(exp, callback) {
-        rules.push({exp: exp, callback: callback, method: 'GET'});
+        rules.push({exp: getURLPattern(exp), callback: callback, method: 'GET'});
     }
 
     this.post = function(exp, callback) {
-        rules.push({exp: exp, callback: callback, method: 'POST'});
+        rules.push({exp: getURLPattern(exp), callback: callback, method: 'POST'});
     }
 
     this.put = function(exp, callback) {
-        rules.push({exp: exp, callback: callback, method: 'PUT'});
+        rules.push({exp: getURLPattern(exp), callback: callback, method: 'PUT'});
     }
 
     this.patch = function(exp, callback) {
-        rules.push({exp: exp, callback: callback, method: 'PATCH'});
+        rules.push({exp: getURLPattern(exp), callback: callback, method: 'PATCH'});
     }
 
     this.delete = function(exp, callback) {
-        rules.push({exp: exp, callback: callback, method: 'DELETE'});
+        rules.push({exp: getURLPattern(exp), callback: callback, method: 'DELETE'});
     }
 
     this.setFieldnameMax = function(max_value) {
@@ -225,17 +239,79 @@ module.exports = function() {
         return request.cookies[name];
     }
 
-    this.setCookie = function(response, name, value, path, max_age) {
+    this.setCookie = function(response, name, value, options) {
         var cookie_str = name+'='+value;
-        if (path) {
-            cookie_str += '; path='+path;
-        }
-        if (max_age) {
-            var now = Date.now();
-            var expires = new Date(now + max_age);
-            cookie_str += '; expires='+expires.toGMTString();
+        if (options) {
+            if (options.path) {
+                cookie_str += '; path='+path;
+            }
+            if (options.max_age) {
+                var now = Date.now();
+                var expires = new Date(now + options.max_age);
+                cookie_str += '; expires='+expires.toGMTString();
+            }
         }
         response.setHeader('Set-Cookie', cookie_str);
+    }
+
+    this.enableSecureCookieSession = function(secret) {
+        useSecureCookieSession = true;
+        secret_key = secret;
+    }
+
+    this.disableSecureCookieSession = function() {
+        useSecureCookieSession = false;
+    }
+
+    this.getSession = function(request) {
+        if (!useSecureCookieSession) {
+            throw 'Secure cookie session is not enabled';
+        }
+
+        if (!request.session) {
+            var session_value = self.getCookie(request, secureCookieName);
+            if (session_value) {
+                session_value = decodeURIComponent(session_value);
+                var parts = session_value.split('|');
+                if (parts.length === 3) {
+                    var timestamp = parseInt(parts[1]);
+                    if (!isNaN(timestamp) && Date.now() - timestamp < session_max_age) {
+                        var signature = crypto.createHmac(algorithm, secret_key)
+                                            .update(secureCookieName+'|'+parts[0]+'|'+parts[1])
+                                            .digest('hex');
+
+                        if (parts[2] === signature) {
+                            request.session = JSON.parse(new Buffer(parts[0], 'base64').toString('utf8'));
+                            return request.session;
+                        }
+                    }
+                }
+            }
+            request.session = {};  
+        }
+        return request.session;
+    }
+
+    this.saveSession = function(response, session_object) {
+        if (!useSecureCookieSession) {
+            throw 'Secure cookie session is not enabled';
+        }
+        
+        var session_str = new Buffer(JSON.stringify(session_object), 'utf8').toString('base64');
+        var timestamp = Date.now();
+        var signature = crypto.createHmac(algorithm, secret_key)
+                                .update(secureCookieName+'|'+session_str+'|'+timestamp)
+                                .digest('hex');
+
+        var options = {path: '/'};
+        if (session_object.keep) {
+            options.max_age = session_max_age;
+        }
+        self.setCookie(response, secureCookieName, encodeURIComponent(session_str+'|'+timestamp+'|'+signature), options);
+    }
+
+    this.clearSession = function(response) {
+        self.setCookie(response, secureCookieName, '', {max_age: 0});
     }
 
     this.setStatic = function(url_pre, local_pre) {

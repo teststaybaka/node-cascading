@@ -1,5 +1,4 @@
 var fs = require('fs');
-var Buffer = require('buffer').Buffer;
 
 function string2array(str) {
     var s = [];
@@ -17,22 +16,22 @@ function array2string(bytes) {
     return new Buffer(bytes).toString('utf8');
 }
 
-function FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max) {
+var space = ' '.charCodeAt(0);
+var quote = '"'.charCodeAt(0);
+var semicolon =';'.charCodeAt(0);
+var returnline = '\r'.charCodeAt(0);
+var newline = '\n'.charCodeAt(0);
+var dash = '-'.charCodeAt(0);
+var content_disposition_prefix = string2array('Content-Disposition: form-data');
+var name_prefix = string2array('name="');
+var filename_prefix = string2array('filename="');
+var content_type_prefix = string2array('Content-Type:');
+
+module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max) {
     var self = this;
     var start_boundary = string2array(boundary_str);
     var content_boundary = string2array('\r\n'+boundary_str);
     var content_boundary_buffer = new Buffer(content_boundary);
-    var space = ' '.charCodeAt(0);
-    var quote = '"'.charCodeAt(0);
-    var semicolon =';'.charCodeAt(0);
-    var returnline = '\r'.charCodeAt(0);
-    var newline = '\n'.charCodeAt(0);
-    var dash = '-'.charCodeAt(0);
-    var content_disposition_prefix = string2array('Content-Disposition: form-data');
-    var name_prefix = string2array('name="');
-    var filename_prefix = string2array('filename="');
-    var content_type_prefix = string2array('Content-Type:');
-    
     var success, fail;
     var writestream_waiting_list_length = 0;
     var data = {};
@@ -417,5 +416,3 @@ function FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post
 
     var cur_state = this.start_boundary_state;
 }
-
-module.exports = FormdataParser;
