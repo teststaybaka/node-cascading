@@ -13,7 +13,7 @@ It will start receiving http request only.
 Access the nodejs http server by `dispatcher.server` to do whatever you want.
 
 ## Basic routing
-Mapping a url to a handler is done by matching regular expression. You could provide a RegExp object explicitly or use a string which is gonna be converted to a RegExp laterly.  
+Mapping a url to a handler is done by matching regular expression. You could provide a RegExp object explicitly or use a string which will be converted into a RegExp laterly.  
 ```javascript 
 dispatcher.get('/url', function(request, response, match) {
     // something to do here
