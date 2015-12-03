@@ -74,7 +74,16 @@ dispatcher.get('/.*', function(request, response, match) {
 });
 ```
 
-Two additional fields are available for request object: `request.pathname` and `request.params`. `request.pathname` is a part of the url, between domain and query string, which is the target when trying to match your regular expression/url pattern. `request.params` is a dictionary of key-value pairs parsed from query string.
+Two additional fields are available for request object: `request.pathname` and `request.params`. `request.pathname` is a part of the url, between domain and query string, which is the target when trying to match your regular expression/url pattern. `request.params` is a dictionary of key-value pairs parsed from query string.  
+
+## Redirect
+The module provides a shortcut to redirect request.  
+```javascript
+function handler(request, response) {
+    dispatcher.redirect(response, '/url/to/redirect');
+}
+```
+Note the reponse is ended with the `redirect` call so don't write more data into response after this.  
 
 ## Cookies
 The module parses cookies only when you need it.
@@ -88,16 +97,21 @@ You can also set cookie with `dispathcer.setCookie(response, name, value, option
 
 To delete a cookie, set the `max_age` to `0`.  
 
-Note: For special characters like `=` and `"`, it is recommanded to escape the string yourself before set it in the cookie. For example, use `encodeURIComponent(str)` to encode. 
+Note: For special characters like `=` and `"`, it is recommanded to escape the string yourself before set it in the cookie. For example, use `encodeURIComponent(str)` to encode.  
 
 ## Session
-The module provides a secured way to store session in cookies. To use it, you need to enable it with a secret key  
+The module provides a secured way to store session in cookies. To use it, first enable it with a secret key.  
 ```javascript
 dispatcher.enableSecureCookieSession(secret_key);
 ```
 The `secret_key` could be a 64-bytes length of unguessable string and you should never expose it to others.  
 
-Then get, save and clear session:  
+And disable it, which is by default:
+```javascript
+dispatcher.disableSecureCookieSession();
+```
+
+Once enabled, to get, save and clear session:  
 ```javascript
 function handler(request, response) {
     var session = dispatcher.getSession(request);
@@ -110,27 +124,17 @@ function handler(request, response) {
     dispatcher.clearSession(response);
 }
 ```
-The `session` you get is essentially a dictionary. Once a user login, you can set his id in the session and save it. Unfortunately, I couldn't figure out a way to save the session automatically, so you have to save it manually if you have made any changes.  
+The `session` you get is essentially a dictionary. Once a user login, you can set his id in the session and save it. Unfortunately, I couldn't figure out a way to save the session automatically, so you have to save it manually if you make any changes.  
 
 `session.keep` is a special mark used to determine whether the session or the cookie should persist when browser closes. Set it to `true` to keep the session.  
 
-More advanced, the time that a session could persist is not infinite. It will expire 30 days later. But it's rarely that someone will only come back 30 days later.    
-
-## Redirect
-The module provides a shortcut to redirect request.  
-```javascript
-function handler(request, response) {
-    dispatcher.redirect(response, '/url/to/redirect');
-}
-```
-Note the reponse is ended with the `redirect` call so don't write more data into response after this.
+More advanced, the time that a session could persist is not infinite. It will expire 30 days later. But it's rare that someone will only come back 30 days later.  
 
 ## Static files
 ```javascript
 dispatcher.setStatic('/static', './static');
 ```
-The first argument is the url prefix for static files request.  
-The second one is the corresponding local static file directory.  
+The first argument is the url prefix for static files request. The second one is the corresponding local static file directory.  
 Note that the first one will be interpreted as RegExp internally.  
 
 ## Template files
