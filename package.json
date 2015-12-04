@@ -1,5 +1,5 @@
 {
-  "name": "node-dispatch",
+  "name": "cascading",
   "version": "0.0.7",
   "description": "Web dispatcher for nodejs",
   "main": "router.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/teststaybaka/node-dispatch.git"
+    "url": "git+https://github.com/teststaybaka/node-cascading.git"
   },
   "keywords": [
     "Node",
@@ -21,7 +21,7 @@
   "author": "Yuxuan Xie <teststaybaka@gmail.com> (http://yuxuanxie.com)",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/teststaybaka/node-dispatch/issues"
+    "url": "https://github.com/teststaybaka/node-cascading/issues"
   },
-  "homepage": "https://github.com/teststaybaka/node-dispatch#readme"
+  "homepage": "https://github.com/teststaybaka/node-cascading#readme"
 }

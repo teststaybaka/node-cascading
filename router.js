@@ -7,7 +7,6 @@ var path = require('path');
 var crypto = require('crypto');
 var FormdataParser = require('./formdataparser.js');
 
-var key_value_reg = /^(.*?)=(.*)$/;
 var form_boundary_reg = /^.*boundary=(.*)$/;
 var suffix_reg = /^.*\.(.*?)$/;
 var mimeTypes = {
