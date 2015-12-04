@@ -373,14 +373,7 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
             try{
                 var ok = self.parse_chunk(chunk);
             } catch(e) {
-                console.log(e, e.stack)
                 fail(e);
-                for (name in request.body) {
-                    var field = request.body[name];
-                    if (field.filename) {
-                        fs.unlink(field.tmp_filepath);
-                    }
-                }
                 request.destroy();
                 request.closed = true;
                 return;

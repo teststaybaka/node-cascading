@@ -31,5 +31,8 @@ dispatcher.get('/test2', function(request, response) {
 dispatcher.post('/upload', function(request, response) {
     console.log(request.content_type);
     console.log(request.body);
+    if (request.body['fileField']) {
+        request.body['fileField'].keep = true;
+    }
     dispatcher.redirect(response, '/');
 });

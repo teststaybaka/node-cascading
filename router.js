@@ -108,7 +108,17 @@ module.exports = function() {
                         new FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max).parse(function() {
                             rule.callback(request, response, match);
                         }, function(e) {
+                            console.log(e);
                             self.notAllowed(response);
+                        });
+
+                        response.on('finish', function() {
+                            for (name in request.body) {
+                                var field = request.body[name];
+                                if (field.filename && !field.keep) {
+                                    fs.unlink(field.tmp_filepath);
+                                }
+                            }
                         });
                     } else if (content_type === 'application/x-www-form-urlencoded') {
                         var data_string = '';
@@ -141,15 +151,19 @@ module.exports = function() {
                         }).pipe(writestream);
 
                         writestream.on('finish', function() {
-                            fs.stat(tmp_filepath, function(error, stat) {
-                                if (error) { throw error; }
-                                request.body = {
-                                    content_type: content_type,
-                                    tmp_filepath: tmp_filepath,
-                                    size: stat.size,
-                                }
-                                rule.callback(request, response, match);
-                            }); 
+                            request.body = {
+                                content_type: content_type,
+                                tmp_filepath: tmp_filepath,
+                                size: size,
+                            }
+                            rule.callback(request, response, match);
+                        });
+
+                        response.on('finish', function() {
+                            var field = request.body;
+                            if (!field.keep) {
+                                fs.unlink(field.tmp_filepath);
+                            }
                         });
                     }
                 } else {
