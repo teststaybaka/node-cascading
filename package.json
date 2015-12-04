@@ -1,6 +1,6 @@
 {
   "name": "node-dispatch",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Web dispatcher for nodejs",
   "main": "router.js",
   "directories": {
