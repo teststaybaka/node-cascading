@@ -200,7 +200,7 @@ dispatcher.setTempfileDir('./temp2');
 ```
 It will throw an error if it failes to create a directory. If you create the directory yourself, make sure the program is able to read and write under it.
 
-## Handles 404 and 403
+## Handling 404 and 403
 Two default way of handling 404 and 403 are provided when url doesn't match any url pattern, the file requested is not found, or file exceeds size limit, etc. You can as well rewrite them if you want.
 ```javascript
 dispatcher.notFound = function(response) {
