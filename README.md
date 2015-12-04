@@ -1,5 +1,10 @@
-# cascading
+# node-cascading
 A web dispatcher for nodejs with highly efficient file upload support.
+
+## Install
+```
+npm install cascading
+```
 
 ## Initialize dispatcher
 ```javascript
