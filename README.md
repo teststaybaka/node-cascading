@@ -160,7 +160,7 @@ dispatcher.post('/upload', function(request, response) {
     request.body['profile_image'].size
     
     // To check if a field is a file:
-    if (request.body['filename'].filename) {
+    if (request.body['file'].filename) {
         // is a file
     } else {
         // is not a file
@@ -179,6 +179,20 @@ dispatcher.post('/upload', function(request, response) {
         request.body.tmp_filepath
         request.body.size
     }
+}
+```
+
+## Keep posted files
+It's not rare that you want to deal with the file after responding to a request (for example, processing it with a new thread). By default, all temporary files will be removed once you responded.  
+
+To keep a file from removing, simply set `keep` in each field to be `true`.  
+```javascript
+function handler(request, response) {
+    //...
+
+    request.body['file'].keep = true;
+    
+    //...
 }
 ```
 
