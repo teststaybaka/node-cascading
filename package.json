@@ -1,7 +1,7 @@
 {
   "name": "cascading",
   "version": "0.1.0",
-  "description": "Web dispatcher for nodejs",
+  "description": "A web framework for nodejs",
   "main": "router.js",
   "directories": {
     "test": "test"
@@ -14,9 +14,11 @@
     "url": "git+https://github.com/teststaybaka/node-cascading.git"
   },
   "keywords": [
-    "Node",
-    "Router",
-    "Dispatcher"
+    "node",
+    "router",
+    "dispatcher",
+    "web",
+    "framework"
   ],
   "author": "Yuxuan Xie <teststaybaka@gmail.com> (http://yuxuanxie.com)",
   "license": "Apache-2.0",

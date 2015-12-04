@@ -1,5 +1,5 @@
 # node-cascading
-A web dispatcher for nodejs with highly efficient file upload support.
+A web framework for nodejs with efficient file upload support.
 
 ## Install
 ```
