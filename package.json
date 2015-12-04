@@ -1,6 +1,6 @@
 {
   "name": "cascading",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "Web dispatcher for nodejs",
   "main": "router.js",
   "directories": {
