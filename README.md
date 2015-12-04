@@ -132,24 +132,19 @@ More advanced, the time that a session could persist is not infinite. It will ex
 
 ## Static files
 ```javascript
-dispatcher.setStatic('/static', './static');
+dispatcher.addStatic('/static', './static');
 ```
-The first argument is the url prefix for static files request. The second one is the corresponding local static file directory.  
+The first argument is the url prefix for static files request. The second one is the corresponding local static file directory. You can add as many static file mapping as you want.   
+
 Note that the first one will be interpreted as RegExp internally.  
 
-## Template files
-```javascript
-dispatcher.setTemplateDir('./static');
-```
-This will setup the template files directory. Later it will be used when you try to use `dispatcher.render` method.  
+You can also return a static file explicitly:  
 ```javascript
 function handler(request, response) {
-    dispatcher.render(response, "test.html");
+    dispatcher.loadStatic(response, './static/index.html');
 }
 ```
-The render method takes response as the first argument and a template file name as the second. The module will try to find the file name under the template files directory.  
-
-Also note that this will end response, so don't write more stuff after `render()` is called.  
+`loadStatic()` actually respond with the file you specified and ends the `reponse`. No more data can be written into `response` after that. You need to provide the path from your execution root to the file or a full path.  
 
 ## Post data
 The module provides highly efficient multipart/form-data parsing function. To use the parsing result:  

@@ -9,7 +9,7 @@ var FormdataParser = require('./formdataparser.js');
 
 var key_value_reg = /^(.*?)=(.*)$/;
 var form_boundary_reg = /^.*boundary=(.*)$/;
-var suffix_reg = /\.(.*?)$/;
+var suffix_reg = /^.*\.(.*?)$/;
 var mimeTypes = {
     "html": "text/html",
     "jpeg": "image/jpeg",
@@ -88,22 +88,7 @@ module.exports = function() {
                 if (file_path.indexOf('..') !== -1) {
                     self.notAllowed(response);
                 } else {
-                    fs.readFile(local_pre+'/'+file_path, function (err, data) {
-                        if (err) {
-                            console.log(err);
-                            self.notFound(response);
-                        } else {
-                            var suffix = file_path.match(suffix_reg);
-                            if (suffix && (suffix[1] in mimeTypes)) {
-                                var mimeType = mimeTypes[suffix[1]];
-                                response.writeHead(200, {'Content-Type': mimeType});
-                            } else {
-                                response.writeHead(200, {'Content-Type': 'application/octet-stream'});
-                            }
-                            response.write(data);
-                            response.end();
-                        }
-                    });
+                    self.loadStatic(response, local_pre+file_path);
                 }
                 return;
             }
@@ -314,9 +299,27 @@ module.exports = function() {
         self.setCookie(response, secureCookieName, '', {max_age: 0});
     }
 
-    this.setStatic = function(url_pre, local_pre) {
+    this.addStatic = function(url_pre, local_pre) {
         var exp = new RegExp('^'+url_pre+'/(.*)$');
-        static_dirs.push({exp: exp, local_pre: local_pre});
+        static_dirs.push({exp: exp, local_pre: local_pre+'/'});
+    }
+
+    this.loadStatic = function(response, file_path) {
+        fs.readFile(file_path, function (err, data) {
+            if (err) {
+                console.log(err);
+                self.notFound(response);
+            } else {
+                var suffix = file_path.match(suffix_reg);
+                if (suffix && (suffix[1] in mimeTypes)) {
+                    var mimeType = mimeTypes[suffix[1]];
+                    response.writeHead(200, {'Content-Type': mimeType});
+                } else {
+                    response.writeHead(200, {'Content-Type': 'application/octet-stream'});
+                }
+                response.end(data);
+            }
+        });
     }
 
     this.redirect = function(response, url) {
@@ -334,29 +337,6 @@ module.exports = function() {
     this.notAllowed = function(response) {
         response.writeHead(403, {'Content-Type': 'text/html'});
         response.end('403 Not Allowed\n');
-    }
-
-    this.setTemplateDir = function(dir) {
-        templateDir = dir;
-    }
-
-    this.render = function(response, filename, params) {
-        fs.readFile(templateDir+'/'+filename, function (err, data) {
-            if (err) {
-                console.log(err);
-                self.notFound(response);
-            } else {
-                var suffix = filename.match(suffix_reg);
-                if (suffix && (suffix[1] in mimeTypes)) {
-                    var mimeType = mimeTypes[suffix[1]];
-                    response.writeHead(200, {'Content-Type': mimeType});
-                } else {
-                    response.writeHead(200, {'Content-Type': 'application/octet-stream'});
-                }
-                response.write(data);
-                response.end();
-            }
-        });
     }
 
     this.server = http.createServer(this.dispatcher);
