@@ -1,9 +1,9 @@
-# node-dispatch
-Web dispatcher/router for nodejs with highly efficient file upload support.
+# cascading
+A web dispatcher for nodejs with highly efficient file upload support.
 
 ## Initialize dispatcher
 ```javascript
-var Dispatcher = require('node-dispatch');
+var Dispatcher = require('cascading');
 var dispatcher = new Dispatcher();
 dispatcher.listen(80);
 ```
