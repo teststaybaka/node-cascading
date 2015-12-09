@@ -9,8 +9,8 @@ dispatcher.listen(80);
 dispatcher.get(/^\/$/, function(request, response) {
     console.log(request.pathname);
     console.log(request.params);
-    console.log(dispatcher.getCookie(request, 'test'))
     var session = dispatcher.getSession(request);
+    console.log(session);
     session.test = '123123';
     session.keep = true;
     console.log(session);
@@ -23,9 +23,15 @@ dispatcher.get(/^\/test$/, function(request, response) {
     dispatcher.loadStatic(response, './test/static/test.html');
 });
 
-dispatcher.get('/test2', function(request, response) {
-    console.log('hahah');
-    dispatcher.loadStatic(response, './test/static/test.html');
+dispatcher.get('/file', function(request, response) {
+    dispatcher.loadStatic(response, './test/static/file.html');
+});
+
+dispatcher.post('/file', function(request, response) {
+    console.log(request.content_type);
+    console.log(request.body);
+    request.body.keep = true;
+    dispatcher.loadStatic(response, './test/static/file.html');
 });
 
 dispatcher.post('/upload', function(request, response) {

@@ -99,8 +99,13 @@ module.exports = function() {
             var match = pathname.match(rule.exp);
             if (match && request.method.toUpperCase() === rule.method) {
                 if (rule.method === 'POST') {
-                    var content_type_parts = request.headers['content-type'].split(';');
-                    var content_type = content_type_parts[0];
+                    var content_type_raw = request.headers['content-type'];
+                    if (!content_type_raw) {
+                        var content_type = 'application/octet-stream';
+                    } else {
+                        var content_type_parts = content_type_raw.split(';');
+                        var content_type = content_type_parts[0];
+                    }
                     request.content_type = content_type;
                     if (content_type === 'multipart/form-data' && content_type_parts.length === 2 && form_boundary_reg.test(content_type_parts[1])) {
                         var boundary_str = '--'+content_type_parts[1].match(form_boundary_reg)[1];
