@@ -119,7 +119,7 @@ dispatcher.disableSecureCookieSession();
 Once enabled, to get, save and clear session:  
 ```javascript
 function handler(request, response) {
-    // Don't worry if you haven't created/initialized a session before. getSession() will create a new session if not find.
+    // Don't worry if you haven't created/initialized a session before. getSession() will create an empty session if not find.
     var session = dispatcher.getSession(request);
     
     session.user_id = 123456
@@ -236,3 +236,45 @@ dispatcher.notAllowed = function(response) {
 }
 ```
 Note the headers of the response are also up to you to fill. Therefore, you could set other response code and you need to set some code yourself.
+
+## Appendix 1: Client side binary file upload script
+In case someone wants to upload a binary file but has no idea how to do that in a browser:  
+```javascript
+$(document).ready(function() {
+    // Listen to a form's submit event
+    $("#file-form").submit(function(evt) {
+        // Disable default submit action for a form.
+        evt.preventDefault();
+
+        var file = $('#file-input')[0].files[0];
+        // Check if any file is selected.
+        if (!file) return;
+
+        var oReq = new XMLHttpRequest();
+        // POST to the server. The third param means if it is async or not.
+        oReq.open("POST", "/file", true);
+        console.log(file.type);
+        console.log(file.name);
+        oReq.setRequestHeader("Content-Type", file.type);
+
+        // Check the progress of uploading. You can update a progress bar by listening to this event.
+        oReq.upload.addEventListener("progress", function(evt) {
+            console.log('progress', evt.loaded, evt.total);
+        });
+        // Once the server responds to the request, load event is fired. So after all, you need to respond.
+        oReq.addEventListener("load", function(evt) {
+            console.log('Done!');
+        });
+        oReq.addEventListener("error", function(evt) {
+            console.log('error', evt.error);
+        });
+        oReq.addEventListener("abort", function(evt) {
+            console.log('abort');
+        });
+
+        // Send the binary file.
+        oReq.send(file);
+    });
+});
+```
+`$` here references to `jQuery`.
