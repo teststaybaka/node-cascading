@@ -195,8 +195,12 @@ To keep a file from removing, simply set `keep` in each field to be `true`.
 function handler(request, response) {
     //...
 
-    request.body['file'].keep = true;
+    // For multipart files
+    request.body['filename'].keep = true;
     
+    // For binary file
+    request.body.keep = true;
+
     //...
 }
 ```
