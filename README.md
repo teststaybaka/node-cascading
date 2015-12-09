@@ -119,6 +119,7 @@ dispatcher.disableSecureCookieSession();
 Once enabled, to get, save and clear session:  
 ```javascript
 function handler(request, response) {
+    // Don't worry if you haven't created/initialized a session before. getSession() will create a new session if not find.
     var session = dispatcher.getSession(request);
     
     session.user_id = 123456
