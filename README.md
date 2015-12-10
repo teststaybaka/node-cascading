@@ -160,30 +160,31 @@ dispatcher.post('/upload', function(request, response) {
     console.log(request.body);
     
     request.body['username']
-    request.body['profile_image'].filename
-    request.body['profile_image'].content_type
-    request.body['profile_image'].tmp_filepath
-    request.body['profile_image'].size
+    request.body['profile_image'][0].filename
+    request.body['profile_image'][0].content_type
+    request.body['profile_image'][0].tmp_filepath
+    request.body['profile_image'][0].size
     
-    // To check if a field is a file:
-    if (request.body['file'].filename) {
-        // is a file
+    // To check if a field is a file field:
+    if (typeof request.body['file'] !== 'string') {
+        // is a file field
     } else {
-        // is not a file
+        // is not a file field
     }
 
     // some other things to do
 });
 ```
-The `request.body` contains all the data parsed from the request. For web forms, it unifies both `application/x-www-form-urlencoded` and `multipart/form-data`.  
+The `request.body` contains all the data parsed from the request. For web forms, it unifies both `application/x-www-form-urlencoded` and `multipart/form-data`. Please note that for a file field, the module actually creates a list/array, each element of which is a single file object containing some information about that file. The reason that it has to be a list is because HTML provides a `multiple` attribute for `<input type='file'>`, where you could choose multiple files by holding shift or ctrl.  
 
-But sometimes, you may want to upload raw binary file without any form encoding. Then check the `request.content_type` which is the raw content type in the request headers. If it is either `application/x-www-form-urlencoded` or `multipart/form-data` then, the module parsed the data as a web form. If not, request.body contains the information about the binary file.  
+Sometimes, you may want to upload a raw binary file without any form encoding. You could check `request.content_type` which is basically the `Content-Type` in the request headers. If it is either `application/x-www-form-urlencoded` or `multipart/form-data` then the module parsed the data as a web form. If not, request.body contains information about the binary file.  
 ```javascript
 dispatcher.post('/upload', function(request, response) {
     if (request.content_type !== 'multipart/form-data' && request.content_type !== 'application/x-www-form-urlencoded') {
         request.body.content_type
         request.body.tmp_filepath
         request.body.size
+        // filename is not available here
     }
 }
 ```
@@ -191,13 +192,13 @@ dispatcher.post('/upload', function(request, response) {
 ## Keep posted files
 It's not rare that you want to deal with the file after responding to a request (for example, processing it with a new thread). By default, all temporary files will be removed once you responded.  
 
-To keep a file from removing, simply set `keep` in each field to be `true`.  
+To keep a file from removing, simply set `keep` in each file object to be `true`.  
 ```javascript
 function handler(request, response) {
     //...
 
     // For multipart files
-    request.body['filename'].keep = true;
+    request.body['profile_image'][0].keep = true;
     
     // For binary file
     request.body.keep = true;
@@ -206,15 +207,15 @@ function handler(request, response) {
 }
 ```
 
-## Post data size limit
-By default, for urlencoded data, the total amout of data that can be received through POST is 1048576 bytes (or 1MB).
-For multipart and binary file data, the total amount is 2147483648 bytes (or 2GB). Each non-file field can not exceed 1048576 bytes (or 1MB). Field name can not exceed 1024 bytes.  
+## Post data limit
+By default, for urlencoded data, the total amout of data that can be received through POST is 1048576 bytes (or 1MB). For multipart and binary file data, the total amount is 2147483648 bytes (or 2GB). Each non-file field can not exceed 1048576 bytes (or 1MB). Field name can not exceed 1024 bytes. And the number of fields can not be larger than 100, including multiple files in one field.  
 
 To change those limits:
 ```javascript
-dispatcher.setFieldnameMax(max_value);
-dispatcher.setPostMax(max_value);
-dispatcher.setPostMultipartMax(max_value);
+dispatcher.setFieldnameMax(max_value); // in bytes
+dispatcher.setPostMax(max_value); // in bytes
+dispatcher.setPostMultipartMax(max_value); // in bytes
+dispatcher.setFieldsMax(max_value);
 ```
 
 ## Temporary directory
@@ -277,4 +278,4 @@ $(document).ready(function() {
     });
 });
 ```
-`$` here references to `jQuery`.
+`$` here refers to `jQuery`.

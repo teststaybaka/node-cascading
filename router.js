@@ -65,6 +65,7 @@ module.exports = function() {
     var fieldname_max = 1024;
     var post_max = 1<<20;
     var post_multipart_max = 2147483648;
+    var num_fields_max = 100;
 
     this.dispatcher = function(request, response) {
         //parse url
@@ -99,17 +100,15 @@ module.exports = function() {
             var match = pathname.match(rule.exp);
             if (match && request.method.toUpperCase() === rule.method) {
                 if (rule.method === 'POST') {
-                    var content_type_raw = request.headers['content-type'];
-                    if (!content_type_raw) {
-                        var content_type = 'application/octet-stream';
-                    } else {
-                        var content_type_parts = content_type_raw.split(';');
-                        var content_type = content_type_parts[0];
+                    var content_type = request.headers['content-type'];
+                    if (content_type) {
+                        var content_type_parts = content_type.split(';');
+                        content_type = content_type_parts[0];
                     }
                     request.content_type = content_type;
                     if (content_type === 'multipart/form-data' && content_type_parts.length === 2 && form_boundary_reg.test(content_type_parts[1])) {
                         var boundary_str = '--'+content_type_parts[1].match(form_boundary_reg)[1];
-                        new FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max).parse(function() {
+                        new FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max, num_fields_max).parse(function() {
                             rule.callback(request, response, match);
                         }, function(e) {
                             console.log(e);
@@ -119,8 +118,13 @@ module.exports = function() {
                         response.on('finish', function() {
                             for (name in request.body) {
                                 var field = request.body[name];
-                                if (field.filename && !field.keep) {
-                                    fs.unlink(field.tmp_filepath);
+                                if (typeof field !== 'string') {
+                                    for (var i = 0; i < field.length; i++) {
+                                        if (!field[i].keep) {
+                                            console.log('unlink on response finish', field[i].tmp_filepath)
+                                            fs.unlink(field[i].tmp_filepath);
+                                        }
+                                    }
                                 }
                             }
                         });
@@ -150,7 +154,6 @@ module.exports = function() {
                             if (size > post_multipart_max) {
                                 self.notAllowed(response);
                                 request.destroy();
-                                fs.unlink(tmp_filepath);
                             }
                         }).pipe(writestream);
 
@@ -160,13 +163,20 @@ module.exports = function() {
                                 tmp_filepath: tmp_filepath,
                                 size: size,
                             }
-                            rule.callback(request, response, match);
+                            if (!request.closed) {
+                                rule.callback(request, response, match);
+                            }
+                        });
+
+                        request.on('close', function() {
+                            fs.unlink(tmp_filepath);
+                            request.closed = true;
                         });
 
                         response.on('finish', function() {
                             var field = request.body;
-                            if (!field.keep) {
-                                fs.unlink(field.tmp_filepath);
+                            if (!field || !field.keep) {
+                                fs.unlink(tmp_filepath);
                             }
                         });
                     }
@@ -214,6 +224,10 @@ module.exports = function() {
 
     this.setPostMultipartMax = function(max_value) {
         post_multipart_max = max_value;
+    }
+
+    this.setFieldsMax = function(max_value) {
+        num_fields_max = max_value;
     }
 
     this.setTempfileDir = function(dir) {

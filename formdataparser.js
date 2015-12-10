@@ -27,7 +27,7 @@ var name_prefix = string2array('name="');
 var filename_prefix = string2array('filename="');
 var content_type_prefix = string2array('Content-Type:');
 
-module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max) {
+module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max, num_fields_max) {
     var self = this;
     var start_boundary = string2array(boundary_str);
     var content_boundary = string2array('\r\n'+boundary_str);
@@ -37,6 +37,7 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
     var data = {};
     var buffer = [];
     var cur_name;
+    var cur_file;
     var cur_filename;
     var cur_content_type;
     var cur_writestream;
@@ -46,6 +47,7 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
     var isFile;
     var in_progress = false;
     var read_complete = false;
+    var fields_count = 0;
     var total = 0;
     var pointer = 0;
 
@@ -107,7 +109,7 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
             if (pointer === content_boundary.length) {
                 pointer = 0;
                 in_progress = false;
-                data[cur_name].size = cur_size_accumulator + end_index - start_index + 1;
+                cur_file.size = cur_size_accumulator + end_index - start_index + 1;
                 cur_size_accumulator = 0;
                 if (start_index === end_index + 1) {
                     cur_writestream.end();
@@ -119,12 +121,6 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
                     } else {
                         cur_writestream.end(cur_chunk.slice(start_index, end_index+1));
                     }
-                }
-
-                if (data[cur_name].filename.length == 0) {
-                    console.log(data[cur_name])
-                    fs.unlink(data[cur_name].tmp_filepath);
-                    delete data[cur_name];
                 }
                 cur_state = self.newline_state1;
             }
@@ -287,20 +283,27 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
             pointer += 1;
             if (pointer == 2) {
                 pointer = 0;
+                fields_count += 1;
+                if (fields_count > num_fields_max) {
+                    throw 'Form parse error: Exceed maximum number of fields'
+                }
+
                 in_progress = true;
                 start_index = idx+1;
                 end_index = idx;
+
                 if (isFile) {
-                    var tmp_filepath = tempfile_dir+'tmpfile'+Date.now();
+                    var tmp_filepath = tempfile_dir+'tmpfile'+fields_count+Date.now();
+                    console.log('new tmp file', tmp_filepath)
                     cur_writestream = fs.createWriteStream(tmp_filepath, {defaultEncoding: 'binary'});
                     writestream_waiting_list_length += 1;
-                    cur_writestream.on('finish', self.writestream_finished);
-
-                    data[cur_name] = {
+                    cur_file = {
                         filename: cur_filename,
                         content_type: cur_content_type,
                         tmp_filepath: tmp_filepath,
                     }
+                    cur_writestream.on('finish', self.writestream_finished(cur_name, cur_file));
+
                     cur_state = self.content_boundary_state;
                 } else {
                     cur_state = self.value_boundary_state;
@@ -311,10 +314,23 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
         }
     }
 
-    this.writestream_finished = function() {
-        writestream_waiting_list_length -= 1;
-        if (writestream_waiting_list_length === 0 && read_complete && !request.closed) {
-            success();
+    this.writestream_finished = function(field_name, file_obj) {
+        return function() {
+            if (file_obj.filename.length == 0 || request.closed) {
+                console.log('unlink on single finish', file_obj.tmp_filepath)
+                fs.unlink(file_obj.tmp_filepath);
+            } else {
+                if (field_name in data) {
+                    data[field_name].push(file_obj);
+                } else {
+                    data[field_name] = [file_obj];
+                }
+            }
+
+            writestream_waiting_list_length -= 1;
+            if (writestream_waiting_list_length === 0 && read_complete && !request.closed) {
+                success();
+            }
         }
     }
 
@@ -392,8 +408,11 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
             console.log('Request closed!');
             for (name in request.body) {
                 var field = request.body[name];
-                if (field.filename) {
-                    fs.unlink(field.tmp_filepath);
+                if (typeof field !== 'string') {
+                    for (var i = 0; i < field.length; i++) {
+                        console.log('unlink on close', field[i].tmp_filepath)
+                        fs.unlink(field[i].tmp_filepath);
+                    }
                 }
             }
             request.closed = true;
