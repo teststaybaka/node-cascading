@@ -175,7 +175,7 @@ dispatcher.post('/upload', function(request, response) {
     // some other things to do
 });
 ```
-The `request.body` contains all the data parsed from the request. For web forms, it unifies both `application/x-www-form-urlencoded` and `multipart/form-data`. Please note that for a file field, the module actually creates a list/array, each element of which is a single file object containing some information about that file. The reason that it has to be a list is because HTML provides a `multiple` attribute for `<input type='file'>`, where you could choose multiple files by holding shift or ctrl.  
+`request.body` contains all the data parsed from the request. For web forms, it unifies both `application/x-www-form-urlencoded` and `multipart/form-data`. Please note that for a file field, the module actually creates a list/array, each element of which is a single file object containing some information about that file. The reason that it has to be a list is because HTML provides a `multiple` attribute for `<input type='file'>`, where you could choose multiple files by holding shift or ctrl.  
 
 Sometimes, you may want to upload a raw binary file without any form encoding. You could check `request.content_type` which is basically the `Content-Type` in the request headers. If it is either `application/x-www-form-urlencoded` or `multipart/form-data` then the module parsed the data as a web form. If not, request.body contains information about the binary file.  
 ```javascript
