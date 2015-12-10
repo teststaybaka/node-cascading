@@ -1,6 +1,6 @@
 {
   "name": "cascading",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "A web framework for nodejs",
   "main": "router.js",
   "directories": {

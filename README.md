@@ -218,12 +218,39 @@ dispatcher.setPostMultipartMax(max_value); // in bytes, 2GB by default
 dispatcher.setFieldsMax(max_value); // 100 by default
 ```
 
+## In memory files
+In case that someone may not want to store any temporary file but only deal with relatively small files.  
+```javascript
+dispatcher.setPostInMemory(true);
+dispatcher.setPostMultipartMax(32<<20); // 32MB total limit
+```
+You'd better change the limit as well so that it won't drain your machine's memory.  
+
+Also note that since files are kept in memory, there is no `tmp_filepath` anymore in each file object but instead `data` which is a `Buffer` object contains the binary data of that file.
+```javascript
+function handler(request, response) {
+    //...
+
+    // For multipart files, this is the binary data which is a Buffer object
+    request.body['profile_image'][0].data
+    // request.body['profile_image'][0].tmp_filepath; is not available
+    // request.body['profile_image'][0].keep = true; doesn't make anymore sense
+    
+    // The same for a single binary file
+    request.body.data
+    // request.body.tmp_filepath; is not available
+    // request.body.keep = true; doesn't make sense
+
+    //...
+}
+```
+
 ## Temporary directory
 Temporary directory is used to store uploaded files. The default is `./tmp`, but you can set it to other directory.
 ```javascript
 dispatcher.setTempfileDir('./temp2');
 ```
-It will throw an error if it failes to create a directory. If you create the directory yourself, make sure the program is able to read and write under it.
+If the module fails to create a directory, it will choose not to store temporary files, meaning it will keep them in memory automatically! So be careful, you may need to set the file limit as well. But if you create a directory yourself, make sure the program can read and write under it.
 
 ## Handling 404 and 403
 Two default way of handling 404 and 403 are provided when url doesn't match any url pattern, the file requested is not found, or file exceeds size limit, etc. You can as well rewrite them if you want.

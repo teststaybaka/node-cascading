@@ -26,19 +26,23 @@ Array.prototype.last = function(index) {
 function mkdir(dir, callback) {
     fs.stat(dir, function(error, stats) {
         if (error) {
-            mkdir(path.dirname(dir), function() {
-                fs.mkdir(dir, 0777, function(error) {
-                    if (error) {
-                        throw error;
-                    } else {
-                        callback();
-                    }
-                });
+            mkdir(path.dirname(dir), function(success) {
+                if (!success) {
+                    callback(false);
+                } else {
+                    fs.mkdir(dir, 0777, function(error) {
+                        if (error) {
+                            callback(false);
+                        } else {
+                            callback(true);
+                        }
+                    });
+                }
             });
         } else if (stats.isDirectory()) {
-            callback();
+            callback(true);
         } else {
-            throw dir + ' is not a directory.';
+            callback(false);
         }
     });
 }
@@ -262,8 +266,13 @@ module.exports = function() {
 
     this.setTempfileDir = function(dir) {
         var directory = path.resolve(dir);
-        mkdir(directory, function() {
-            tempfile_dir = dir+'/';
+        mkdir(directory, function(success) {
+            if (success) {
+                tempfile_dir = dir+'/';
+                post_in_memory = false;
+            } else {
+                post_in_memory = true;
+            }
         });
     }
     this.setTempfileDir('./tmp');
