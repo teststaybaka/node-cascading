@@ -212,10 +212,10 @@ By default, for urlencoded data, the total amout of data that can be received th
 
 To change those limits:
 ```javascript
-dispatcher.setFieldnameMax(max_value); // in bytes
-dispatcher.setPostMax(max_value); // in bytes
-dispatcher.setPostMultipartMax(max_value); // in bytes
-dispatcher.setFieldsMax(max_value);
+dispatcher.setFieldnameMax(max_value); // in bytes, 1KB by default
+dispatcher.setPostMax(max_value); // in bytes, 1MB by default
+dispatcher.setPostMultipartMax(max_value); // in bytes, 2GB by default
+dispatcher.setFieldsMax(max_value); // 100 by default
 ```
 
 ## Temporary directory

@@ -18,7 +18,8 @@
     "router",
     "dispatcher",
     "web",
-    "framework"
+    "framework",
+    "upload"
   ],
   "author": "Yuxuan Xie <teststaybaka@gmail.com> (http://yuxuanxie.com)",
   "license": "Apache-2.0",
