@@ -66,6 +66,7 @@ module.exports = function() {
     var post_max = 1<<20;
     var post_multipart_max = 2147483648;
     var num_fields_max = 100;
+    var post_in_memory = false;
 
     this.dispatcher = function(request, response) {
         //parse url
@@ -108,26 +109,28 @@ module.exports = function() {
                     request.content_type = content_type;
                     if (content_type === 'multipart/form-data' && content_type_parts.length === 2 && form_boundary_reg.test(content_type_parts[1])) {
                         var boundary_str = '--'+content_type_parts[1].match(form_boundary_reg)[1];
-                        new FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max, num_fields_max).parse(function() {
+                        new FormdataParser(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max, num_fields_max, post_in_memory).parse(function() {
                             rule.callback(request, response, match);
                         }, function(e) {
                             console.log(e);
                             self.notAllowed(response);
                         });
 
-                        response.on('finish', function() {
-                            for (name in request.body) {
-                                var field = request.body[name];
-                                if (typeof field !== 'string') {
-                                    for (var i = 0; i < field.length; i++) {
-                                        if (!field[i].keep) {
-                                            console.log('unlink on response finish', field[i].tmp_filepath)
-                                            fs.unlink(field[i].tmp_filepath);
+                        if (!post_in_memory) {
+                            response.on('finish', function() {
+                                for (name in request.body) {
+                                    var field = request.body[name];
+                                    if (typeof field !== 'string') {
+                                        for (var i = 0; i < field.length; i++) {
+                                            if (!field[i].keep) {
+                                                console.log('unlink on response finish', field[i].tmp_filepath)
+                                                fs.unlink(field[i].tmp_filepath);
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
                     } else if (content_type === 'application/x-www-form-urlencoded') {
                         var data_string = '';
                         request.setEncoding('utf8');
@@ -145,40 +148,63 @@ module.exports = function() {
                             rule.callback(request, response, match);
                         });
                     } else {
-                        var tmp_filepath = tempfile_dir+'tmpfile'+Date.now();
-                        var writestream = fs.createWriteStream(tmp_filepath, {defaultEncoding: 'binary'});
-                        var size = 0;
-                        request.on('data', function(chunk) {
-                            size += chunk.length;
+                        if (!post_in_memory) {
+                            var tmp_filepath = tempfile_dir+'tmpfile'+Date.now();
+                            var writestream = fs.createWriteStream(tmp_filepath, {defaultEncoding: 'binary'});
+                            var size = 0;
+                            request.on('data', function(chunk) {
+                                size += chunk.length;
 
-                            if (size > post_multipart_max) {
-                                self.notAllowed(response);
-                                request.destroy();
-                            }
-                        }).pipe(writestream);
+                                if (size > post_multipart_max) {
+                                    self.notAllowed(response);
+                                    request.destroy();
+                                }
+                            }).pipe(writestream);
 
-                        writestream.on('finish', function() {
-                            request.body = {
-                                content_type: content_type,
-                                tmp_filepath: tmp_filepath,
-                                size: size,
-                            }
-                            if (!request.closed) {
-                                rule.callback(request, response, match);
-                            }
-                        });
+                            writestream.on('finish', function() {
+                                request.body = {
+                                    content_type: content_type,
+                                    tmp_filepath: tmp_filepath,
+                                    size: size,
+                                }
+                                if (!request.closed) {
+                                    rule.callback(request, response, match);
+                                }
+                            });
 
-                        request.on('close', function() {
-                            fs.unlink(tmp_filepath);
-                            request.closed = true;
-                        });
-
-                        response.on('finish', function() {
-                            var field = request.body;
-                            if (!field || !field.keep) {
+                            request.on('close', function() {
                                 fs.unlink(tmp_filepath);
-                            }
-                        });
+                                request.closed = true;
+                            });
+
+                            response.on('finish', function() {
+                                var field = request.body;
+                                if (!field || !field.keep) {
+                                    fs.unlink(tmp_filepath);
+                                }
+                            });
+                        } else {
+                            var size = 0;
+                            var chunks = [];
+                            request.on('data', function(chunk) {
+                                size += chunk.length;
+                                chunks.push(chunk);
+
+                                if (size > post_multipart_max) {
+                                    self.notAllowed(response);
+                                    request.destroy();
+                                }
+                            });
+
+                            request.on('end', function() {
+                                request.body = {
+                                    content_type: content_type,
+                                    size: size,
+                                    data: Buffer.concat(chunks, size),
+                                }
+                                rule.callback(request, response, match);
+                            });
+                        }
                     }
                 } else {
                     rule.callback(request, response, match);
@@ -228,6 +254,10 @@ module.exports = function() {
 
     this.setFieldsMax = function(max_value) {
         num_fields_max = max_value;
+    }
+
+    this.setPostInMemory = function(value) {
+        post_in_memory = value;
     }
 
     this.setTempfileDir = function(dir) {

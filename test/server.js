@@ -5,6 +5,7 @@ var dispatcher = new Router();
 dispatcher.enableSecureCookieSession(secret_key);
 dispatcher.addStatic('/static', './test/static');
 // dispatcher.setFieldsMax(2);
+dispatcher.setPostInMemory(true);
 dispatcher.listen(80);
 
 dispatcher.get(/^\/$/, function(request, response) {

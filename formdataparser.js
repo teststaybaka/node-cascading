@@ -27,7 +27,7 @@ var name_prefix = string2array('name="');
 var filename_prefix = string2array('filename="');
 var content_type_prefix = string2array('Content-Type:');
 
-module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max, num_fields_max) {
+module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, post_max, post_multipart_max, num_fields_max, in_memory) {
     var self = this;
     var start_boundary = string2array(boundary_str);
     var content_boundary = string2array('\r\n'+boundary_str);
@@ -112,14 +112,50 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
                 cur_file.size = cur_size_accumulator + end_index - start_index + 1;
                 cur_size_accumulator = 0;
                 if (start_index === end_index + 1) {
-                    cur_writestream.end();
+                    if (!in_memory) {
+                        cur_writestream.end();
+                    } else {
+                        cur_file.data = Buffer.concat(cur_file.chunks, cur_file.size);
+                        delete cur_file.chunks;
+
+                        if (cur_name in data) {
+                            data[cur_name].push(cur_file);
+                        } else {
+                            data[cur_name] = [cur_file];
+                        }
+                    }
                 } else {
                     if (start_index < 0) {
                         console.log('remain!!!!!!!!!', start_index, end_index)
-                        cur_writestream.write(content_boundary_buffer.slice(0, - start_index));
-                        cur_writestream.end(cur_chunk.slice(0, end_index+1));
+                        if (!in_memory) {
+                            cur_writestream.write(content_boundary_buffer.slice(0, - start_index));
+                            cur_writestream.end(cur_chunk.slice(0, end_index+1));
+                        } else {
+                            cur_file.chunks.push(content_boundary_buffer.slice(0, - start_index));
+                            cur_file.chunks.push(cur_chunk.slice(0, end_index+1));
+                            cur_file.data = Buffer.concat(cur_file.chunks, cur_file.size);
+                            delete cur_file.chunks;
+
+                            if (cur_name in data) {
+                                data[cur_name].push(cur_file);
+                            } else {
+                                data[cur_name] = [cur_file];
+                            }
+                        }
                     } else {
-                        cur_writestream.end(cur_chunk.slice(start_index, end_index+1));
+                        if (!in_memory) {
+                            cur_writestream.end(cur_chunk.slice(start_index, end_index+1));
+                        } else {
+                            cur_file.chunks.push(cur_chunk.slice(start_index, end_index+1));
+                            cur_file.data = Buffer.concat(cur_file.chunks, cur_file.size);
+                            delete cur_file.chunks;
+                            
+                            if (cur_name in data) {
+                                data[cur_name].push(cur_file);
+                            } else {
+                                data[cur_name] = [cur_file];
+                            }
+                        }
                     }
                 }
                 cur_state = self.newline_state1;
@@ -293,16 +329,20 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
                 end_index = idx;
 
                 if (isFile) {
-                    var tmp_filepath = tempfile_dir+'tmpfile'+fields_count+Date.now();
-                    console.log('new tmp file', tmp_filepath)
-                    cur_writestream = fs.createWriteStream(tmp_filepath, {defaultEncoding: 'binary'});
-                    writestream_waiting_list_length += 1;
                     cur_file = {
                         filename: cur_filename,
                         content_type: cur_content_type,
-                        tmp_filepath: tmp_filepath,
                     }
-                    cur_writestream.on('finish', self.writestream_finished(cur_name, cur_file));
+                    if (!in_memory) {
+                        var tmp_filepath = tempfile_dir+'tmpfile'+fields_count+Date.now();
+                        console.log('new tmp file', tmp_filepath)
+                        cur_writestream = fs.createWriteStream(tmp_filepath, {defaultEncoding: 'binary'});
+                        writestream_waiting_list_length += 1;
+                        cur_file.tmp_filepath = tmp_filepath;
+                        cur_writestream.on('finish', self.writestream_finished(cur_name, cur_file));
+                    } else {
+                        cur_file.chunks = [];
+                    }
 
                     cur_state = self.content_boundary_state;
                 } else {
@@ -368,10 +408,19 @@ module.exports = function(request, boundary_str, tempfile_dir, fieldname_max, po
                 if (start_index !== end_index + 1) {
                     if (start_index < 0) {
                         // console.log('remaining in progress!!!!', start_index);
-                        cur_writestream.write(content_boundary_buffer.slice(0, - start_index));
-                        ok = cur_writestream.write(cur_chunk.slice(0, end_index+1));
+                        if (!in_memory) {
+                            cur_writestream.write(content_boundary_buffer.slice(0, - start_index));
+                            ok = cur_writestream.write(cur_chunk.slice(0, end_index+1));
+                        } else {
+                            cur_file.chunks.push(content_boundary_buffer.slice(0, - start_index));
+                            cur_file.chunks.push(cur_chunk.slice(0, end_index+1));
+                        }
                     } else {
-                        ok = cur_writestream.write(cur_chunk.slice(start_index, end_index+1));
+                        if (!in_memory) {
+                            ok = cur_writestream.write(cur_chunk.slice(start_index, end_index+1));
+                        } else {
+                            cur_file.chunks.push(cur_chunk.slice(start_index, end_index+1));
+                        }
                     }
                 }
             }
