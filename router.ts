@@ -22,7 +22,7 @@ export class Router {
   private static ALLOW_METHODS_HEADER = 'Access-Control-Allow-Methods';
   private static ALLOW_HEADERS_HEADER = 'Access-Control-Allow-Headers';
   private static LOCATION_HEADER = 'Location';
-  private static REDIRECT_CODE = 301;
+  private static REDIRECT_CODE = 307;
   private static OK_CODE = 200;
   private static REQUEST_ID_RANDOM_MAX = 10000;
   private static HTTPS_PROTOCAL = 'https://';

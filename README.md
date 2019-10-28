@@ -35,7 +35,8 @@ class SubHandler implements HttpHandler {
 import { ROUTER_FACTORY } from 'cascading/router';
 
 let router = ROUTER_FACTORY.get('your-hostname.com');
-router.start(); // Starts a HTTP server.
+// Starts a HTTP server.
+router.start();
 
 ```
 
@@ -47,7 +48,9 @@ let router = ROUTER_FACTORY.get('your-hostname.com', {
   cert: certificate,
   ca: [ca...],
 });
-router.start(); // Starts a HTTP & HTTPS server. Refer to Node's document for HttpsOption.
+// Starts a HTTP & HTTPS server. All HTTP requests will be redirected to HTTPS temporarily (Code
+// 307). Refer to Node's document for HttpsOption.
+router.start();
 
 ```
 
