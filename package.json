@@ -1,14 +1,9 @@
 {
   "name": "cascading",
-  "version": "0.2.2",
-  "description": "A web framework for nodejs",
-  "main": "router.js",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "test": "node test/server.js"
-  },
+  "version": "0.3.0",
+  "description": "Yet another http/https framework",
+  "main": "bin/router.js",
+  "types" : "bin/router.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/teststaybaka/node-cascading.git"
@@ -21,10 +16,18 @@
     "framework",
     "upload"
   ],
-  "author": "Yuxuan Xie <teststaybaka@gmail.com> (http://yuxuanxie.com)",
+  "author": "Yuxuan Xie <teststaybaka@gmail.com> (http://www.yuxuanxie.com)",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/teststaybaka/node-cascading/issues"
   },
-  "homepage": "https://github.com/teststaybaka/node-cascading#readme"
+  "homepage": "https://github.com/teststaybaka/node-cascading#readme",
+  "dependencies": {
+    "@google-cloud/logging": "^5.2.0",
+    "@types/node": "^7.10.7",
+    "typescript": "^3.5.3"
+  },
+  "devDependencies": {
+    "source-map-support": "^0.4.18"
+  }
 }
