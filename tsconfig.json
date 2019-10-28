@@ -7,8 +7,6 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "sourceMap": true,
-    "rootDir": "src",
-    "outDir": "bin",
     "noUnusedLocals": true,
     "moduleResolution": "Node",
     "skipLibCheck": true,

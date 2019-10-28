@@ -1,9 +1,7 @@
 {
   "name": "cascading",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "description": "Yet another http/https framework",
-  "main": "bin/router.js",
-  "types" : "bin/router.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/teststaybaka/node-cascading.git"
