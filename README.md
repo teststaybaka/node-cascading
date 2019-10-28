@@ -49,7 +49,7 @@ let router = ROUTER_FACTORY.get('your-hostname.com', {
   ca: [ca...],
 });
 // Starts a HTTP & HTTPS server. All HTTP requests will be redirected to HTTPS temporarily (Code
-// 307). Refer to Node's document for HttpsOption.
+// 307). Refer to Node's document for https.ServerOptions.
 router.start();
 
 ```

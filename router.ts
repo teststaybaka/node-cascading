@@ -7,12 +7,6 @@ import { TypedError, newInternalError, ErrorType } from './errors';
 import { HttpHandler, HttpResponse } from './http_handler';
 import { LOGGER } from './logger';
 
-interface HttpsOption {
-  key: string,
-  cert: string,
-  ca: string[],
-}
-
 // TODO: Rate limit requests.
 export class Router {
   private static HTTP_PORT = 80;
@@ -134,7 +128,7 @@ export class Router {
 }
 
 export class RouterFactory {
-  public get(hostname: string, httpsOption?: HttpsOption): Router {
+  public get(hostname: string, httpsOption?: https.ServerOptions): Router {
     let httpServer = http.createServer();
     let httpsServer = undefined;
     if (httpsOption) {
