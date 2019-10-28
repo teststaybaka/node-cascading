@@ -122,8 +122,10 @@ export class Router {
   public start(): void {
     this.httpServer.listen(Router.HTTP_PORT);
     LOGGER.info(`Http server started at ${Router.HTTP_PORT}.`);
-    this.httpsServer.listen(Router.HTTPS_PORT);
-    LOGGER.info(`Https server started at ${Router.HTTPS_PORT}.`);
+    if (this.httpsServer) {
+      this.httpsServer.listen(Router.HTTPS_PORT);
+      LOGGER.info(`Https server started at ${Router.HTTPS_PORT}.`);
+    }
   }
 
   public addHandler(httpHandler: HttpHandler): void {
