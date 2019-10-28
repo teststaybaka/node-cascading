@@ -1,6 +1,6 @@
 {
   "name": "cascading",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Yet another http/https framework",
   "repository": {
     "type": "git",
