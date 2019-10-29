@@ -1,5 +1,5 @@
 # node-cascading
-Yet another web framework for nodejs written in TypeScript, with some common util classes/functions.
+Yet another web framework written in TypeScript, with some common util classes/functions.
 
 ## Install
 ```
