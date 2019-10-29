@@ -13,24 +13,10 @@ class BatchLogger {
   private entries: Entry[] = [];
   private flushTimer: NodeJS.Timer;
 
-  public constructor(private log: Log, private severity: Severity) {}
+  public constructor(private remoteLogger: Log, private severity: Severity) {}
 
   public buffer(message: string): void {
-    switch (this.severity) {
-      case Severity.Info:
-        console.info(message);
-        break;
-      case Severity.Warning:
-        console.warn(message);
-        break;
-      case Severity.Error:
-        console.error(message);
-        break;
-      default:
-        console.log(message);
-    }
-
-    let entry = this.log.entry(message);
+    let entry = this.remoteLogger.entry(message);
     this.entries.push(entry);
     if (this.entries.length < BatchLogger.ENTRIES_LIMIT) {
       if (!this.flushTimer) {
@@ -48,16 +34,16 @@ class BatchLogger {
     try {
       switch (this.severity) {
         case Severity.Info:
-          await this.log.info(this.entries);
+          await this.remoteLogger.info(this.entries);
           break;
         case Severity.Warning:
-          await this.log.warning(this.entries);
+          await this.remoteLogger.warning(this.entries);
           break;
         case Severity.Error:
-          await this.log.error(this.entries);
+          await this.remoteLogger.error(this.entries);
           break;
         default:
-          await this.log.info(this.entries);
+          await this.remoteLogger.info(this.entries);
       }
     } catch(e) {
       // Do nothing
@@ -71,14 +57,25 @@ class BatchLogger {
 class Logger {
   private severityToBatchLoggers = new Map<string, BatchLogger>();
   private logging: Logging;
-  private log: Log;
+  private remoteLogger: Log;
+
+  public info = this.infoRemote;
+  public warning = this.warningRemote;
+  public error = this.errorRemote;
 
   public constructor() {
     this.logging = new Logging();
-    this.log = this.logging.log('Backend');
+    this.remoteLogger = this.logging.log('Backend');
   }
 
-  public info(message: string) {
+  public switchToLocal(): void {
+    this.info = console.info;
+    this.warning = console.warn;
+    this.error = console.error;
+  }
+
+  public infoRemote(message: string): void {
+    console.log(message);
     let batchLogger = this.getBatchLogger(Severity.Info);
     batchLogger.buffer(message);
   }
@@ -86,18 +83,20 @@ class Logger {
   private getBatchLogger(severity: Severity): BatchLogger {
     let batchLogger = this.severityToBatchLoggers.get(Severity[severity]);
     if (!batchLogger) {
-      batchLogger = new BatchLogger(this.log, severity);
+      batchLogger = new BatchLogger(this.remoteLogger, severity);
       this.severityToBatchLoggers.set(Severity[severity], batchLogger);
     }
     return batchLogger;
   }
 
-  public warning(message: string) {
+  public warningRemote(message: string): void {
+    console.warn(message);
     let batchLogger = this.getBatchLogger(Severity.Warning);
     batchLogger.buffer(message);
   }
 
-  public error(message: string) {
+  public errorRemote(message: string): void {
+    console.error(message);
     let batchLogger = this.getBatchLogger(Severity.Error);
     batchLogger.buffer(message);
   }

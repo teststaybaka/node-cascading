@@ -1,5 +1,6 @@
 import process = require('process');
 import { parseFlags } from './flag_parser';
+import { LOGGER } from './logger';
 import 'source-map-support/register';
 
 let WHICH_CHILD = 'child';
@@ -23,6 +24,7 @@ export async function runTests(testSetName: string, testCases: TestCase[]) {
       console.info = () => {};
       console.warn = () => {};
       console.error = () => {};
+      LOGGER.switchToLocal();
       let statusMsg: string;
       try {
         await testCases[i].execute();
@@ -38,6 +40,7 @@ export async function runTests(testSetName: string, testCases: TestCase[]) {
     }
   } else {
     let whichChild = parseInt(child);
+    LOGGER.switchToLocal();
     try {
       await testCases[whichChild].execute();
     } catch (e) {

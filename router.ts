@@ -110,7 +110,7 @@ export class Router {
       }
     }
 
-    throw newInternalError(`404 Not Found :/`);
+    throw newInternalError(`Not Found :/`);
   }
 
   public start(): void {
