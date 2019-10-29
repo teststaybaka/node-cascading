@@ -11,7 +11,8 @@ export interface TestCase {
 
 export async function runTests(testSetName: string, testCases: TestCase[]) {
   let flags = parseFlags(process.argv);
-  if (!(WHICH_CHILD in flags)) {
+  let child = flags.get(WHICH_CHILD);
+  if (child === undefined) {
     console.log('\n\x1b[35m%s test result:\x1b[0m', testSetName);
     for (let i = 0, len = testCases.length; i < len; i++) {
       let oldLog = console.log;
@@ -36,7 +37,7 @@ export async function runTests(testSetName: string, testCases: TestCase[]) {
       console.log(statusMsg);
     }
   } else {
-    let whichChild = parseInt(flags.get(WHICH_CHILD));
+    let whichChild = parseInt(child);
     try {
       await testCases[whichChild].execute();
     } catch (e) {
