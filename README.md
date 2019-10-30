@@ -1,5 +1,5 @@
 # node-cascading
-Yet another web framework written in TypeScript, with some common util classes/functions.
+Yet another web framework written in TypeScript with some toolkit, i.e. singleton factory, unit test framework, and flag parser. It is compiled to ES5.
 
 ## Install
 ```
@@ -8,7 +8,7 @@ npm install cascading
 
 ## Example handler
 
-```TypeScript
+```typescript
 // File 'sub_handler.ts'.
 import { CONTENT_TYPE_TEXT, HttpMethod } from 'cascading/common';
 import { HttpHandler } from 'cascading/http_handler';
@@ -39,7 +39,7 @@ export let SUB_HANDLER_FACTORY = new SingletonFactory((): SubHandler => {
 
 Then added to router.
 
-```TypeScript
+```typescript
 import { ROUTER_FACTORY } from 'cascading/router';
 import { SUB_HANDLER_FACTORY } from './sub_handler';
 
@@ -51,7 +51,7 @@ router.addHandler(SUB_HANDLER_FACTORY.get());
 
 ## Start router
 
-```TypeScript
+```typescript
 import { ROUTER_FACTORY } from 'cascading/router';
 
 let router = ROUTER_FACTORY.get('your-hostname.com');
@@ -59,7 +59,7 @@ let router = ROUTER_FACTORY.get('your-hostname.com');
 router.start();
 ```
 
-```TypeScript
+```typescript
 import { ROUTER_FACTORY } from 'cascading/router';
 
 let router = ROUTER_FACTORY.get('your-hostname.com', {
@@ -74,14 +74,101 @@ router.start();
 
 Ports are fixed at 80 for HTTP and 443 for HTTPS.
 
+## Logging
+
+This router depends on GCP (Google Cloud Platform) logging lib. It will try to log to GCP all the time as well as log to console, ignoring any error regarding GCP. Internally, it holds a buffer of 100 messages before flushing logs to GCP, or has 30 secs timeout.
+
 ## Cross-origin request & Preflight handler
 
-This router always allows cross-origin requests from any origin. Depends on client implementation, you might receive an `OPTIONS` request to ask for cross-origin policy. You can add `PreflightHandler` to handle this request.
+This router always allows cross-origin requests from any origin. Depends on client implementation, you might receive an `OPTIONS` request to ask for cross-origin policy. Each router always has a singleton `PreflightHandler` added when created from `ROUTER_FACTORY`. However, it intercepts all `OPTIONS` requests. Thus any handler that handles `OPTIONS` is ignored.
 
-```TypeScript
-import { PREFLIGHT_HANDLER_FACTORY } from 'cascading/preflight_handler';
+## Static file & directory handler
+
+```typescript
+import { STATIC_DIR_HANDLER_FACTORY, STATIC_FILE_HANDLER_FACTORY } from 'cascading/static_handler';
 
 // ...
-router.addHandler(PREFLIGHT_HANDLER_FACTORY.get());
+router.addHandler(STATIC_FILE_HANDLER_FACTORY.get('/favicon.ico', 'image/favicon.ico'));
+router.addHandler(STATIC_DIR_HANDLER_FACTORY.get('/image', 'image'));
 // ...
 ```
+
+`STATIC_FILE_HANDLER_FACTORY` takes a URL and a local path. `STATIC_DIR_HANDLER_FACTORY` takes a URL prefix and a local directory.
+
+## SingletonFactory
+
+```typescript
+import { SingletonFactory } from 'cascading/singleton_factory';
+
+// ...
+export let SUB_HANDLER_FACTORY = new SingletonFactory((): SubHandler => {
+  let handler = new SubHandler();
+  handler.init();
+  return handler;
+});
+```
+
+`SingletonFactory` takes a function without any argument to construct an instance. It will only call the the constucting function once, no matter what.
+
+## Test base
+
+```typescript
+import { TestCase, runTests, assert, assertContains, assertError, expectRejection, expectThrow } from 'cascading/test_base';
+
+// ...
+class FileHandlerSuffix implements TestCase {
+  public name = 'FileHandlerSuffix';
+
+  public async execute() {
+    // Prepare
+    let handler = new StaticFileHandler('/url', 'path.js');
+    handler.init();
+
+    // Execute
+    let response = await handler.handle(undefined, undefined, undefined);
+
+    // Verify
+    assert(response.contentFile === 'path.js');
+    assert(response.contentType === 'text/javascript');
+    assertContains(response.contentType, 'javas');
+  }
+}
+// ...
+runTests('StaticHttpHandlerTest', [
+  new FileHandlerSuffix(),
+  // ...
+]);
+```
+
+Compile and execute this file normally using `tsc` and `node` to run all tests added in `runTests()`.
+
+To run a single test, use `node test_file.js -- --child=1`, where `child` specifies which test case to run.
+
+In addition, use `expectRejection`, `expectThrow` and `assertError` to test failure cases. Note that `assertError` first asserts the error is an instance of JavaScript `Error`.
+
+```typescript
+{
+  // Expect rejection from a promise.
+  let promise: Promise<any> = ...
+  let error = await expectRejection(promise);
+  // The message of `error` only needs to contain the message of `expectedError`.
+  assertError(error, expectedError);
+}
+
+{
+  // Expect an error to be thrown when invoking foo().
+  let error = expectThrow(() => foo());
+  // The message of `error` only needs to contain the message of `expectedError`.
+  assertError(error, expectedError);
+}
+```
+
+## Flag parser
+
+```typescript
+import { parseFlags } from 'cascading/flag_parser';
+
+let flags = parseFlags(process.argv);
+```
+
+The return value is simply a Map.

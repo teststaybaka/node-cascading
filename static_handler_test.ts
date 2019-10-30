@@ -14,7 +14,7 @@ class FileHandlerSuffix implements TestCase {
     handler.init();
 
     // Execute
-    let response = await handler.handle(null, null, null);
+    let response = await handler.handle(undefined, undefined, undefined);
 
     // Verify
     assert(response.contentFile === 'path.js');
@@ -31,7 +31,7 @@ class FileHandlerBinaryType implements TestCase {
     handler.init();
 
     // Execute
-    let response = await handler.handle(null, null, null);
+    let response = await handler.handle(undefined, undefined, undefined);
 
     // Verify
     assert(response.contentFile === 'path');
@@ -49,7 +49,7 @@ class DirHandlerUrlNotMatch implements TestCase {
     let urlPath = url.parse('/xxx');
 
     // Execute
-    let error = await expectRejection(handler.handle(null, null, urlPath));
+    let error = await expectRejection(handler.handle(undefined, undefined, urlPath));
 
     // Verify
     assertError(error, newInternalError('match url regex'));
@@ -66,7 +66,7 @@ class DirHandlerMatchJpgFile implements TestCase {
     let urlPath = url.parse('/xxx/test.jpg');
 
     // Execute
-    let response = await handler.handle(null, null, urlPath);
+    let response = await handler.handle(undefined, undefined, urlPath);
 
     // Verify
     let stats = fs.statSync(response.contentFile);
@@ -85,7 +85,7 @@ class DirHandlerMatchBinaryFile implements TestCase {
     let urlPath = url.parse('/xxx/file');
 
     // Execute
-    let response = await handler.handle(null, null, urlPath);
+    let response = await handler.handle(undefined, undefined, urlPath);
 
     // Verify
     let stats = fs.statSync(response.contentFile);
