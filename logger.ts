@@ -1,6 +1,6 @@
 import { Entry, Log, Logging } from '@google-cloud/logging';
 
-export enum Severity {
+enum Severity {
   Info = 1,
   Warning = 2,
   Error = 3,

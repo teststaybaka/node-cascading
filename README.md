@@ -47,7 +47,7 @@ let router = ROUTER_FACTORY.get('your-hostname.com');
 router.addHandler(SUB_HANDLER_FACTORY.get());
 ```
 
-`logContext` simply contains a random request id for easy log tracking when you prepend it to any subsequent logging.
+`logContext` simply contains a random request id for easy log tracking when you prepend it to any subsequent logging. No need to add a space.
 
 ## Start router
 
@@ -76,7 +76,15 @@ Ports are fixed at 80 for HTTP and 443 for HTTPS.
 
 ## Logging
 
-This router depends on GCP (Google Cloud Platform) logging lib. It will try to log to GCP all the time as well as log to console, ignoring any error regarding GCP. Internally, it holds a buffer of 100 messages before flushing logs to GCP, or has 30 secs timeout.
+```
+import { LOGGER } from 'cascading/logger';
+
+LOGGER.info(...);
+LOGGER.warning(...);
+LOGGER.error(...);
+```
+
+`LOGGER`, also used by `Router`, depends on GCP (Google Cloud Platform) logging lib. It will try to log to GCP all the time as well as log to console, ignoring any error regarding GCP. Internally, it holds a buffer of 100 messages before flushing to GCP, or waits for 30 secs upon receiving the first message.
 
 ## Cross-origin request & Preflight handler
 
