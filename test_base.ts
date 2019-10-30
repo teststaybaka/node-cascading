@@ -71,12 +71,13 @@ export function assertError(actualError: any, expectedError: Error) {
   }
 }
 
-export function expectRejection(promise: Promise<any>) {
-  return promise.then(() => {
-    throw new Error('Expecting the promise to be rejected but did not.');
-  }, (error) => {
-    return error;
-  });
+export async function expectRejection(promise: Promise<any>) {
+  try {
+    await promise;
+  } catch (e) {
+    return e;
+  }
+  throw new Error('Expecting the promise to be rejected but did not.');
 }
 
 export function expectThrow(method: () => void) {
