@@ -51,7 +51,7 @@ export class StaticDirHandler implements HttpHandler {
   public async handle(logContext: string, request: http.IncomingMessage, parsedUrl: url.Url): Promise<HttpResponse> {
     let matched = parsedUrl.pathname.match(this.urlRegex);
     if (!matched) {
-      throw newInternalError(`${logContext}Pathname, ${parsedUrl.pathname}, didn't match url regex, ${this.urlRegex}.`);
+      throw newInternalError(`Pathname, ${parsedUrl.pathname}, didn't match url regex, ${this.urlRegex}.`);
     }
 
     let filePath = matched[1];
