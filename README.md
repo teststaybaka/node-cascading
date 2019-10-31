@@ -76,7 +76,7 @@ Ports are fixed at 80 for HTTP and 443 for HTTPS.
 
 ## Logger
 
-```
+```typescript
 import { LOGGER } from 'cascading/logger';
 
 LOGGER.info(...);
