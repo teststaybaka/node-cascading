@@ -74,7 +74,7 @@ router.start();
 
 Ports are fixed at 80 for HTTP and 443 for HTTPS.
 
-## Logging
+## Logger
 
 ```
 import { LOGGER } from 'cascading/logger';
