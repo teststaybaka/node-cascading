@@ -1,5 +1,5 @@
 # node-cascading
-Yet another web framework written in TypeScript with some toolkit, i.e. singleton factory, unit test framework, and flag parser. It is compiled to ES5.
+Yet another web framework written in TypeScript with some toolkit, e.g. singleton factory and unit test framework. It is compiled to ES5.
 
 ## Install
 ```
@@ -171,12 +171,17 @@ In addition, use `expectRejection`, `expectThrow` and `assertError` to test fail
 }
 ```
 
-## Flag parser
+## TypedError
 
 ```typescript
-import { parseFlags } from 'cascading/flag_parser';
+import { ErrorType, TypedError, newInternalError, newUnauthorizedError } from 'cascading/errors';
 
-let flags = parseFlags(process.argv);
+let error1 = newInternalError('Error');
+error1.errorType === ErrorType.INTERNAL;
+
+let nativeError = new Error('Failure');
+let error2 = newUnauthorizedError('Error', nativeError);
+error2.errorType === ErrorType.UNAUTHORIZED;
 ```
 
-The return value is simply a Map.
+`TypedError` requires an `ErrorType` and optionally wraps an existing error by concatenating error stack. The `ErrorType` of a `TypedError` is erased when passed to another `TypedError`. The value of `ErrorType` reflects HTTP error code. When a `HttpHandler` returns a `TypedError`, the number value of its `ErrorType` is passed to response.
