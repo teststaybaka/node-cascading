@@ -150,7 +150,7 @@ runTests('StaticHttpHandlerTest', [
 
 Compile and execute this file normally using `tsc` and `node` to run all tests added in `runTests()`.
 
-To run a single test, use `node test_file.js -- --child=1`, where `child` specifies which test case to run.
+To run a single test, use `node test_file.js <No. of test case>`.
 
 In addition, use `expectRejection`, `expectThrow` and `assertError` to test failure cases. Note that `assertError` first asserts the error is an instance of JavaScript `Error`.
 

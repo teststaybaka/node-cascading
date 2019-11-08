@@ -1,9 +1,6 @@
 import process = require('process');
-import { parseFlags } from './flag_parser';
 import { LOGGER } from './logger';
 import 'source-map-support/register';
-
-let WHICH_CHILD = 'child';
 
 export interface TestCase {
   name: string,
@@ -11,8 +8,7 @@ export interface TestCase {
 }
 
 export async function runTests(testSetName: string, testCases: TestCase[]) {
-  let flags = parseFlags(process.argv);
-  let child = flags.get(WHICH_CHILD);
+  let child = process.argv[2];
   if (child === undefined) {
     console.log('\n\x1b[35m%s test result:\x1b[0m', testSetName);
     for (let i = 0, len = testCases.length; i < len; i++) {
