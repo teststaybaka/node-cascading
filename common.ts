@@ -13,3 +13,9 @@ export function findWithDefault<Key, Value>(map: Map<Key, Value>, key: Key, defa
     return value;
   }
 }
+
+export function extendArray<Value>(list: Value[], fromList: Value[]): void {
+  for (let value of fromList) {
+    list.push(value);
+  }
+}
