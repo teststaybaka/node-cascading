@@ -63,7 +63,7 @@ export class Router {
       if (error.errorType) {
         response.writeHead((error as TypedError).errorType, {[Router.CONTENT_TYPE_HEADER]: CONTENT_TYPE_TEXT});
       } else {
-        response.writeHead(ErrorType.INTERNAL, {[Router.CONTENT_TYPE_HEADER]: CONTENT_TYPE_TEXT});
+        response.writeHead(ErrorType.Internal, {[Router.CONTENT_TYPE_HEADER]: CONTENT_TYPE_TEXT});
       }
       response.end(error.message);
       return;
