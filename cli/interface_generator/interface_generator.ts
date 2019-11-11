@@ -1,3 +1,4 @@
+import fs = require('fs');
 import { newInternalError } from '../../errors';
 import { extendSet } from '../../common';
 import { generateFromObjectDescriptor, validateObjectDescriptor, ObjectDescriptor } from './object_generator';
@@ -37,20 +38,23 @@ function generateFromDescriptor(descriptor: Descriptor): GeneratedContent {
   throw newInternalError('Not a valid descriptor.');
 }
 
-export function generateFromDescriptorList(obj: any): string {
-  if (!(obj instanceof Array)) {
+export function generateFromFile(filePath: string): void {
+  let content = fs.readFileSync(filePath + '.json');
+  let descriptors = JSON.parse(content.toString());
+
+  if (!(descriptors instanceof Array)) {
     throw newInternalError('Top level object is not an Array.');
   }
 
   let allGeneratedContent: GeneratedContent[] = [];
-  for (let i = 0; i < obj.length; i++) {
-    let subObj = obj[i];
+  for (let i = 0; i < descriptors.length; i++) {
+    let descriptor = descriptors[i];
     try {
-      validateDescriptor(subObj);
+      validateDescriptor(descriptor);
     } catch (e) {
       throw newInternalError(`Failed to validate the ${i}th object.`, e);
     }
-    allGeneratedContent.push(generateFromDescriptor(subObj));
+    allGeneratedContent.push(generateFromDescriptor(descriptor));
   }
 
   let imports = new Map<string, Set<string>>();
@@ -85,5 +89,6 @@ export function generateFromDescriptorList(obj: any): string {
       fileContent += generatedContent.footer;
     }
   }
-  return fileContent;
+
+  fs.writeFileSync(filePath + '.ts', fileContent);
 }
