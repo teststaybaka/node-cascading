@@ -1,5 +1,5 @@
 import fs = require('fs');
-import { generateFromDescriptorList } from './interface_generator';
+import { generateFromDescriptorList } from './interface_generator/interface_generator';
 
 let filePath = process.argv[2];
 let content = fs.readFileSync(filePath + '.json');
