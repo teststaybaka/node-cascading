@@ -1,0 +1,18 @@
+[{
+  "object": {
+    "name": "TestNestedObject",
+    "fields": [{
+      "name": "nestedField1",
+      "type": "TestObject",
+      "importFrom": "./test_interface"
+    }, {
+      "name": "color",
+      "type": "TestEnumColor",
+      "importFrom": "./test_interface"
+    }, {
+      "name": "color2",
+      "type": "TestEnumColor",
+      "importFrom": "./test_interface"
+    }]
+  }
+}]

@@ -19,3 +19,9 @@ export function extendArray<Value>(list: Value[], fromList: Value[]): void {
     list.push(value);
   }
 }
+
+export function extendSet<Value>(set: Set<Value>, fromSet: Set<Value>): void {
+  for (let iter = fromSet.values(), result = iter.next(); !result.done; result = iter.next()) {
+    set.add(result.value);
+  }
+}
