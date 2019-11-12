@@ -12,7 +12,8 @@
     "dispatcher",
     "web",
     "framework",
-    "upload"
+    "upload",
+    "typescript"
   ],
   "author": "Yuxuan Xie <teststaybaka@gmail.com> (http://www.yuxuanxie.com)",
   "license": "Apache-2.0",
