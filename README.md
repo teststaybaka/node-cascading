@@ -177,11 +177,11 @@ In addition, use `expectRejection`, `expectThrow` and `assertError` to test fail
 import { ErrorType, TypedError, newInternalError, newUnauthorizedError } from 'cascading/errors';
 
 let error1 = newInternalError('Error');
-error1.errorType === ErrorType.INTERNAL;
+error1.errorType === ErrorType.Internal;
 
 let nativeError = new Error('Failure');
 let error2 = newUnauthorizedError('Error', nativeError);
-error2.errorType === ErrorType.UNAUTHORIZED;
+error2.errorType === ErrorType.Unauthorized;
 ```
 
-`TypedError` requires an `ErrorType` and optionally wraps an existing error by concatenating error stack. The `ErrorType` of a `TypedError` is erased when passed to another `TypedError`. The value of `ErrorType` reflects HTTP error code. When a `HttpHandler` returns a `TypedError`, the number value of its `ErrorType` is passed to response.
+`TypedError` requires an `ErrorType` and optionally wraps an existing error by prepending the new error message to it. The `ErrorType` of a `TypedError` is erased when passed to another `TypedError`. The value of `ErrorType` reflects HTTP error code. When a `HttpHandler` returns a `TypedError`, the number value of its `ErrorType` is passed to response.
