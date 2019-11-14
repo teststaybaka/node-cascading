@@ -29,6 +29,7 @@
     "source-map-support": "^0.4.18",
     "typescript": "^3.7.2"
   },
+  "bin": "./cli/main.js",
   "scripts": {
     "release": "tsc && npm publish"
   }
