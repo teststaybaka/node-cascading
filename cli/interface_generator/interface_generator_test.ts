@@ -1,5 +1,4 @@
-import { spawn } from 'child_process';
-import { newInternalError } from '../../errors';
+import { execSync } from 'child_process';
 import { TestCase, runTests } from '../../test_base';
 import { generateFromFile } from './interface_generator';
 
@@ -14,18 +13,7 @@ class GenerateInterfaceWithinSameFile implements TestCase {
     generateFromFile(filePath);
 
     // Verify
-    let compiling = spawn('cmd', ['/s', '/c', 'tsc', filePath]);
-    await new Promise<void>((resolve, reject): void => {
-      compiling.stdout.on('data', (data) => {
-        console.log(data.toString());
-      });
-      compiling.stderr.on('data', (data) => {
-        reject(newInternalError(data.toString()));
-      });
-      compiling.on('close', (code) => {
-        resolve();
-      });
-    });
+    execSync(`tsc ${filePath}`);
   }
 }
 
@@ -34,24 +22,16 @@ class GenerateInterfaceWithImports implements TestCase {
 
   public async execute() {
     // Prepare
-    let filePath = './test_data/test_interface_another';
+    let filePath1 = './test_data/test_interface';
+    let filePath2 = './test_data/test_interface_another';
 
     // Execute
-    generateFromFile(filePath);
+    generateFromFile(filePath1);
+    generateFromFile(filePath2);
 
     // Verify
-    let compiling = spawn('cmd', ['/s', '/c', 'tsc', filePath]);
-    await new Promise<void>((resolve, reject): void => {
-      compiling.stdout.on('data', (data) => {
-        console.log(data.toString());
-      });
-      compiling.stderr.on('data', (data) => {
-        reject(newInternalError(data.toString()));
-      });
-      compiling.on('close', (code) => {
-        resolve();
-      });
-    });
+    execSync(`tsc ${filePath1}`);
+    execSync(`tsc ${filePath2}`);
   }
 }
 
