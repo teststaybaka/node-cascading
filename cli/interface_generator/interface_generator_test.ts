@@ -10,7 +10,7 @@ class GenerateInterfaceWithinSameFile implements TestCase {
     let filePath = './test_data/test_interface';
 
     // Execute
-    generateFromFile(filePath);
+    generateFromFile(filePath + '.itf');
 
     // Verify
     execSync(`tsc ${filePath}`);
@@ -26,8 +26,8 @@ class GenerateInterfaceWithImports implements TestCase {
     let filePath2 = './test_data/test_interface_another';
 
     // Execute
-    generateFromFile(filePath1);
-    generateFromFile(filePath2);
+    generateFromFile(filePath1 + '.itf');
+    generateFromFile(filePath2 + '.itf');
 
     // Verify
     execSync(`tsc ${filePath1}`);

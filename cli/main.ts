@@ -1,5 +1,14 @@
 #!/usr/bin/env node
-import { generateFromFile } from './interface_generator/interface_generator';
+import { execSync } from 'child_process';
+import { buildAllFiles } from './build';
 
-let filePath = process.argv[2];
-generateFromFile(filePath);
+let purpose = process.argv[2];
+if (purpose === 'build') {
+  buildAllFiles();
+} else if (purpose === 'run') {
+  buildAllFiles();
+  let filePath = process.argv[3];
+  let passAlongArgs = process.argv.slice(4);
+  let output = execSync(`node ${filePath} ${passAlongArgs}`);
+  console.log(output.toString());
+}

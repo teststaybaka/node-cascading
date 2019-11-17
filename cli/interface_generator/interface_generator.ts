@@ -1,4 +1,5 @@
 import fs = require('fs');
+import path = require('path');
 import { newInternalError } from '../../errors';
 import { extendSet } from '../../common';
 import { generateFromObjectDescriptor, validateObjectDescriptor, ObjectDescriptor } from './object_generator';
@@ -39,7 +40,7 @@ function generateFromDescriptor(descriptor: Descriptor): GeneratedContent {
 }
 
 export function generateFromFile(filePath: string): void {
-  let content = fs.readFileSync(filePath + '.json');
+  let content = fs.readFileSync(filePath);
   let descriptors = JSON.parse(content.toString());
 
   if (!(descriptors instanceof Array)) {
@@ -90,5 +91,8 @@ export function generateFromFile(filePath: string): void {
     }
   }
 
-  fs.writeFileSync(filePath + '.ts', fileContent);
+  let dir = path.dirname(filePath);
+  let ext = path.extname(filePath);
+  let base = path.basename(filePath, ext);
+  fs.writeFileSync(path.join(dir, base + '.ts'), fileContent);
 }
