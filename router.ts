@@ -3,7 +3,7 @@ import http = require('http');
 import https = require('https');
 import url = require('url');
 import { CONTENT_TYPE_TEXT, HttpMethod } from './common';
-import { TypedError, newInternalError, ErrorType } from './errors';
+import { ErrorType, TypedError, newInternalError } from './errors';
 import { HttpHandler, HttpResponse } from './http_handler';
 import { LOGGER } from './logger';
 import { PREFLIGHT_HANDLER_FACTORY } from './preflight_handler';

@@ -1,7 +1,7 @@
 import fs = require('fs');
 import path = require('path');
-import { execSync } from 'child_process';
 import { generateFromFile } from './interface_generator/interface_generator';
+import { execSync } from 'child_process';
 
 let BLACKLIST_DIRS = new Set(['node_modules', '.git']);
 
