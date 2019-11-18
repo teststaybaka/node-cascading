@@ -1,10 +1,11 @@
 import fs = require('fs');
 import path = require('path');
-import { newInternalError } from '../../errors';
 import { extendSet } from '../../common';
-import { generateFromObjectDescriptor, validateObjectDescriptor, ObjectDescriptor } from './object_generator';
-import { generateFromEnumDescriptor, validateEnumDescriptor, EnumDescriptor } from './enum_generator';
+import { newInternalError } from '../../errors';
+import { ImportLine } from '../format';
+import { EnumDescriptor, generateFromEnumDescriptor, validateEnumDescriptor } from './enum_generator';
 import { GeneratedContent } from './generated_content';
+import { ObjectDescriptor, generateFromObjectDescriptor, validateObjectDescriptor } from './object_generator';
 
 interface Descriptor {
   object?: ObjectDescriptor,
@@ -75,12 +76,23 @@ export function generateFromFile(filePath: string): void {
     }
   }
 
-  let fileContent = '';
+  let importLines: ImportLine[] = [];
   for (let iter = imports.entries(), result = iter.next(); !result.done; result = iter.next()) {
     let path = result.value[0];
     let names = result.value[1];
-    let nameStr = Array.from(names).join(', ');
-    fileContent += `import { ${nameStr} } from '${path}';\n`;
+    let nameStr = Array.from(names).sort().join(', ');
+    importLines.push({
+      declaration: nameStr,
+      path: path,
+    });
+  }
+  importLines.sort((a, b): number => {
+    return a.path.localeCompare(b.path);
+  });
+
+  let fileContent = '';
+  for (let importLine of importLines) {
+    fileContent += `import { ${importLine.declaration} } from '${importLine.path}';\n`;
   }
   for (let generatedContent of allGeneratedContent) {
     fileContent += generatedContent.content;

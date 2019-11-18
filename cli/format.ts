@@ -1,6 +1,6 @@
 import fs = require('fs');
 
-interface ImportLine {
+export interface ImportLine {
   declaration: string,
   path: string,
 }
@@ -18,9 +18,8 @@ export function sortImports(filePath: string): void {
   for (let line of lines) {
     let importRequireMatched = line.match(extractImportRequireRegex);
     if (importRequireMatched) {
-      let declarationTrimmed = importRequireMatched[1].trim();
       importRequireList.push({
-        declaration: declarationTrimmed,
+        declaration: importRequireMatched[1].trim(),
         path: importRequireMatched[2],
       });
       continue;
@@ -33,11 +32,9 @@ export function sortImports(filePath: string): void {
       for (let declaration of declarations) {
         declarationsTrimmed.push(declaration.trim());
       }
-      declarationsTrimmed.sort();
-      let declarationStr = declarationsTrimmed.join(', ');
 
       importFromList.push({
-        declaration: declarationStr,
+        declaration: declarationsTrimmed.sort().join(', '),
         path: importFromMatched[2],
       });
       continue;
