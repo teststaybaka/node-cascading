@@ -185,3 +185,83 @@ error2.errorType === ErrorType.Unauthorized;
 ```
 
 `TypedError` requires an `ErrorType` and optionally wraps an existing error by prepending the new error message to it. The `ErrorType` of a `TypedError` is erased when passed to another `TypedError`. The value of `ErrorType` reflects HTTP error code. When a `HttpHandler` returns a `TypedError`, the number value of its `ErrorType` is passed to response.
+
+## Data interface
+
+In some cases, we want to safely cast an `any` object into a typed object, e.g., validating a data object received from wire. Because TypeScript/JavaScript doesn't have type information in runtime, one cannot pass an interface/class itself to a function to validate each field (i.e. no reflection). And we also don't want to write a validation function for each interface/class. One could consider using Protocol Buffers but I want a really light-weight version.
+
+Write the interface definition in a .itf file, which is essentially a JSON object. Examples are shown below.
+
+```
+[{
+  "object": {
+    "name": "TestObject",
+    "fields": [{
+      "name": "field1",
+      "type": "string"
+    }, {
+      "name": "field2",
+      "type": "number"
+    }, {
+      "name": "field3",
+      "type": "boolean"
+    }]
+  }
+}, {
+  "enum": {
+    "name": "TestEnumColor",
+    "values": [{
+      "name": "Red",
+      "value": 1
+    }, {
+      "name": "Green",
+      "value": 3
+    }, {
+      "name": "Blue",
+      "value": 10
+    }]
+  }
+}]
+```
+
+```
+[{
+  "object": {
+    "name": "TestNestedObject",
+    "fields": [{
+      "name": "nestedField1",
+      "type": "TestObject",
+      "importFrom": "./test_interface"
+    }, {
+      "name": "color",
+      "type": "TestEnumColor",
+      "importFrom": "./test_interface"
+    }, {
+      "name": "color2",
+      "type": "TestEnumColor",
+      "importFrom": "./test_interface"
+    }]
+  }
+}]
+```
+
+.itf needs to start with an array, whose element is either an "object" or an "enum" definition. cli/interface_generator/object_generator.ts & enum_generator.ts contain the definitions of an "object" and an "enum" interface respectively. "importFrom" will be copied to the generated TypeScript file without modification.
+
+The generated TypeScript file will be located in the same directory with the same file name but with .ts as its file extension. It exports TypeScript `interface` or `enum` definitions as well as a `function construct<name of the object>(obj?: any)` for each definition.
+
+Execute `cascading build` (without arguments) in your command line to build all .itf files.
+
+## CLI
+
+### Build
+
+By executing `cascading build`, which doesn't accept any arguments, it first builds all .itf files and then compile all TypeScript files.
+
+### Run
+
+By executing `cascading run <file path without extension> <all pass along arguments>`, it first builds all files and then runs the built JavaScript file. Starting from the 4th arguments, they will be passed as-is to the executed JavaScript file.
+
+
+### Format
+
+By executing `cascading fmt <file path without extension>`, it sorts (sadly only sorting) the import statements in a deterministic way.
