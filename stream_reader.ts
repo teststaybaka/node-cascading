@@ -9,7 +9,7 @@ export class StreamReader {
       let buffer: number[] = [];
       incoming.on('data', (chunk): void => {
         if (buffer.length + chunk.length > BUFFER_LIMIT) {
-          reject(newInternalError(`Incoming data exceeds buffer limit, ${BUFFER_LIMIT}.`));
+          reject(newInternalError(`Stream data exceeds buffer limit, ${BUFFER_LIMIT}.`));
           return;
         }
 
@@ -18,7 +18,7 @@ export class StreamReader {
         }
       });
       incoming.on('error', (err): void => {
-        reject(newInternalError('Incoming stream encountered an error!', err));
+        reject(newInternalError('Stream encountered an error!', err));
       });
       incoming.on('end', (): void => {
         resolve(buffer);
