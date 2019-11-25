@@ -4,8 +4,8 @@ import { newUnauthorizedError } from './errors';
 let ALGORITHM = 'sha256';
 let SECRET_KEY = 'sdoijfoieaojmfmfiqujroifzxco';
 let SEED_MAX = 100000;
-export let SESSION_SEPARATOR = '|';
-export let SESSION_LONGEVITY = 30*24*60*60*1000;
+let SESSION_SEPARATOR = '|';
+let SESSION_LONGEVITY = 30*24*60*60*1000;
 
 export class Signer {
   public secretKey: string;
