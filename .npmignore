@@ -1,5 +1,4 @@
 /node_modules/
-/test/
 /test_data/
 *.js.map
 *_test.*
