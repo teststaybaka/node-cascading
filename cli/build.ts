@@ -1,7 +1,7 @@
 import fs = require('fs');
 import path = require('path');
 import { generateFromFile } from './interface_generator/interface_generator';
-import { execSync } from 'child_process';
+import { exec } from 'child_process';
 
 let BLACKLIST_DIRS = new Set(['node_modules', '.git']);
 
@@ -26,8 +26,18 @@ function buildDir(basePath: string): void {
   }
 }
 
-export function buildAllFiles(): void {
+export async function buildAllFiles(): Promise<void> {
   buildDir('.');
-  let output = execSync('tsc');
-  console.log(output.toString());
+  await new Promise<void>((resolve, reject): void => {
+    let child = exec('tsc');
+    child.stdout.on('data', (chunk): void => {
+      console.log(chunk);
+    });
+    child.stderr.on('data', (chunk): void => {
+      console.log(chunk);
+    });
+    child.on('close', () => {
+      resolve();
+    });
+  });
 }
