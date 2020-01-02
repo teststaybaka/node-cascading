@@ -6,11 +6,7 @@ import { HttpHandler, HttpResponse } from './http_handler';
 
 class PreflightHandler implements HttpHandler {
   public method = HttpMethod.OPTIONS;
-  public urlRegex: RegExp;
-
-  public init(): void {
-    this.urlRegex = /^\/.*$/;
-  }
+  public urlRegex = /^\/.*$/;
 
   public handle(logContext: string,  request: http.IncomingMessage, parsedUrl: url.Url): Promise<HttpResponse> {
     return Promise.resolve({
@@ -19,9 +15,3 @@ class PreflightHandler implements HttpHandler {
     });
   }
 }
-
-export let PREFLIGHT_HANDLER_FACTORY = new SingletonFactory((): PreflightHandler => {
-  let handler = new PreflightHandler();
-  handler.init();
-  return handler;
-});
