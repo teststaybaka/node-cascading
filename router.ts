@@ -6,7 +6,7 @@ import { CONTENT_TYPE_TEXT, HttpMethod } from './common';
 import { ErrorType, TypedError, newInternalError } from './errors';
 import { HttpHandler, HttpResponse } from './http_handler';
 import { LOGGER } from './logger';
-import { PREFLIGHT_HANDLER } from './preflight_handler';
+import { PreflightHandler } from './preflight_handler';
 
 // TODO: Rate limit requests.
 export class Router {
@@ -137,7 +137,7 @@ export class RouterFactory {
     }
     let router = new Router(hostname, httpServer, httpsServer);
     router.init();
-    router.addHandler(new PREFLIGHT_HANDLER());
+    router.addHandler(new PreflightHandler());
     return router;
   }
 }
