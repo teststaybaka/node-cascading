@@ -45,7 +45,6 @@ class DirHandlerUrlNotMatch implements TestCase {
   public async execute() {
     // Prepare
     let handler = new StaticDirHandler('/xxx', 'path');
-    handler.init();
     let urlPath = url.parse('/xxx');
 
     // Execute
@@ -62,7 +61,6 @@ class DirHandlerMatchJpgFile implements TestCase {
   public async execute() {
     // Prepare
     let handler = new StaticDirHandler('/xxx', 'test_data');
-    handler.init();
     let urlPath = url.parse('/xxx/test.jpg');
 
     // Execute
@@ -81,7 +79,6 @@ class DirHandlerMatchBinaryFile implements TestCase {
   public async execute() {
     // Prepare
     let handler = new StaticDirHandler('/xxx', 'test_data');
-    handler.init();
     let urlPath = url.parse('/xxx/file');
 
     // Execute
