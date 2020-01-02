@@ -1,10 +1,9 @@
 import http = require('http');
 import url = require('url');
 import { CONTENT_TYPE_TEXT, HttpMethod } from './common';
-import { SingletonFactory } from './singleton_factory';
 import { HttpHandler, HttpResponse } from './http_handler';
 
-class PreflightHandler implements HttpHandler {
+export class PreflightHandler implements HttpHandler {
   public method = HttpMethod.OPTIONS;
   public urlRegex = /^\/.*$/;
 
