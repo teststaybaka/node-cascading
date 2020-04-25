@@ -4,7 +4,7 @@
   "description": "Yet another http/https framework",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/teststaybaka/node-cascading.git"
+    "url": "git+https://github.com/teststaybaka/selfage.git"
   },
   "keywords": [
     "node",
