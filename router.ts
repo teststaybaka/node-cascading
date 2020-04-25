@@ -24,9 +24,21 @@ export class Router {
 
   private handlers: HttpHandler[] = [];
 
-  public constructor(private hostname: string, private httpServer: http.Server, private httpsServer?: https.Server) {}
+  public static create(hostname: string,
+                       httpsOption?: https.ServerOptions): Router {
+    let httpServer = http.createServer();
+    let httpsServer = undefined;
+    if (httpsOption) {
+      httpsServer = https.createServer(httpsOption);
+    }
+    let router = new Router(hostname, httpServer, httpsServer);
+    router.addHandler(new PreflightHandler());
+    return router;
+  }
 
-  public init(): void {
+  public constructor(private hostname: string,
+                     private httpServer: http.Server,
+                     private httpsServer?: https.Server) {
     if (this.httpsServer) {
       this.httpServer.addListener('request',
         (request: http.IncomingMessage, response: http.ServerResponse): void => this.redirectToHttps(request, response));
@@ -38,7 +50,8 @@ export class Router {
     }
   }
 
-  private redirectToHttps(request: http.IncomingMessage, response: http.ServerResponse): void {
+  private redirectToHttps(request: http.IncomingMessage,
+                          response: http.ServerResponse): void {
     LOGGER.info(`Redirecting to ${Router.HTTPS_PROTOCAL + this.hostname + request.url}.`);
     response.setHeader(Router.ALLOW_ORIGIN_HEADER, '*');
     response.setHeader(Router.ALLOW_METHODS_HEADER, '*');
@@ -47,7 +60,8 @@ export class Router {
     response.end();
   }
 
-  private async handle(request: http.IncomingMessage, response: http.ServerResponse): Promise<void> {
+  private async handle(request: http.IncomingMessage,
+                       response: http.ServerResponse): Promise<void> {
     let randomId = Math.floor(Math.random() * Router.REQUEST_ID_RANDOM_MAX);
     let logContext = `Request ${Date.now()}-${randomId}: `;
 
@@ -94,7 +108,8 @@ export class Router {
     }
   }
 
-  private async dispatch(logContext: string, request: http.IncomingMessage): Promise<HttpResponse> {
+  private async dispatch(logContext: string,
+                         request: http.IncomingMessage): Promise<HttpResponse> {
     let method = request.method.toUpperCase();
     let parsedUrl = url.parse(request.url);
 
@@ -128,18 +143,3 @@ export class Router {
   }
 }
 
-export class RouterFactory {
-  public get(hostname: string, httpsOption?: https.ServerOptions): Router {
-    let httpServer = http.createServer();
-    let httpsServer = undefined;
-    if (httpsOption) {
-      httpsServer = https.createServer(httpsOption);
-    }
-    let router = new Router(hostname, httpServer, httpsServer);
-    router.init();
-    router.addHandler(new PreflightHandler());
-    return router;
-  }
-}
-
-export let ROUTER_FACTORY = new RouterFactory();

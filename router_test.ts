@@ -30,7 +30,8 @@ class MockHttpServer {
   public request: any;
   public response: any;
 
-  public addListener(eventName: string, callback: ((request: http.IncomingMessage, response: http.ServerResponse) => Promise<void>)) {
+  public addListener(eventName: string,
+                     callback: ((request: http.IncomingMessage, response: http.ServerResponse) => Promise<void>)) {
     this.callback = callback;
   }
 
@@ -55,7 +56,9 @@ class MockHttpHandler {
   public getUrlRegex() {
     return this.urlRegex;
   }
-  public handle(logContext: string, request: http.IncomingMessage, url: url.Url): Promise<HttpResponse> {
+  public handle(logContext: string,
+                request: http.IncomingMessage,
+                url: url.Url): Promise<HttpResponse> {
     this.handled = true;
     if (this.error) {
       return Promise.reject(this.error);
@@ -94,7 +97,6 @@ class MatchHandler implements TestCase {
     router.addHandler(mockHandler4);
 
     // Execute
-    router.init();
     await mockHttpServer.triggerEvent();
 
     // Verify
@@ -125,7 +127,6 @@ class RejectHandler implements TestCase {
     router.addHandler(mockHandler);
 
     // Execute
-    router.init();
     await mockHttpServer.triggerEvent();
 
     // Verify
@@ -152,7 +153,6 @@ class NotFound implements TestCase {
     router.addHandler(mockHandler);
 
     // Execute
-    router.init();
     await mockHttpServer.triggerEvent();
 
     // Verify
