@@ -19,14 +19,12 @@ function findType(filePath: string): string {
 }
 
 export class StaticFileHandler implements HttpHandler {
-  public urlRegex = new RegExp(`^${this.urlText}$`);
+  public urlRegex: RegExp;
   public method = HttpMethod.GET;
-
   private contentType: string;
 
-  public constructor(private urlText: string, private filePath: string) {}
-
-  public init(): void {
+  public constructor(urlText: string, private filePath: string) {
+    this.urlRegex = new RegExp(`^${urlText}$`);
     this.contentType = findType(this.filePath);
   }
 
@@ -39,10 +37,12 @@ export class StaticFileHandler implements HttpHandler {
 }
 
 export class StaticDirHandler implements HttpHandler {
-  public urlRegex = new RegExp(`^${this.urlPrefix}/(.*)$`);
+  public urlRegex: RegExp;
   public method = HttpMethod.GET;
 
-  public constructor(private urlPrefix: string, private localDir: string) {}
+  public constructor(urlPrefix: string, private localDir: string) {
+    this.urlRegex = new RegExp(`^${urlPrefix}/(.*)$`);
+  }
 
   public async handle(logContext: string, request: http.IncomingMessage, parsedUrl: url.Url): Promise<HttpResponse> {
     let matched = parsedUrl.pathname.match(this.urlRegex);
@@ -60,20 +60,3 @@ export class StaticDirHandler implements HttpHandler {
   }
 }
 
-export class StaticFileHandlerFactory {
-  public create(urlText: string, filePath: string): StaticFileHandler {
-    let handler = new StaticFileHandler(urlText, filePath);
-    handler.init();
-    return handler;
-  }
-}
-
-export class StaticDirHandlerFactory {
-  public create(urlPrefix: string, localDir: string): StaticDirHandler {
-    let handler = new StaticDirHandler(urlPrefix, localDir);
-    return handler;
-  }
-}
-
-export let STATIC_FILE_HANDLER_FACTORY = new StaticFileHandlerFactory();
-export let STATIC_DIR_HANDLER_FACTORY = new StaticDirHandlerFactory();

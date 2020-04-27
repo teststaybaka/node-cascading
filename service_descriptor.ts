@@ -1,8 +1,10 @@
+import { InterfaceDescriptor } from './interface_descriptor';
+
 export interface ServiceDescriptor<Request, Response> {
   name: string,
   pathname: string,
-  constructRequest: ((obj?: any) => Request),
-  constructResponse: ((obj?: any) => Response),
+  requestDescriptor: InterfaceDescriptor<Request>,
+  responseDescriptor: InterfaceDescriptor<Response>,
 }
 
 export interface SignedOutServiceDescriptor<Request, Response>

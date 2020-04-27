@@ -6,7 +6,9 @@ export let CONTENT_TYPE_JSON = 'application/json';
 export let CONTENT_TYPE_BINARY_STREAM = 'application/octet-stream';
 export let SESSION_HEADER = 'X-SESSION';
 
-export function findWithDefault<Key, Value>(map: Map<Key, Value>, key: Key, defaultValue: Value): Value {
+export function findWithDefault<Key, Value>(map: Map<Key, Value>,
+                                            key: Key,
+                                            defaultValue: Value): Value {
   let value = map.get(key);
   if (value === undefined) {
     return defaultValue;
@@ -22,7 +24,9 @@ export function extendArray<Value>(list: Value[], fromList: Value[]): void {
 }
 
 export function extendSet<Value>(set: Set<Value>, fromSet: Set<Value>): void {
-  for (let iter = fromSet.values(), result = iter.next(); !result.done; result = iter.next()) {
+  for (let iter = fromSet.values(), result = iter.next();
+       !result.done;
+       result = iter.next()) {
     set.add(result.value);
   }
 }

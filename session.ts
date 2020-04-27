@@ -1,22 +1,14 @@
 import crypto = require('crypto');
-import { newUnauthorizedError } from './errors';
+import { newUnauthenticatedError } from './errors';
 
-let ALGORITHM = 'sha256';
-let SECRET_KEY = 'sdoijfoieaojmfmfiqujroifzxco';
-let SEED_MAX = 100000;
 let SESSION_SEPARATOR = '|';
-let SESSION_LONGEVITY = 30*24*60*60*1000;
 
 export class Signer {
-  public secretKey: string;
+  public static SECRET_KEY = 'sdoijfoieaojmfmfiqujroifzxco';
+  private static ALGORITHM = 'sha256';
 
-  public getSignature(str: string): string {
-    let secretKey = this.secretKey;
-    if (!secretKey) {
-      secretKey = SECRET_KEY;
-    }
-
-    let signature = crypto.createHmac(ALGORITHM, SECRET_KEY)
+  public sign(str: string): string {
+    let signature = crypto.createHmac(Signer.ALGORITHM, Signer.SECRET_KEY)
       .update(str)
       .digest('hex');
     return signature;
@@ -24,52 +16,61 @@ export class Signer {
 }
 
 export class SecureSessionGenerator {
+  private static SEED_MAX = 100000;
+
+  public static create(): SecureSessionGenerator {
+    return new SecureSessionGenerator(new Signer());
+  }
+
   public constructor(private signer: Signer) {}
 
-  public getSignedSession(userId: string): string {
+  public generate(userId: string): string {
     let session = {
       userId: userId,
-      seed: Math.round(Math.random()*SEED_MAX),
+      seed: Math.round(Math.random()*SecureSessionGenerator.SEED_MAX),
       timestamp: Date.now(),
     };
     let sessionStr = JSON.stringify(session);
-    let signature = this.signer.getSignature(sessionStr);
+    let signature = this.signer.sign(sessionStr);
     return [sessionStr, signature].join(SESSION_SEPARATOR);
   }
 }
 
 export class SecureSessionVerifier {
+  private static SESSION_LONGEVITY = 30*24*60*60*1000;
+  
+  public static create(): SecureSessionVerifier {
+    return new SecureSessionVerifier(new Signer());
+  }
+  
   public constructor(private signer: Signer) {}
 
   public verifyAndGetUserId(signedSession: string): string {
     let pieces = signedSession.split(SESSION_SEPARATOR);
     if (pieces.length !== 2) {
-      throw newUnauthorizedError('Invalid signed session string.');
+      throw newUnauthenticatedError('Invalid signed session string.');
     }
 
     let sessionStr = pieces[0];
     let signature = pieces[1];
-    let signatureExpected = this.signer.getSignature(sessionStr);
+    let signatureExpected = this.signer.sign(sessionStr);
     if (signature !== signatureExpected) {
-      throw newUnauthorizedError('Invalid session signature');
+      throw newUnauthenticatedError('Invalid session signature');
     }
 
     let session: any;
     try {
       session = JSON.parse(sessionStr);
     } catch (e) {
-      throw newUnauthorizedError('Invalid json data.', e);
+      throw newUnauthenticatedError('Invalid json data.', e);
     }
     if (typeof session.timestamp !== 'number' || typeof session.userId !== 'string') {
-      throw newUnauthorizedError('Invalid session data.');
+      throw newUnauthenticatedError('Invalid session data.');
     }
-    if (Date.now() - session.timestamp > SESSION_LONGEVITY) {
-      throw newUnauthorizedError('Session expired.');
+    if (Date.now() - session.timestamp > SecureSessionVerifier.SESSION_LONGEVITY) {
+      throw newUnauthenticatedError('Session expired.');
     }
     return session.userId;
   }
 }
 
-export let SIGNER = new Signer();
-export let SECURE_SESSION_GENERATOR = new SecureSessionGenerator(SIGNER);
-export let SECURE_SESSION_VERIFIER = new SecureSessionVerifier(SIGNER);

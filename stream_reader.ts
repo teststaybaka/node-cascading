@@ -1,15 +1,15 @@
 import stream = require('stream');
 import { newInternalError } from './errors';
 
-let BUFFER_LIMIT = 50*1024*1024;
-
 export class StreamReader {
+  private static BUFFER_LIMIT = 50*1024*1024;
+
   public async readJson(incoming: stream.Readable): Promise<any> {
     let buffer = await new Promise<number[]>((resolve, reject): void => {
       let buffer: number[] = [];
       incoming.on('data', (chunk): void => {
-        if (buffer.length + chunk.length > BUFFER_LIMIT) {
-          reject(newInternalError(`Stream data exceeds buffer limit, ${BUFFER_LIMIT}.`));
+        if (buffer.length + chunk.length > StreamReader.BUFFER_LIMIT) {
+          reject(newInternalError(`Stream data exceeds buffer limit, ${StreamReader.BUFFER_LIMIT}.`));
           return;
         }
 
@@ -29,4 +29,3 @@ export class StreamReader {
   }
 }
 
-export let STREAM_READER = new StreamReader();

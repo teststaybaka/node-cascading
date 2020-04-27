@@ -1,11 +1,11 @@
-import { newUnauthorizedError } from './errors';
+import { newUnauthenticatedError } from './errors';
 import { SecureSessionGenerator, SecureSessionVerifier } from './session';
 import { TestCase, assert, assertError, expectThrow, runTests } from './test_base';
 
 class MockSigner {
   public signature: string = null;
 
-  public getSignature(str: string) {
+  public sign(str: string) {
     return this.signature;
   }
 }
@@ -21,7 +21,7 @@ class InvalidRawSession implements TestCase {
     let error = expectThrow(() => verifier.verifyAndGetUserId('f|s|aa'));
 
     // Verify
-    assertError(error, newUnauthorizedError('Invalid signed session'));
+    assertError(error, newUnauthenticatedError('Invalid signed session'));
   }
 }
 
@@ -38,7 +38,7 @@ class InvalidSignature implements TestCase {
     let error = expectThrow(() => verifier.verifyAndGetUserId('f|s'));
 
     // Verify
-    assertError(error, newUnauthorizedError('session signature'));
+    assertError(error, newUnauthenticatedError('session signature'));
   }
 }
 
@@ -55,7 +55,7 @@ class InvalidSessionJsonData implements TestCase {
     let error = expectThrow(() => verifier.verifyAndGetUserId('--|xxxx'));
 
     // Verify
-    assertError(error, newUnauthorizedError('json data'));
+    assertError(error, newUnauthenticatedError('json data'));
   }
 }
 
@@ -72,7 +72,7 @@ class NoTimestampInSession implements TestCase {
     let error = expectThrow(() => verifier.verifyAndGetUserId('{}|xxxx'));
 
     // Verify
-    assertError(error, newUnauthorizedError('session data'));
+    assertError(error, newUnauthenticatedError('session data'));
   }
 }
 
@@ -89,7 +89,7 @@ class NoUserIdInSession implements TestCase {
     let error = expectThrow(() => verifier.verifyAndGetUserId('{"timestamp":3131}|xxxx'));
 
     // Verify
-    assertError(error, newUnauthorizedError('session data'));
+    assertError(error, newUnauthenticatedError('session data'));
   }
 }
 
@@ -107,7 +107,7 @@ class SessionExpired implements TestCase {
     let error = expectThrow(() => verifier.verifyAndGetUserId(`{"timestamp":${nowTime},"userId":"blabla"}|xxxx`));
 
     // Verify
-    assertError(error, newUnauthorizedError('Session expired'));
+    assertError(error, newUnauthenticatedError('Session expired'));
   }
 }
 
@@ -142,7 +142,7 @@ class GenerateSessionSuccess implements TestCase {
     let generator = new SecureSessionGenerator(mockSigner as any);
 
     // Execute
-    let session = generator.getSignedSession(userId);
+    let session = generator.generate(userId);
 
     // Verify
     let extractedId = verifier.verifyAndGetUserId(session);

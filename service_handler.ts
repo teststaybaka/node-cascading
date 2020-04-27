@@ -2,41 +2,36 @@ import http = require('http');
 import url = require('url');
 import { CONTENT_TYPE_JSON, HttpMethod, SESSION_HEADER } from './common';
 import { HttpHandler, HttpResponse } from './http_handler';
-import { STREAM_READER } from './stream_reader';
-import { SignedInServiceDescriptor, SignedOutServiceDescriptor, ServiceDescriptor } from './service_descriptor';
-import { SECURE_SESSION_VERIFIER } from './session';
+import { StreamReader } from './stream_reader';
+import { SignedInServiceDescriptor, SignedOutServiceDescriptor } from './service_descriptor';
+import { SecureSessionVerifier } from './session';
 
-interface SubServiceHandler<Request, Response> {
-  handle: ((logContext: string, request: Request, userId?: string) => Promise<Response>),
-}
-
-export interface SignedInSubServiceHandler<Request, Response> extends SubServiceHandler<Request, Response> {
+export interface SignedInServiceHandler<Request, Response> {
   handle: ((logContext: string, request: Request, userId: string) => Promise<Response>),
 }
 
-export interface SignedOutSubServiceHandler<Request, Response> extends SubServiceHandler<Request, Response> {
+export interface SignedOutServiceHandler<Request, Response> {
   handle: ((logContext: string, request: Request) => Promise<Response>),
 }
 
-class ServiceHandler<Request, Response> implements HttpHandler {
+export class BaseSignedInServiceHandler<Request, Response> implements HttpHandler {
   public method = HttpMethod.POST;
   public urlRegex = new RegExp(`^${this.serviceDescriptor.pathname}$`);
+  private streamReader = new StreamReader();
+  private secureSessionVerifier = SecureSessionVerifier.create();
 
-  public constructor(private serviceDescriptor: ServiceDescriptor<Request, Response>,
-    private subServiceHandler: SubServiceHandler<Request, Response>,
-    private signedIn: boolean) {
-  }
+  public constructor(
+      private serviceDescriptor: SignedInServiceDescriptor<Request, Response>,
+      private subServiceHandler: SignedInServiceHandler<Request, Response>) {}
 
-  public async handle(logContext: string, request: http.IncomingMessage,
-    parsedUrl: url.Url): Promise<HttpResponse> {
-    let userId: string;
-    if (this.signedIn) {
-      let session = request.headers[SESSION_HEADER] as string;
-      userId = SECURE_SESSION_VERIFIER.verifyAndGetUserId(session);
-    }
-    let data = await STREAM_READER.readJson(request);
+  public async handle(logContext: string,
+                      request: http.IncomingMessage,
+                      parsedUrl: url.Url): Promise<HttpResponse> {
+    let session = request.headers[SESSION_HEADER] as string;
+    let userId = this.secureSessionVerifier.verifyAndGetUserId(session);
+    let data = await this.streamReader.readJson(request);
     let response = await this.subServiceHandler.handle(logContext,
-      this.serviceDescriptor.constructRequest(data), userId);
+      this.serviceDescriptor.requestDescriptor.from(data), userId);
     let httpResponse: HttpResponse = {
       contentType: CONTENT_TYPE_JSON,
       content: JSON.stringify(response),
@@ -45,16 +40,26 @@ class ServiceHandler<Request, Response> implements HttpHandler {
   }
 }
 
-export class ServiceHandlerFactory {
-  public createSignedInServiceHandler<Request, Response>(
-    serviceDescriptor: SignedInServiceDescriptor<Request, Response>,
-    subServiceHandler: SignedInSubServiceHandler<Request, Response>): ServiceHandler<Request, Response> {
-    return new ServiceHandler(serviceDescriptor, subServiceHandler, true);
-  }
+export class BaseSignedOutServiceHandler<Request, Response> implements HttpHandler {
+  public method = HttpMethod.POST;
+  public urlRegex = new RegExp(`^${this.serviceDescriptor.pathname}$`);
+  private streamReader = new StreamReader();
 
-  public createSignedOutServiceHandler<Request, Response>(
-    serviceDescriptor: SignedOutServiceDescriptor<Request, Response>,
-    subServiceHandler: SignedOutSubServiceHandler<Request, Response>): ServiceHandler<Request, Response> {
-    return new ServiceHandler(serviceDescriptor, subServiceHandler, false);
+  public constructor(
+      private serviceDescriptor: SignedOutServiceDescriptor<Request, Response>,
+      private subServiceHandler: SignedOutServiceHandler<Request, Response>) {}
+
+  public async handle(logContext: string,
+                      request: http.IncomingMessage,
+                      parsedUrl: url.Url): Promise<HttpResponse> {
+    let data = await this.streamReader.readJson(request);
+    let response = await this.subServiceHandler.handle(logContext,
+      this.serviceDescriptor.requestDescriptor.from(data));
+    let httpResponse: HttpResponse = {
+      contentType: CONTENT_TYPE_JSON,
+      content: JSON.stringify(response),
+    };
+    return httpResponse;
   }
 }
+

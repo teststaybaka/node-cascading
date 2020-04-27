@@ -11,7 +11,6 @@ class FileHandlerSuffix implements TestCase {
   public async execute() {
     // Prepare
     let handler = new StaticFileHandler('/url', 'path.js');
-    handler.init();
 
     // Execute
     let response = await handler.handle(undefined, undefined, undefined);
@@ -28,7 +27,6 @@ class FileHandlerBinaryType implements TestCase {
   public async execute() {
     // Prepare
     let handler = new StaticFileHandler('/url', 'path');
-    handler.init();
 
     // Execute
     let response = await handler.handle(undefined, undefined, undefined);

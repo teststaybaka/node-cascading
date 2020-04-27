@@ -75,15 +75,18 @@ export class Router {
     } catch (error) {
       LOGGER.error(logContext + error.stack);
       if (error.errorType) {
-        response.writeHead((error as TypedError).errorType, {[Router.CONTENT_TYPE_HEADER]: CONTENT_TYPE_TEXT});
+        response.writeHead((error as TypedError).errorType,
+                           {[Router.CONTENT_TYPE_HEADER]: CONTENT_TYPE_TEXT});
       } else {
-        response.writeHead(ErrorType.Internal, {[Router.CONTENT_TYPE_HEADER]: CONTENT_TYPE_TEXT});
+        response.writeHead(ErrorType.Internal,
+                           {[Router.CONTENT_TYPE_HEADER]: CONTENT_TYPE_TEXT});
       }
       response.end(error.message);
       return;
     }
 
-    response.writeHead(Router.OK_CODE, {[Router.CONTENT_TYPE_HEADER]: httpResponse.contentType});
+    response.writeHead(Router.OK_CODE,
+                       {[Router.CONTENT_TYPE_HEADER]: httpResponse.contentType});
     if (!httpResponse.contentFile) {
       response.end(httpResponse.content);
     } else {
@@ -92,16 +95,8 @@ export class Router {
         LOGGER.error(logContext + err.stack);
         response.end();
       });
-      readStream.on('close', (): void => {
-        LOGGER.info(logContext + `File, ${httpResponse.contentFile}, was closed.`);
-        response.end();
-      });
-      response.on('error', (err): void => {
+     response.on('error', (err): void => {
         LOGGER.error(logContext + err.stack);
-        readStream.close();
-      });
-      response.on('close', (): void => {
-        LOGGER.info(logContext + 'Response closed.');
         readStream.close();
       });
       readStream.pipe(response);
@@ -120,7 +115,8 @@ export class Router {
 
     for (let i = 0; i < this.handlers.length; i++) {
       let handler = this.handlers[i];
-      if (method === HttpMethod[handler.method] && parsedUrl.pathname.match(handler.urlRegex)) {
+      if (method === HttpMethod[handler.method]
+          && parsedUrl.pathname.match(handler.urlRegex)) {
         LOGGER.info(logContext + `Handler ${i} matched request with [${handler.urlRegex}, ${handler.method}].`)
         return handler.handle(logContext, request, parsedUrl);
       }

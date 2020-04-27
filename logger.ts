@@ -10,8 +10,8 @@ class BatchLogger {
   private static FLUSH_DELAY = 30000; // ms
   private static ENTRIES_LIMIT = 100;
 
-  private entries: Entry[] = [];
   private flushTimer: NodeJS.Timer;
+  private entries: Entry[] = [];
 
   public constructor(private remoteLogger: Log, private severity: Severity) {}
 
@@ -55,13 +55,12 @@ class BatchLogger {
 }
 
 class Logger {
-  private severityToBatchLoggers = new Map<string, BatchLogger>();
-  private logging: Logging;
-  private remoteLogger: Log;
-
   public info = this.infoRemote;
   public warning = this.warningRemote;
   public error = this.errorRemote;
+  private logging: Logging;
+  private remoteLogger: Log;
+  private severityToBatchLoggers = new Map<string, BatchLogger>();
 
   public constructor() {
     this.logging = new Logging();
