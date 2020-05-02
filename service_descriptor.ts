@@ -1,10 +1,10 @@
-import { InterfaceDescriptor } from './interface_descriptor';
+import { MessageDescriptor } from './message_descriptor';
 
 export interface ServiceDescriptor<Request, Response> {
   name: string,
   pathname: string,
-  requestDescriptor: InterfaceDescriptor<Request>,
-  responseDescriptor: InterfaceDescriptor<Response>,
+  requestDescriptor: MessageDescriptor<Request>,
+  responseDescriptor: MessageDescriptor<Response>,
 }
 
 export interface SignedOutServiceDescriptor<Request, Response>
