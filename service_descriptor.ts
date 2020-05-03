@@ -1,10 +1,10 @@
-import { MessageDescriptor } from './message_descriptor';
+import { MessageSerializer } from './message_serializer';
 
 export interface ServiceDescriptor<Request, Response> {
   name: string,
   pathname: string,
-  requestDescriptor: MessageDescriptor<Request>,
-  responseDescriptor: MessageDescriptor<Response>,
+  requestSerializer: MessageSerializer<Request>,
+  responseSerializer: MessageSerializer<Response>,
 }
 
 export interface SignedOutServiceDescriptor<Request, Response>

@@ -29,9 +29,9 @@ export class BaseSignedInServiceHandler<Request, Response> implements HttpHandle
                       parsedUrl: url.Url): Promise<HttpResponse> {
     let session = request.headers[SESSION_HEADER] as string;
     let userId = this.secureSessionVerifier.verifyAndGetUserId(session);
-    let data = await this.streamReader.readJson(request);
+    let obj = await this.streamReader.readJson(request);
     let response = await this.subServiceHandler.handle(logContext,
-      this.serviceDescriptor.requestDescriptor.from(data), userId);
+      this.serviceDescriptor.requestSerializer.fromObj(obj), userId);
     let httpResponse: HttpResponse = {
       contentType: CONTENT_TYPE_JSON,
       content: JSON.stringify(response),
@@ -52,9 +52,9 @@ export class BaseSignedOutServiceHandler<Request, Response> implements HttpHandl
   public async handle(logContext: string,
                       request: http.IncomingMessage,
                       parsedUrl: url.Url): Promise<HttpResponse> {
-    let data = await this.streamReader.readJson(request);
+    let obj = await this.streamReader.readJson(request);
     let response = await this.subServiceHandler.handle(logContext,
-      this.serviceDescriptor.requestDescriptor.from(data));
+      this.serviceDescriptor.requestSerializer.fromObj(obj));
     let httpResponse: HttpResponse = {
       contentType: CONTENT_TYPE_JSON,
       content: JSON.stringify(response),
