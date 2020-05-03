@@ -1,5 +1,4 @@
 /node_modules/
-/test_data/*.ts
 *.d.ts
 *.js
 *.js.map
