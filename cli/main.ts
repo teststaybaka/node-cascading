@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { buildAllFiles } from './build';
 import { sortImports } from './format';
+import { MessageGenerator } from './message_generator';
 import { execSync } from 'child_process';
 
 
@@ -17,6 +18,8 @@ async function main(): Promise<void> {
   } else if (purpose === 'fmt') {
     let filePath = process.argv[3];
     sortImports(filePath + '.ts');
+  } else if (purpose === 'msg') {
+    new MessageGenerator(process.argv[3]).generate();
   }
 }
 
