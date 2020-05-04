@@ -1,6 +1,6 @@
 export interface TestObject {
   field1: string,
-  field2: string,
+  field2: number,
   field3: boolean,
 }
 

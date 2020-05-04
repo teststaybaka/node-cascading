@@ -1,4 +1,4 @@
-import { TestObject, TestColor } from './test_interface'
+import { TestObject, TestColor } from './test_interface';
 
 export interface TestNestedObject {
   nestedField1: TestObject,
