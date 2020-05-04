@@ -37,18 +37,42 @@ export class MessageGenerator {
     }
   }
 
-  private generateMessageSerializer(itfNode: ts.InterfaceDeclaration): void {
-    let itfName = itfNode.name.text;
+  private generateMessageSerializer(interfacceNode: ts.InterfaceDeclaration): void {
+    let interfaceName = interfacceNode.name.text;
     this.contentToAppend += `
-export class ${itfName}Serializer implements MessageSerializer<${itfName}> {
-  public fromObj(obj?: any): ${itfName} {
+export interface ${interfaceName} {`;
+
+    for (let member of interfacceNode.members) {
+      let field = member as ts.PropertySignature;
+      let fieldName = (field.name as ts.Identifier).text;
+      let fieldType = '';
+      if (field.type.kind === ts.SyntaxKind.StringKeyword) {
+        fieldType = 'string';
+      } else if (field.type.kind === ts.SyntaxKind.BooleanKeyword) {
+        fieldType = 'boolean';
+      } else if (field.type.kind === ts.SyntaxKind.NumberKeyword) {
+        fieldType = 'number';
+      } else if (field.type.kind === ts.SyntaxKind.TypeReference) {
+        fieldType = ((field.type as ts.TypeReferenceNode).typeName as ts.Identifier).text;
+      }
+      this.contentToAppend += `
+  ${fieldName}: ${fieldType},`;
+    }
+
+    this.contentToAppend += `
+}
+`;
+    
+    this.contentToAppend += `
+export class ${interfaceName}Serializer implements MessageSerializer<${interfaceName}> {
+  public fromObj(obj?: any): ${interfaceName} {
     if (!obj || typeof obj !== 'object') {
       return undefined;
     }
 
-    let ret: ${itfName} = {};`;
+    let ret: ${interfaceName} = {};`;
 
-    for (let member of itfNode.members) {
+    for (let member of interfacceNode.members) {
       let field = member as ts.PropertySignature;
       let fieldName = (field.name as ts.Identifier).text;
       let fieldType = '';
@@ -88,6 +112,20 @@ import { ${nestedFieldType}Serializer } from '${importPath}';`;
 
   private generateEnumSerializer(enumNode: ts.EnumDeclaration): void {
     let enumName = enumNode.name.text;
+    this.contentToAppend += `
+export Enum ${enumName} {`;
+
+    for (let member of enumNode.members) {
+      let enumValueName = (member.name as ts.Identifier).text;
+      let enumValueValue = (member.initializer as ts.NumericLiteral).text;
+      this.contentToAppend += `
+  ${enumValueName} = ${enumValueValue},`;
+    }
+
+    this.contentToAppend += `
+}
+`;
+    
     this.contentToAppend += `
 export class ${enumName}Serializer implements MessageSerializer<${enumName}> {
   public fromObj(obj?: any): ${enumName} {
