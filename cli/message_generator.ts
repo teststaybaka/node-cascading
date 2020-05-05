@@ -4,7 +4,7 @@ import * as ts from 'typescript';
 export class MessageGenerator {
   private pathToNamedImports = new Map<string, Set<string>>();
   private namedImportsToPath = new Map<string, string>();
-  private contentToAppend = '';
+  private content = '';
 
   public constructor(private fileName: string) {}
 
@@ -13,7 +13,7 @@ export class MessageGenerator {
       readFileSync(this.fileName).toString(), ts.ScriptTarget.ES5, true);
     ts.forEachChild(sourceFile, (node) => this.visitTopDeclarations(node));
     this.prependImports();
-    console.log(this.contentToAppend);
+    console.log(this.content);
   }
 
   private visitTopDeclarations(node: ts.Node): void {
@@ -43,7 +43,7 @@ export class MessageGenerator {
 
   private generateMessageSerializer(interfacceNode: ts.InterfaceDeclaration): void {
     let interfaceName = interfacceNode.name.text;
-    this.contentToAppend += `
+    this.content += `
 export interface ${interfaceName} {`;
 
     for (let member of interfacceNode.members) {
@@ -59,15 +59,15 @@ export interface ${interfaceName} {`;
       } else if (field.type.kind === ts.SyntaxKind.TypeReference) {
         fieldType = ((field.type as ts.TypeReferenceNode).typeName as ts.Identifier).text;
       }
-      this.contentToAppend += `
+      this.content += `
   ${fieldName}: ${fieldType},`;
     }
 
-    this.contentToAppend += `
+    this.content += `
 }
 `;
     
-    this.contentToAppend += `
+    this.content += `
 export class ${interfaceName}Serializer implements MessageSerializer<${interfaceName}> {
   public fromObj(obj?: any): ${interfaceName} {
     if (!obj || typeof obj !== 'object') {
@@ -93,12 +93,12 @@ export class ${interfaceName}Serializer implements MessageSerializer<${interface
       }
 
       if (fieldType) {
-        this.contentToAppend +=`
+        this.content +=`
     if (typeof obj.${fieldName} === '${fieldType}') {
       ret.${fieldName} = obj.${fieldName};
     }`;
       } else if (nestedFieldType) {
-        this.contentToAppend +=`
+        this.content +=`
     ret.${fieldName} = new ${nestedFieldType}Serializer().fromObj(obj.${fieldName});`;
 
         let importPath = this.namedImportsToPath.get(nestedFieldType);
@@ -106,7 +106,7 @@ export class ${interfaceName}Serializer implements MessageSerializer<${interface
       }
     }
 
-    this.contentToAppend +=`
+    this.content +=`
     return ret;
   }
 }
@@ -115,21 +115,21 @@ export class ${interfaceName}Serializer implements MessageSerializer<${interface
 
   private generateEnumSerializer(enumNode: ts.EnumDeclaration): void {
     let enumName = enumNode.name.text;
-    this.contentToAppend += `
+    this.content += `
 export Enum ${enumName} {`;
 
     for (let member of enumNode.members) {
       let enumValueName = (member.name as ts.Identifier).text;
       let enumValueValue = (member.initializer as ts.NumericLiteral).text;
-      this.contentToAppend += `
+      this.content += `
   ${enumValueName} = ${enumValueValue},`;
     }
 
-    this.contentToAppend += `
+    this.content += `
 }
 `;
     
-    this.contentToAppend += `
+    this.content += `
 export class ${enumName}Serializer implements MessageSerializer<${enumName}> {
   public fromObj(obj?: any): ${enumName} {
     if (!obj || typeof obj !== 'number' || !(obj in ${enumName}) {
@@ -146,9 +146,8 @@ export class ${enumName}Serializer implements MessageSerializer<${enumName}> {
     for (let entry of Array.from(this.pathToNamedImports.entries())) {
       let importPath = entry[0];
       let namedImports = Array.from(entry[1]).join(', ');
-      this.contentToAppend = 
-        `import { ${namedImports} } from '${importPath}';\n` +
-        this.contentToAppend;
+      this.content =
+        `import { ${namedImports} } from '${importPath}';\n` + this.content;
     }
   }
 }
