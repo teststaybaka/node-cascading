@@ -2,8 +2,8 @@ import { readFileSync } from "fs";
 import * as ts from 'typescript';
 
 export class MessageGenerator {
+  private pathToNamedImports = new Map<string, Set<string>>();
   private namedImportsToPath = new Map<string, string>();
-  private contentToPrepend = '';
   private contentToAppend = '';
 
   public constructor(private fileName: string) {}
@@ -12,7 +12,7 @@ export class MessageGenerator {
     let sourceFile = ts.createSourceFile(this.fileName,
       readFileSync(this.fileName).toString(), ts.ScriptTarget.ES5, true);
     ts.forEachChild(sourceFile, (node) => this.visitTopDeclarations(node));
-    console.log(this.contentToPrepend);
+    this.prependImports();
     console.log(this.contentToAppend);
   }
 
@@ -32,9 +32,13 @@ export class MessageGenerator {
 
   private parseImports(importNode: ts.ImportDeclaration): void {
     let importPath = (importNode.moduleSpecifier as ts.StringLiteral).text;
+    let namedImports: string[] = [];
     for (let importSpecifier of (importNode.importClause.namedBindings as ts.NamedImports).elements) {
-      this.namedImportsToPath.set(importSpecifier.name.text, importPath);
+      let namedImport = importSpecifier.name.text;
+      namedImports.push(namedImport);
+      this.namedImportsToPath.set(namedImport, importPath);
     }
+    this.pathToNamedImports.set(importPath, new Set(namedImports));
   }
 
   private generateMessageSerializer(interfacceNode: ts.InterfaceDeclaration): void {
@@ -98,8 +102,7 @@ export class ${interfaceName}Serializer implements MessageSerializer<${interface
     ret.${fieldName} = new ${nestedFieldType}Serializer().fromObj(obj.${fieldName});`;
 
         let importPath = this.namedImportsToPath.get(nestedFieldType);
-        this.contentToPrepend +=`
-import { ${nestedFieldType}Serializer } from '${importPath}';`;
+        this.pathToNamedImports.get(importPath).add(`${nestedFieldType}Serializer`);
       }
     }
 
@@ -137,6 +140,16 @@ export class ${enumName}Serializer implements MessageSerializer<${enumName}> {
   }
 }
 `;
+  }
+
+  private prependImports(): void {
+    for (let entry of Array.from(this.pathToNamedImports.entries())) {
+      let importPath = entry[0];
+      let namedImports = Array.from(entry[1]).join(', ');
+      this.contentToAppend = 
+        `import { ${namedImports} } from '${importPath}';\n` +
+        this.contentToAppend;
+    }
   }
 }
 
