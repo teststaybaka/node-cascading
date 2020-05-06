@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import * as ts from 'typescript';
 
 export class MessageGenerator {
@@ -8,12 +8,12 @@ export class MessageGenerator {
 
   public constructor(private fileName: string) {}
 
-  public generate(): void {  
+  public generate(): void {
     let sourceFile = ts.createSourceFile(this.fileName,
       readFileSync(this.fileName).toString(), ts.ScriptTarget.ES5, true);
     ts.forEachChild(sourceFile, (node) => this.visitTopDeclarations(node));
     this.prependImports();
-    console.log(this.content);
+    writeFileSync(this.fileName, this.content);
   }
 
   private visitTopDeclarations(node: ts.Node): void {
@@ -60,7 +60,7 @@ export interface ${interfaceName} {`;
         fieldType = ((field.type as ts.TypeReferenceNode).typeName as ts.Identifier).text;
       }
       this.content += `
-  ${fieldName}: ${fieldType},`;
+  ${fieldName}?: ${fieldType},`;
     }
 
     this.content += `
@@ -101,6 +101,7 @@ export class ${interfaceName}Serializer implements MessageSerializer<${interface
         this.content +=`
     ret.${fieldName} = new ${nestedFieldType}Serializer().fromObj(obj.${fieldName});`;
 
+        // TODO: Support nested field within the file, without imports.
         let importPath = this.namedImportsToPath.get(nestedFieldType);
         this.pathToNamedImports.get(importPath).add(`${nestedFieldType}Serializer`);
       }
@@ -116,7 +117,7 @@ export class ${interfaceName}Serializer implements MessageSerializer<${interface
   private generateEnumSerializer(enumNode: ts.EnumDeclaration): void {
     let enumName = enumNode.name.text;
     this.content += `
-export Enum ${enumName} {`;
+export enum ${enumName} {`;
 
     for (let member of enumNode.members) {
       let enumValueName = (member.name as ts.Identifier).text;
@@ -132,7 +133,7 @@ export Enum ${enumName} {`;
     this.content += `
 export class ${enumName}Serializer implements MessageSerializer<${enumName}> {
   public fromObj(obj?: any): ${enumName} {
-    if (!obj || typeof obj !== 'number' || !(obj in ${enumName}) {
+    if (!obj || typeof obj !== 'number' || !(obj in ${enumName})) {
       return undefined;
     } else {
       return obj;
@@ -149,6 +150,10 @@ export class ${enumName}Serializer implements MessageSerializer<${enumName}> {
       this.content =
         `import { ${namedImports} } from '${importPath}';\n` + this.content;
     }
+    // TODO: Support imports when install as library.
+    this.content =
+      `import { MessageSerializer } from '../message_serializer';\n`
+      + this.content;
   }
 }
 
