@@ -101,9 +101,11 @@ export class ${interfaceName}Serializer implements MessageSerializer<${interface
         this.content +=`
     ret.${fieldName} = new ${nestedFieldType}Serializer().fromObj(obj.${fieldName});`;
 
-        // TODO: Support nested field within the file, without imports.
         let importPath = this.namedImportsToPath.get(nestedFieldType);
-        this.pathToNamedImports.get(importPath).add(`${nestedFieldType}Serializer`);
+        if (importPath) {
+          this.pathToNamedImports.get(importPath)
+            .add(`${nestedFieldType}Serializer`);
+        }
       }
     }
 

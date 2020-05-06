@@ -15,8 +15,11 @@ class GenerateMessageWithinSameFile implements TestCase {
     new MessageGenerator(filePath).generate();
 
     // Verify
-    execSync(`tsc ${filePath}`, {encoding: 'utf-8'});
-    writeFileSync(filePath, originalContent);
+    try {
+      execSync(`tsc ${filePath}`, {encoding: 'utf-8'});
+    } finally {
+      writeFileSync(filePath, originalContent);
+    }
   }
 }
 
@@ -35,9 +38,12 @@ class GenerateMessageWithNestedField implements TestCase {
     new MessageGenerator(filePathAnother).generate();
 
     // Verify
-    execSync(`tsc ${filePathAnother}`, {encoding: 'utf-8'});
-    writeFileSync(filePath, originalContent);
-    writeFileSync(filePathAnother, originalContentAnother);
+    try {
+      execSync(`tsc ${filePathAnother}`, {encoding: 'utf-8'});
+    } finally {
+      writeFileSync(filePath, originalContent);
+      writeFileSync(filePathAnother, originalContentAnother);
+    }
   }
 }
 
