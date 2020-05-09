@@ -4,7 +4,6 @@ import { sortImports } from './format';
 import { MessageGenerator } from './message_generator';
 import { execSync } from 'child_process';
 
-
 async function main(): Promise<void> {
   let purpose = process.argv[2];
   if (purpose === 'build') {
