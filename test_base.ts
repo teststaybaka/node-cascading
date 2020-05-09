@@ -2,12 +2,16 @@ import process = require('process');
 import { LOGGER } from './logger';
 import 'source-map-support/register';
 
+export interface TestEnvironment {
+  destroy(): void,
+}
+
 export interface TestCase {
   name: string,
   execute: (() => void|Promise<void>),
 }
 
-export async function runTests(testSetName: string, testCases: TestCase[]) {
+export async function runTests(testSetName: string, testCases: TestCase[], testEnvironment?: TestEnvironment) {
   let child = process.argv[2];
   if (child === undefined) {
     console.log('\n\x1b[35m%s test result:\x1b[0m', testSetName);
@@ -42,6 +46,9 @@ export async function runTests(testSetName: string, testCases: TestCase[]) {
     } catch (e) {
       console.log(e);
     }
+  }
+  if (testEnvironment) {
+    testEnvironment.destroy();
   }
 }
 

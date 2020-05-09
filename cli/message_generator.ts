@@ -152,10 +152,13 @@ export class ${enumName}Serializer implements MessageSerializer<${enumName}> {
       this.content =
         `import { ${namedImports} } from '${importPath}';\n` + this.content;
     }
-    // TODO: Support imports when install as library.
+
+    let serializerPath = 'selfage/message_serializer';
+    if (this.pathToNamedImports.has(serializerPath)) {
+      return;
+    }
     this.content =
-      `import { MessageSerializer } from '../message_serializer';\n`
-      + this.content;
+      `import { MessageSerializer } from '${serializerPath}';\n` + this.content;
   }
 }
 

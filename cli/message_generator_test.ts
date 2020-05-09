@@ -1,7 +1,17 @@
 import { execSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
-import { TestCase, runTests } from '../test_base';
+import { TestCase, TestEnvironment, runTests } from '../test_base';
 import { MessageGenerator } from './message_generator';
+
+class SelfLinkPackages implements TestEnvironment {
+  public constructor() {
+    execSync(`sudo npm link ../selfage`, {encoding: 'utf-8'});
+  }
+
+  public destroy() {
+    execSync(`sudo npm unlink; rm node_modules/selfage`, {encoding: 'utf-8'});
+  }
+}
 
 class GenerateMessageWithinSameFile implements TestCase {
   public name = 'GenerateMessagesWithinSameFile';
@@ -50,5 +60,5 @@ class GenerateMessageWithNestedField implements TestCase {
 runTests('MessageGeneratorTest', [
   new GenerateMessageWithinSameFile(),
   new GenerateMessageWithNestedField(),
-]);
+], new SelfLinkPackages());
 
