@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync } from "fs";
-import * as ts from 'typescript';
+import { readFileSync, writeFileSync } from 'fs';
+import { forEachChild, createSourceFile, ScriptTarget, SyntaxKind, Node as TsNode, ImportDeclaration, InterfaceDeclaration, EnumDeclaration, StringLiteral, NamedImports, Identifier, PropertySignature, TypeReferenceNode, NumericLiteral } from 'typescript';
 
 export class MessageGenerator {
   private pathToNamedImports = new Map<string, Set<string>>();
@@ -9,31 +9,31 @@ export class MessageGenerator {
   public constructor(private fileName: string) {}
 
   public generate(): void {
-    let sourceFile = ts.createSourceFile(this.fileName,
-      readFileSync(this.fileName).toString(), ts.ScriptTarget.ES5, true);
-    ts.forEachChild(sourceFile, (node) => this.visitTopDeclarations(node));
+    let sourceFile = createSourceFile(this.fileName,
+      readFileSync(this.fileName).toString(), ScriptTarget.ES5, true);
+    forEachChild(sourceFile, (node) => this.visitTopDeclarations(node));
     this.prependImports();
     writeFileSync(this.fileName, this.content);
   }
 
-  private visitTopDeclarations(node: ts.Node): void {
-    if (node.kind === ts.SyntaxKind.ImportDeclaration) {
-      this.parseImports(node as ts.ImportDeclaration);
+  private visitTopDeclarations(node: TsNode): void {
+    if (node.kind === SyntaxKind.ImportDeclaration) {
+      this.parseImports(node as ImportDeclaration);
     }
 
-    if (node.kind === ts.SyntaxKind.InterfaceDeclaration) {
-      this.generateMessageSerializer(node as ts.InterfaceDeclaration);
+    if (node.kind === SyntaxKind.InterfaceDeclaration) {
+      this.generateMessageSerializer(node as InterfaceDeclaration);
     }
 
-    if (node.kind === ts.SyntaxKind.EnumDeclaration) {
-      this.generateEnumSerializer(node as ts.EnumDeclaration);
+    if (node.kind === SyntaxKind.EnumDeclaration) {
+      this.generateEnumSerializer(node as EnumDeclaration);
     }
   }
 
-  private parseImports(importNode: ts.ImportDeclaration): void {
-    let importPath = (importNode.moduleSpecifier as ts.StringLiteral).text;
+  private parseImports(importNode: ImportDeclaration): void {
+    let importPath = (importNode.moduleSpecifier as StringLiteral).text;
     let namedImports: string[] = [];
-    for (let importSpecifier of (importNode.importClause.namedBindings as ts.NamedImports).elements) {
+    for (let importSpecifier of (importNode.importClause.namedBindings as NamedImports).elements) {
       let namedImport = importSpecifier.name.text;
       namedImports.push(namedImport);
       this.namedImportsToPath.set(namedImport, importPath);
@@ -41,23 +41,23 @@ export class MessageGenerator {
     this.pathToNamedImports.set(importPath, new Set(namedImports));
   }
 
-  private generateMessageSerializer(interfacceNode: ts.InterfaceDeclaration): void {
+  private generateMessageSerializer(interfacceNode: InterfaceDeclaration): void {
     let interfaceName = interfacceNode.name.text;
     this.content += `
 export interface ${interfaceName} {`;
 
     for (let member of interfacceNode.members) {
-      let field = member as ts.PropertySignature;
-      let fieldName = (field.name as ts.Identifier).text;
+      let field = member as PropertySignature;
+      let fieldName = (field.name as Identifier).text;
       let fieldType = '';
-      if (field.type.kind === ts.SyntaxKind.StringKeyword) {
+      if (field.type.kind === SyntaxKind.StringKeyword) {
         fieldType = 'string';
-      } else if (field.type.kind === ts.SyntaxKind.BooleanKeyword) {
+      } else if (field.type.kind === SyntaxKind.BooleanKeyword) {
         fieldType = 'boolean';
-      } else if (field.type.kind === ts.SyntaxKind.NumberKeyword) {
+      } else if (field.type.kind === SyntaxKind.NumberKeyword) {
         fieldType = 'number';
-      } else if (field.type.kind === ts.SyntaxKind.TypeReference) {
-        fieldType = ((field.type as ts.TypeReferenceNode).typeName as ts.Identifier).text;
+      } else if (field.type.kind === SyntaxKind.TypeReference) {
+        fieldType = ((field.type as TypeReferenceNode).typeName as Identifier).text;
       }
       this.content += `
   ${fieldName}?: ${fieldType},`;
@@ -77,19 +77,19 @@ export class ${interfaceName}Serializer implements MessageSerializer<${interface
     let ret: ${interfaceName} = {};`;
 
     for (let member of interfacceNode.members) {
-      let field = member as ts.PropertySignature;
-      let fieldName = (field.name as ts.Identifier).text;
+      let field = member as PropertySignature;
+      let fieldName = (field.name as Identifier).text;
       let fieldType = '';
-      if (field.type.kind === ts.SyntaxKind.StringKeyword) {
+      if (field.type.kind === SyntaxKind.StringKeyword) {
         fieldType = 'string';
-      } else if (field.type.kind === ts.SyntaxKind.BooleanKeyword) {
+      } else if (field.type.kind === SyntaxKind.BooleanKeyword) {
         fieldType = 'boolean';
-      } else if (field.type.kind === ts.SyntaxKind.NumberKeyword) {
+      } else if (field.type.kind === SyntaxKind.NumberKeyword) {
         fieldType = 'number';
       }
       let nestedFieldType = '';
-      if (field.type.kind === ts.SyntaxKind.TypeReference) {
-        nestedFieldType = ((field.type as ts.TypeReferenceNode).typeName as ts.Identifier).text;
+      if (field.type.kind === SyntaxKind.TypeReference) {
+        nestedFieldType = ((field.type as TypeReferenceNode).typeName as Identifier).text;
       }
 
       if (fieldType) {
@@ -116,14 +116,14 @@ export class ${interfaceName}Serializer implements MessageSerializer<${interface
 `;
   }
 
-  private generateEnumSerializer(enumNode: ts.EnumDeclaration): void {
+  private generateEnumSerializer(enumNode: EnumDeclaration): void {
     let enumName = enumNode.name.text;
     this.content += `
 export enum ${enumName} {`;
 
     for (let member of enumNode.members) {
-      let enumValueName = (member.name as ts.Identifier).text;
-      let enumValueValue = (member.initializer as ts.NumericLiteral).text;
+      let enumValueName = (member.name as Identifier).text;
+      let enumValueValue = (member.initializer as NumericLiteral).text;
       this.content += `
   ${enumValueName} = ${enumValueValue},`;
     }
