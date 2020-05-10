@@ -10,7 +10,7 @@ export class MessageGenerator {
 
   public generate(): void {
     let sourceFile = createSourceFile(this.fileName,
-      readFileSync(this.fileName).toString(), ScriptTarget.ES5, true);
+      readFileSync(this.fileName).toString(), ScriptTarget.ES5, false);
     forEachChild(sourceFile, (node) => this.visitTopDeclarations(node));
     this.prependImports();
     writeFileSync(this.fileName, this.content);
