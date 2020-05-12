@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import path = require('path');
 import { buildAllFiles } from './build';
-import { sortImports } from './format';
+import { Formatter } from './formatter';
 import { MessageGenerator } from './message_generator';
 import { execSync } from 'child_process';
+import 'source-map-support/register';
 
 async function main(): Promise<void> {
   let purpose = process.argv[2];
@@ -21,7 +22,7 @@ async function main(): Promise<void> {
     let pathObj = path.parse(process.argv[3]);
     pathObj.base = undefined;
     pathObj.ext = '.ts';
-    sortImports(path.format(pathObj));
+    new Formatter(path.format(pathObj)).format();
   } else if (purpose === 'msg') {
     let pathObj = path.parse(process.argv[3]);
     pathObj.base = undefined;
