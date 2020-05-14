@@ -1,33 +1,34 @@
 #!/usr/bin/env node
-import path = require('path');
+import { parse as parsePath, format as formatPath } from 'path';
+import { install as installSourceMap } from 'source-map-support';
 import { buildAllFiles } from './build';
 import { Formatter } from './formatter';
 import { MessageGenerator } from './message_generator';
 import { execSync } from 'child_process';
-import 'source-map-support/register';
 
 async function main(): Promise<void> {
+  installSourceMap ();
   let purpose = process.argv[2];
   if (purpose === 'build') {
     await buildAllFiles();
   } else if (purpose === 'run') {
     await buildAllFiles();
-    let pathObj = path.parse(process.argv[3]);
+    let pathObj = parsePath(process.argv[3]);
     pathObj.base = undefined;
     pathObj.ext = '.js';
     let passAlongArgs = process.argv.slice(4);
-    let output = execSync(`node ${path.format(pathObj)} ${passAlongArgs}`);
+    let output = execSync(`node $(formatPath(pathObj)} ${passAlongArgs}`);
     console.log(output.toString());
   } else if (purpose === 'fmt') {
-    let pathObj = path.parse(process.argv[3]);
+    let pathObj = parsePath(process.argv[3]);
     pathObj.base = undefined;
     pathObj.ext = '.ts';
-    new Formatter(path.format(pathObj)).format();
+    new Formatter(formatPath(pathObj)).format();
   } else if (purpose === 'msg') {
-    let pathObj = path.parse(process.argv[3]);
+    let pathObj = parsePath(process.argv[3]);
     pathObj.base = undefined;
     pathObj.ext = '.ts';
-    new MessageGenerator(path.format(pathObj)).generate();
+    new MessageGenerator(formatPath(pathObj)).generate();
     await buildAllFiles();
   } else {
     console.log(`Usage:
