@@ -5,7 +5,7 @@ export class Formatter {
   private static LINE_LIMIT = 80;
   private static INDENT_STEP = '  ';
 
-  private importNodesNamed: ImportDeclaration[] = [];
+  private importNodes: ImportDeclaration[] = [];
   private currentIndent = 0;
   private content = '';
   private line = '';
@@ -16,17 +16,20 @@ export class Formatter {
   public format(): void {
     let sourceFile = createSourceFile(this.fileName,
       readFileSync(this.fileName).toString(), ScriptTarget.ES5, false);
-    forEachChild(sourceFile, (node): void => this.visitTopDeclarations(node));
-    
-    this.importNodesNamed.sort(
+    for (let node of sourceFile.statements) {
+      if (node.kind === SyntaxKind.ImportDeclaration) {
+        this.importNodes.push(node as ImportDeclaration);
+      }
+    }
+    this.importNodes.sort(
       (a, b): number => {
         return (a.moduleSpecifier as StringLiteral).text.localeCompare(
           (b.moduleSpecifier as StringLiteral).text
         );
       }
     );
-    for (let importNode of this.importNodesNamed) {
-      this.visitNamedImport(importNode);
+    for (let importNode of this.importNodes) {
+      this.visitImportNode(importNode);
     }
     this.flushLineAndNewLine();
     console.log(this.content);
@@ -85,13 +88,15 @@ export class Formatter {
     return prevHasNewLine;
   }
 
-  private visitTopDeclarations(node: TsNode): void {
-    if (node.kind === SyntaxKind.ImportDeclaration) {
-      this.importNodesNamed.push(node as ImportDeclaration);
+  private visitImportNode(importNode: ImportDeclaration): void {
+    if (!importNode.importClause || !importNode.importClause.namedBindings
+      || importNode.importClause.namedBindings.kind !== SyntaxKind.NamedImports
+    ) {
+      console.warn(`Please use "import {} from '';" syntax. Ignoring the `
+        + `following import statement: ${importNode.getText()}`);
+      return;
     }
-  }
 
-  private visitNamedImport(importNode: ImportDeclaration): void {
     let importNames: string[] = [];
     for (let importSpecifier of
       (importNode.importClause.namedBindings as NamedImports).elements
