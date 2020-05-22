@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs';
-import { NamedImports, StringLiteral, ImportDeclaration, forEachChild, createSourceFile, ScriptTarget, Node as TsNode, SyntaxKind } from 'typescript';
+import { InterfaceDeclaration, Statement, NodeArray, NamedImports, StringLiteral, ImportDeclaration, createSourceFile, ScriptTarget, Node as TsNode, SyntaxKind } from 'typescript';
 
 export class Formatter {
+  private static UNSUPPORTED_REASON = 'Unsupported syntax for formatter.';
   private static LINE_LIMIT = 80;
   private static INDENT_STEP = '  ';
 
@@ -9,16 +10,84 @@ export class Formatter {
   private currentIndent = 0;
   private content = '';
   private line = '';
-  private hasNewLine = false;
+  private lineNumber = 1;
 
   public constructor(private fileName: string) {}
 
   public format(): void {
     let sourceFile = createSourceFile(this.fileName,
-      readFileSync(this.fileName).toString(), ScriptTarget.ES5, false);
-    for (let node of sourceFile.statements) {
+      readFileSync(this.fileName).toString(), ScriptTarget.ES5, true);
+    this.formatImports(sourceFile.statements);
+    this.flushLine();
+    this.formatStatements(sourceFile.statements);
+    console.log(this.content);
+  }
+
+  private appendText(text: string): void {
+    this.line += text;
+  }
+
+  private flushLine(): void {
+    this.content += this.line + '\n';
+    this.lineNumber++;
+    this.line = Formatter.INDENT_STEP.repeat(this.currentIndent);
+  }
+
+  private flushLineIfOverLineLimit(textToBeAppended: string
+    , needsToPadSpace = false
+  ): void {
+    if (needsToPadSpace) {
+      if (this.line.length + textToBeAppended.length + 1
+        > Formatter.LINE_LIMIT
+      ) {
+        this.flushLine();
+        this.appendText(textToBeAppended);
+      } else {
+        this.appendText(' ' + textToBeAppended);
+      }
+    } else {
+      if (this.line.length + textToBeAppended.length > Formatter.LINE_LIMIT) {
+        this.flushLine();
+        this.appendText(textToBeAppended);
+      } else {
+        this.appendText(textToBeAppended);
+      }
+    }
+  }
+
+  private indentOne(
+    visitBlock: () => void
+  ): void {
+    this.currentIndent++;
+    visitBlock();
+    this.currentIndent--;
+  }
+
+  private formatBracketBlock(textToCloseBracket: string
+    , needsToPadSpace: boolean
+    , visitBlock: () => void
+  ): void {
+    let startLineNumber = this.lineNumber;
+    this.indentOne(visitBlock);
+    let hadNewLine = this.lineNumber - startLineNumber > 0;
+    if (hadNewLine) {
+      this.flushLine();
+      this.appendText(textToCloseBracket);
+    } else {
+      this.flushLineIfOverLineLimit(textToCloseBracket, needsToPadSpace);
+    }
+  }
+
+  private warnNode(node: TsNode, reason: string): void {
+    console.warn(reason + ` Skipping the following code: ${node.getText()}`);
+  }
+
+  private formatImports(statementNodes: NodeArray<Statement>): void {
+    for (let node of statementNodes) {
       if (node.kind === SyntaxKind.ImportDeclaration) {
         this.importNodes.push(node as ImportDeclaration);
+      } else if (node.kind === SyntaxKind.ImportEqualsDeclaration) {
+        this.warnNode(node, `Please use "import {} from '';"`);
       }
     }
     this.importNodes.sort(
@@ -31,69 +100,13 @@ export class Formatter {
     for (let importNode of this.importNodes) {
       this.visitImportNode(importNode);
     }
-    this.flushLineAndNewLine();
-    console.log(this.content);
-  }
-
-  private flushLineAndNewLine(textInNewLine = ''): void {
-    this.content += this.line + '\n';
-    this.hasNewLine = true;
-    this.line = Formatter.INDENT_STEP.repeat(this.currentIndent)
-      + textInNewLine;
-  }
-
-  private flushLineIfOverLineLimit(textToBeAppended: string
-    , needsToPadSpaceBefore = false
-  ): void {
-    if (needsToPadSpaceBefore) {
-      if (this.line.length + textToBeAppended.length + 1
-        > Formatter.LINE_LIMIT
-      ) {
-        this.flushLineAndNewLine(textToBeAppended);
-      } else {
-        this.line += ' ' + textToBeAppended;
-      }
-    } else {
-      if (this.line.length + textToBeAppended.length > Formatter.LINE_LIMIT) {
-        this.flushLineAndNewLine(textToBeAppended);
-      } else {
-        this.line += textToBeAppended;
-      }
-    }
-  }
-
-  private flushLineIfOverLineLimitOrPrevHasNewLine(
-    textToBeAppended: string, prevHasNewLine: boolean
-    , needsToPadSpaceBefore = false
-  ): void {
-    if (prevHasNewLine) {
-      this.flushLineAndNewLine(textToBeAppended);
-    } else {
-      this.flushLineIfOverLineLimit(textToBeAppended, needsToPadSpaceBefore);
-    }
-  }
-
-  private indentOne(leadingTextAfterIndent: string, visitBlock
-    : () => void
-  ): boolean {
-    this.flushLineAndNewLine(leadingTextAfterIndent);
- 
-    this.currentIndent++;
-    this.hasNewLine = false;
-    visitBlock();
-    let prevHasNewLine = this.hasNewLine;
-    this.currentIndent--;
-
-    this.hasNewLine = true;
-    return prevHasNewLine;
   }
 
   private visitImportNode(importNode: ImportDeclaration): void {
     if (!importNode.importClause || !importNode.importClause.namedBindings
       || importNode.importClause.namedBindings.kind !== SyntaxKind.NamedImports
     ) {
-      console.warn(`Please use "import {} from '';" syntax. Ignoring the `
-        + `following import statement: ${importNode.getText()}`);
+      this.warnNode(importNode, `Please use "import {} from '';".`);
       return;
     }
 
@@ -113,8 +126,11 @@ export class Formatter {
     }
     importNames.sort();
 
-    let prevHasNewLine = this.indentOne('import {',
-      (): void => {
+    this.appendText('import {');
+    let importPath = (importNode.moduleSpecifier as StringLiteral).text;
+    let importFrom = `} from '${importPath}';`;
+    this.formatBracketBlock(importFrom, true
+      , (): void => {
         let firstName = importNames[0];
         this.flushLineIfOverLineLimit(firstName, true);
         for (let i = 1; i < importNames.length; i++) {
@@ -122,14 +138,79 @@ export class Formatter {
           let text = ', ' + importName;
           this.flushLineIfOverLineLimit(text);;
         }
-      },
+      }
     );
+    this.flushLine();
+  }
 
-    let importPath = (importNode.moduleSpecifier as StringLiteral).text;
-    let importFrom = `} from '${importPath}';`;
-    this.flushLineIfOverLineLimitOrPrevHasNewLine(importFrom, prevHasNewLine
-      , true
-    );
+  private formatStatements(statementNodes: NodeArray<Statement>): void {
+    for (let node of statementNodes) {
+      if (node.kind === SyntaxKind.InterfaceDeclaration) {
+        this.visitInterfaceNode(node as InterfaceDeclaration);
+        this.flushLine();
+      } else if (node.kind === SyntaxKind.ClassDeclaration) {
+      } else if (node.kind === SyntaxKind.VariableStatement) {
+      } else if (node.kind === SyntaxKind.FunctionDeclaration) {
+      } else if (node.kind === SyntaxKind.ExpressionStatement) {
+      } else if (node.kind === SyntaxKind.ForStatement) {
+      } else if (node.kind === SyntaxKind.IfStatement) {
+      } else if (node.kind === SyntaxKind.ImportDeclaration || node.kind ===
+        SyntaxKind.ImportEqualsDeclaration
+      ) {
+        // Should have been handled by {@code #formatImports}.
+      } else {
+        this.warnNode(node, Formatter.UNSUPPORTED_REASON);
+      }
+    }
+  }
+
+  private visitInterfaceNode(interfaceNode: InterfaceDeclaration): void {
+    let name = interfaceNode.name.text;
+
+    let foundExport = false;
+    for (let modifier of interfaceNode.modifiers) {
+      if (foundExport) {
+        console.warn(`Skipping "${SyntaxKind[modifier.kind]}" of interface ${name}.`);
+        continue;
+      }
+      if (modifier.kind === SyntaxKind.ExportKeyword) {
+        foundExport = true;
+      }
+    }
+    if (foundExport) {
+      this.appendText('export ');
+    }
+    this.appendText('interface');
+    this.flushLineIfOverLineLimit(name, true);
+
+    if (interfaceNode.typeParameters) {
+      this.flushLineIfOverLineLimit('<');
+      this.formatBracketBlock('>', false
+        , (): void => {
+          let hasOne = false;
+          for (let typeParameter of interfaceNode.typeParameters) {
+            if (!hasOne) {
+              this.flushLineIfOverLineLimit(typeParameter.name.text, false);
+              hasOne = true;
+            } else {
+              this.flushLineIfOverLineLimit(', ' + typeParameter.name.text
+                , false
+              );
+            }
+            if (typeParameter.constraint) {
+              this.flushLineIfOverLineLimit('extends', true);
+              this.flushLineIfOverLineLimit(
+                typeParameter.constraint.typeName.text, true
+              );
+            }
+          }
+        }
+      );
+    }
+
+    if (interfaceNode.heritageClauses) {
+      
+    }
   }
 }
 

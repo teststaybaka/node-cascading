@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.1",
+    "prettier": "2.0.5",
     "typescript": "^3.9.2"
   },
   "bin": "./cli/main.js",

@@ -2,7 +2,6 @@
 import { parse as parsePath, format as formatPath } from 'path';
 import { install as installSourceMap } from 'source-map-support';
 import { buildAllFiles } from './build';
-import { Formatter } from './formatter';
 import { MessageGenerator } from './message_generator';
 import { execSync } from 'child_process';
 
@@ -19,11 +18,6 @@ async function main(): Promise<void> {
     let passAlongArgs = process.argv.slice(4);
     let output = execSync(`node $(formatPath(pathObj)} ${passAlongArgs}`);
     console.log(output.toString());
-  } else if (purpose === 'fmt') {
-    let pathObj = parsePath(process.argv[3]);
-    pathObj.base = undefined;
-    pathObj.ext = '.ts';
-    new Formatter(formatPath(pathObj)).format();
   } else if (purpose === 'msg') {
     let pathObj = parsePath(process.argv[3]);
     pathObj.base = undefined;
@@ -34,12 +28,10 @@ async function main(): Promise<void> {
     console.log(`Usage:
   selfage build
   selfage run <relative file path> <pass-through flags>
-  selfage fmt <relative file path>
   selfage msg <relative file path>
   
   build: Compile all files.
   run: Compile and run the specified file with the rest of the flags passed through.
-  fmt: Format the specified file.
   msg: Generate implementions of MessageSerializer for and overwrite the specified file, followed by compiling to verify the result.
 
   <relative file path>'s extension can be .js, .ts, a single ".", or no extension at all, but cannot be .d.ts. It will be transformed to ts or js file depending on the command.
