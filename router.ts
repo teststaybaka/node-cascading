@@ -122,11 +122,9 @@ export class Router {
       let readStream = fs.createReadStream(httpResponse.contentFile);
       readStream.on("error", (err: Error): void => {
         LOGGER.error(logContext + err.stack);
-        response.end();
       });
       response.on("error", (err): void => {
         LOGGER.error(logContext + err.stack);
-        readStream.close();
       });
       readStream.pipe(response);
     }
