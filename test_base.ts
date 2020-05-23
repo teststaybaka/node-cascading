@@ -1,20 +1,24 @@
-import process = require('process');
-import { LOGGER } from './logger';
-import 'source-map-support/register';
+import process = require("process");
+import { LOGGER } from "./logger";
+import "source-map-support/register";
 
 export interface TestEnvironment {
-  destroy(): void,
+  destroy(): void;
 }
 
 export interface TestCase {
-  name: string,
-  execute: (() => void|Promise<void>),
+  name: string;
+  execute: () => void | Promise<void>;
 }
 
-export async function runTests(testSetName: string, testCases: TestCase[], testEnvironment?: TestEnvironment) {
+export async function runTests(
+  testSetName: string,
+  testCases: TestCase[],
+  testEnvironment?: TestEnvironment
+) {
   let child = process.argv[2];
   if (child === undefined) {
-    console.log('\n\x1b[35m%s test result:\x1b[0m', testSetName);
+    console.log("\n\x1b[35m%s test result:\x1b[0m", testSetName);
     for (let i = 0, len = testCases.length; i < len; i++) {
       let oldLog = console.log;
       let oldInfo = console.info;
@@ -52,25 +56,49 @@ export async function runTests(testSetName: string, testCases: TestCase[], testE
   }
 }
 
-export function assert(result: boolean, errorMessage: string = 'Assert failed!') {
+export function assert(
+  result: boolean,
+  errorMessage: string = "Assert failed!"
+) {
   if (!result) {
     throw new Error(errorMessage);
   }
 }
 
-export function assertContains(longStr: string, shortStr: string, errorMessage?: string) {
+export function assertContains(
+  longStr: string,
+  shortStr: string,
+  errorMessage?: string
+) {
   assert(longStr.indexOf(shortStr) != -1, errorMessage);
 }
 
 export function assertError(actualError: any, expectedError: Error) {
   console.log(actualError);
   if (actualError instanceof Error) {
-    assert(actualError.name === expectedError.name,
-      'Expecting error type [' + expectedError.name + '] but got [' + actualError.name + '] instead.');
-    assertContains(actualError.message, expectedError.message,
-      'Expecting message [' + expectedError.message + '] but got [' + actualError.message + '] instead.');
+    assert(
+      actualError.name === expectedError.name,
+      "Expecting error type [" +
+        expectedError.name +
+        "] but got [" +
+        actualError.name +
+        "] instead."
+    );
+    assertContains(
+      actualError.message,
+      expectedError.message,
+      "Expecting message [" +
+        expectedError.message +
+        "] but got [" +
+        actualError.message +
+        "] instead."
+    );
   } else {
-    throw new Error('Expecting error to be of type "Error" but got "' + (typeof actualError) + '" instead.');
+    throw new Error(
+      'Expecting error to be of type "Error" but got "' +
+        typeof actualError +
+        '" instead.'
+    );
   }
 }
 
@@ -80,7 +108,7 @@ export async function expectRejection(promise: Promise<any>) {
   } catch (e) {
     return e;
   }
-  throw new Error('Expecting the promise to be rejected but did not.');
+  throw new Error("Expecting the promise to be rejected but did not.");
 }
 
 export function expectThrow(method: () => void) {
@@ -89,5 +117,5 @@ export function expectThrow(method: () => void) {
   } catch (e) {
     return e;
   }
-  throw new Error('Expecting an error to be thrown.');
+  throw new Error("Expecting an error to be thrown.");
 }

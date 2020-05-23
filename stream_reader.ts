@@ -1,15 +1,19 @@
-import stream = require('stream');
-import { newInternalError } from './errors';
+import stream = require("stream");
+import { newInternalError } from "./errors";
 
 export class StreamReader {
-  private static BUFFER_LIMIT = 50*1024*1024;
+  private static BUFFER_LIMIT = 50 * 1024 * 1024;
 
   public async readJson(incoming: stream.Readable): Promise<any> {
     let buffer = await new Promise<number[]>((resolve, reject): void => {
       let buffer: number[] = [];
-      incoming.on('data', (chunk): void => {
+      incoming.on("data", (chunk): void => {
         if (buffer.length + chunk.length > StreamReader.BUFFER_LIMIT) {
-          reject(newInternalError(`Stream data exceeds buffer limit, ${StreamReader.BUFFER_LIMIT}.`));
+          reject(
+            newInternalError(
+              `Stream data exceeds buffer limit, ${StreamReader.BUFFER_LIMIT}.`
+            )
+          );
           return;
         }
 
@@ -17,10 +21,10 @@ export class StreamReader {
           buffer.push(chunk[i] as number);
         }
       });
-      incoming.on('error', (err): void => {
-        reject(newInternalError('Stream encountered an error!', err));
+      incoming.on("error", (err): void => {
+        reject(newInternalError("Stream encountered an error!", err));
       });
-      incoming.on('end', (): void => {
+      incoming.on("end", (): void => {
         resolve(buffer);
       });
     });
@@ -28,4 +32,3 @@ export class StreamReader {
     return JSON.parse(jsonString);
   }
 }
-

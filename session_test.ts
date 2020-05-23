@@ -1,6 +1,12 @@
-import { newUnauthenticatedError } from './errors';
-import { SecureSessionGenerator, SecureSessionVerifier } from './session';
-import { TestCase, assert, assertError, expectThrow, runTests } from './test_base';
+import { newUnauthenticatedError } from "./errors";
+import { SecureSessionGenerator, SecureSessionVerifier } from "./session";
+import {
+  TestCase,
+  assert,
+  assertError,
+  expectThrow,
+  runTests,
+} from "./test_base";
 
 class MockSigner {
   public signature: string = null;
@@ -11,119 +17,127 @@ class MockSigner {
 }
 
 class InvalidRawSession implements TestCase {
-  public name = 'InvalidRawSession';
+  public name = "InvalidRawSession";
 
   public async execute() {
     // Prepare
     let verifier = new SecureSessionVerifier(null);
 
     // Execute
-    let error = expectThrow(() => verifier.verifyAndGetUserId('f|s|aa'));
+    let error = expectThrow(() => verifier.verifyAndGetUserId("f|s|aa"));
 
     // Verify
-    assertError(error, newUnauthenticatedError('Invalid signed session'));
+    assertError(error, newUnauthenticatedError("Invalid signed session"));
   }
 }
 
 class InvalidSignature implements TestCase {
-  public name = 'InvalidSignature';
+  public name = "InvalidSignature";
 
   public async execute() {
     // Prepare
     let mockSigner = new MockSigner();
-    mockSigner.signature = 'xxxx';
+    mockSigner.signature = "xxxx";
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let error = expectThrow(() => verifier.verifyAndGetUserId('f|s'));
+    let error = expectThrow(() => verifier.verifyAndGetUserId("f|s"));
 
     // Verify
-    assertError(error, newUnauthenticatedError('session signature'));
+    assertError(error, newUnauthenticatedError("session signature"));
   }
 }
 
 class InvalidSessionJsonData implements TestCase {
-  public name = 'InvalidSessionJsonData';
+  public name = "InvalidSessionJsonData";
 
   public async execute() {
     // Prepare
     let mockSigner = new MockSigner();
-    mockSigner.signature = 'xxxx';
+    mockSigner.signature = "xxxx";
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let error = expectThrow(() => verifier.verifyAndGetUserId('--|xxxx'));
+    let error = expectThrow(() => verifier.verifyAndGetUserId("--|xxxx"));
 
     // Verify
-    assertError(error, newUnauthenticatedError('json data'));
+    assertError(error, newUnauthenticatedError("json data"));
   }
 }
 
 class NoTimestampInSession implements TestCase {
-  public name = 'NoTimestampInSession';
+  public name = "NoTimestampInSession";
 
   public async execute() {
     // Prepare
     let mockSigner = new MockSigner();
-    mockSigner.signature = 'xxxx';
+    mockSigner.signature = "xxxx";
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let error = expectThrow(() => verifier.verifyAndGetUserId('{}|xxxx'));
+    let error = expectThrow(() => verifier.verifyAndGetUserId("{}|xxxx"));
 
     // Verify
-    assertError(error, newUnauthenticatedError('session data'));
+    assertError(error, newUnauthenticatedError("session data"));
   }
 }
 
 class NoUserIdInSession implements TestCase {
-  public name = 'NoUserIdInSession';
+  public name = "NoUserIdInSession";
 
   public async execute() {
     // Prepare
     let mockSigner = new MockSigner();
-    mockSigner.signature = 'xxxx';
+    mockSigner.signature = "xxxx";
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let error = expectThrow(() => verifier.verifyAndGetUserId('{"timestamp":3131}|xxxx'));
+    let error = expectThrow(() =>
+      verifier.verifyAndGetUserId('{"timestamp":3131}|xxxx')
+    );
 
     // Verify
-    assertError(error, newUnauthenticatedError('session data'));
+    assertError(error, newUnauthenticatedError("session data"));
   }
 }
 
 class SessionExpired implements TestCase {
-  public name = 'SessionExpired';
+  public name = "SessionExpired";
 
   public async execute() {
     // Prepare
     let mockSigner = new MockSigner();
-    mockSigner.signature = 'xxxx';
-    let nowTime = Date.now() - 30*24*60*60*1000 - 1;
+    mockSigner.signature = "xxxx";
+    let nowTime = Date.now() - 30 * 24 * 60 * 60 * 1000 - 1;
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let error = expectThrow(() => verifier.verifyAndGetUserId(`{"timestamp":${nowTime},"userId":"blabla"}|xxxx`));
+    let error = expectThrow(() =>
+      verifier.verifyAndGetUserId(
+        `{"timestamp":${nowTime},"userId":"blabla"}|xxxx`
+      )
+    );
 
     // Verify
-    assertError(error, newUnauthenticatedError('Session expired'));
+    assertError(error, newUnauthenticatedError("Session expired"));
   }
 }
 
 class ExtractUserIdSuccess implements TestCase {
-  public name = 'ExtractUserIdSuccess';
+  public name = "ExtractUserIdSuccess";
 
   public async execute() {
     // Prepare
     let mockSigner = new MockSigner();
-    mockSigner.signature = 'xxxx';
+    mockSigner.signature = "xxxx";
     let nowTime = Date.now();
-    let userId = 'an id';
+    let userId = "an id";
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let extractedId = verifier.verifyAndGetUserId(`{"timestamp":${nowTime},"userId":"${userId}"}|xxxx`);
+    let extractedId = verifier.verifyAndGetUserId(
+      `{"timestamp":${nowTime},"userId":"${userId}"}|xxxx`
+    );
 
     // Verify
     assert(extractedId === userId);
@@ -131,13 +145,13 @@ class ExtractUserIdSuccess implements TestCase {
 }
 
 class GenerateSessionSuccess implements TestCase {
-  public name = 'GenerateSessionSuccess';
+  public name = "GenerateSessionSuccess";
 
   public async execute() {
     // Prepare
     let mockSigner = new MockSigner();
-    mockSigner.signature = 'xxxx';
-    let userId = 'id!!!!!!!!';
+    mockSigner.signature = "xxxx";
+    let userId = "id!!!!!!!!";
     let verifier = new SecureSessionVerifier(mockSigner as any);
     let generator = new SecureSessionGenerator(mockSigner as any);
 
@@ -146,11 +160,11 @@ class GenerateSessionSuccess implements TestCase {
 
     // Verify
     let extractedId = verifier.verifyAndGetUserId(session);
-    assert(extractedId === userId)
+    assert(extractedId === userId);
   }
 }
 
-runTests('SessionTest', [
+runTests("SessionTest", [
   new InvalidRawSession(),
   new InvalidSignature(),
   new InvalidSessionJsonData(),

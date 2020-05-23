@@ -1,4 +1,3 @@
 export interface Pointer<T> {
-  value: T,
+  value: T;
 }
-

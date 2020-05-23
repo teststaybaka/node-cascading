@@ -1,65 +1,73 @@
-import fs = require('fs');
-import url = require('url');
-import { CONTENT_TYPE_BINARY_STREAM } from './common';
-import { newInternalError } from './errors';
-import { TestCase, assert, assertError, expectRejection, runTests } from './test_base';
-import { StaticDirHandler, StaticFileHandler } from './static_handler';
+import fs = require("fs");
+import url = require("url");
+import { CONTENT_TYPE_BINARY_STREAM } from "./common";
+import { newInternalError } from "./errors";
+import {
+  TestCase,
+  assert,
+  assertError,
+  expectRejection,
+  runTests,
+} from "./test_base";
+import { StaticDirHandler, StaticFileHandler } from "./static_handler";
 
 class FileHandlerSuffix implements TestCase {
-  public name = 'FileHandlerSuffix';
+  public name = "FileHandlerSuffix";
 
   public async execute() {
     // Prepare
-    let handler = new StaticFileHandler('/url', 'path.js');
+    let handler = new StaticFileHandler("/url", "path.js");
 
     // Execute
     let response = await handler.handle(undefined, undefined, undefined);
 
     // Verify
-    assert(response.contentFile === 'path.js');
-    assert(response.contentType === 'text/javascript');
+    assert(response.contentFile === "path.js");
+    assert(response.contentType === "text/javascript");
   }
 }
 
 class FileHandlerBinaryType implements TestCase {
-  public name = 'FileHandlerBinaryType';
+  public name = "FileHandlerBinaryType";
 
   public async execute() {
     // Prepare
-    let handler = new StaticFileHandler('/url', 'path');
+    let handler = new StaticFileHandler("/url", "path");
 
     // Execute
     let response = await handler.handle(undefined, undefined, undefined);
 
     // Verify
-    assert(response.contentFile === 'path');
+    assert(response.contentFile === "path");
     assert(response.contentType === CONTENT_TYPE_BINARY_STREAM);
   }
 }
 
 class DirHandlerUrlNotMatch implements TestCase {
-  public name = 'DirHandlerUrlNotMatch';
+  public name = "DirHandlerUrlNotMatch";
 
   public async execute() {
     // Prepare
-    let handler = new StaticDirHandler('/xxx', 'path');
-    let urlPath = url.parse('/xxx');
+    let handler = new StaticDirHandler("/xxx", "path");
+    let urlPath = url.parse("/xxx");
 
     // Execute
-    let error = await expectRejection(handler.handle(undefined, undefined, urlPath));
+    let error = await expectRejection(
+      handler.handle(undefined, undefined, urlPath)
+    );
 
     // Verify
-    assertError(error, newInternalError('match url regex'));
+    assertError(error, newInternalError("match url regex"));
   }
 }
 
 class DirHandlerMatchJpgFile implements TestCase {
-  public name = 'DirHandlerMatchJpgFile';
+  public name = "DirHandlerMatchJpgFile";
 
   public async execute() {
     // Prepare
-    let handler = new StaticDirHandler('/xxx', 'test_data');
-    let urlPath = url.parse('/xxx/test.jpg');
+    let handler = new StaticDirHandler("/xxx", "test_data");
+    let urlPath = url.parse("/xxx/test.jpg");
 
     // Execute
     let response = await handler.handle(undefined, undefined, urlPath);
@@ -67,17 +75,17 @@ class DirHandlerMatchJpgFile implements TestCase {
     // Verify
     let stats = fs.statSync(response.contentFile);
     assert(stats.isFile());
-    assert(response.contentType === 'image/jpeg');
+    assert(response.contentType === "image/jpeg");
   }
 }
 
 class DirHandlerMatchBinaryFile implements TestCase {
-  public name = 'DirHandlerMatchBinaryFile';
+  public name = "DirHandlerMatchBinaryFile";
 
   public async execute() {
     // Prepare
-    let handler = new StaticDirHandler('/xxx', 'test_data');
-    let urlPath = url.parse('/xxx/file');
+    let handler = new StaticDirHandler("/xxx", "test_data");
+    let urlPath = url.parse("/xxx/file");
 
     // Execute
     let response = await handler.handle(undefined, undefined, urlPath);
@@ -89,7 +97,7 @@ class DirHandlerMatchBinaryFile implements TestCase {
   }
 }
 
-runTests('StaticHttpHandlerTest', [
+runTests("StaticHttpHandlerTest", [
   new FileHandlerSuffix(),
   new FileHandlerBinaryType(),
   new DirHandlerUrlNotMatch(),

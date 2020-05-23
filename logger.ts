@@ -1,4 +1,4 @@
-import { Entry, Log, Logging } from '@google-cloud/logging';
+import { Entry, Log, Logging } from "@google-cloud/logging";
 
 enum Severity {
   Info = 1,
@@ -30,7 +30,7 @@ class BatchLogger {
     }
   }
 
-  private flush = (async (): Promise<void> => {
+  private flush = async (): Promise<void> => {
     try {
       switch (this.severity) {
         case Severity.Info:
@@ -45,13 +45,13 @@ class BatchLogger {
         default:
           await this.remoteLogger.info(this.entries);
       }
-    } catch(e) {
+    } catch (e) {
       // Do nothing
     }
 
     this.entries = [];
     this.flushTimer = undefined;
-  });
+  };
 }
 
 class Logger {
@@ -64,7 +64,7 @@ class Logger {
 
   public constructor() {
     this.logging = new Logging();
-    this.remoteLogger = this.logging.log('Backend');
+    this.remoteLogger = this.logging.log("Backend");
   }
 
   public switchToLocal(): void {

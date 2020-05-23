@@ -1,16 +1,20 @@
-import http = require('http');
-import path = require('path');
-import url = require('url');
-import { CONTENT_TYPE_BINARY_STREAM, HttpMethod, findWithDefault } from './common';
-import { newInternalError } from './errors';
-import { HttpHandler, HttpResponse } from './http_handler';
+import http = require("http");
+import path = require("path");
+import url = require("url");
+import {
+  CONTENT_TYPE_BINARY_STREAM,
+  HttpMethod,
+  findWithDefault,
+} from "./common";
+import { newInternalError } from "./errors";
+import { HttpHandler, HttpResponse } from "./http_handler";
 
 let MIME_TYPES = new Map<string, string>([
-  ['jpeg', 'image/jpeg'],
-  ['jpg', 'image/jpeg'],
-  ['png', 'image/png'],
-  ['gif', 'image/gif'],
-  ['js', 'text/javascript'],
+  ["jpeg", "image/jpeg"],
+  ["jpg", "image/jpeg"],
+  ["png", "image/png"],
+  ["gif", "image/gif"],
+  ["js", "text/javascript"],
 ]);
 
 function findType(filePath: string): string {
@@ -28,10 +32,14 @@ export class StaticFileHandler implements HttpHandler {
     this.contentType = findType(this.filePath);
   }
 
-  public async handle(logContext: string, request: http.IncomingMessage, parsedUrl: url.Url): Promise<HttpResponse> {
+  public async handle(
+    logContext: string,
+    request: http.IncomingMessage,
+    parsedUrl: url.Url
+  ): Promise<HttpResponse> {
     return {
       contentType: this.contentType,
-      contentFile: this.filePath
+      contentFile: this.filePath,
     };
   }
 }
@@ -44,10 +52,16 @@ export class StaticDirHandler implements HttpHandler {
     this.urlRegex = new RegExp(`^${urlPrefix}/(.*)$`);
   }
 
-  public async handle(logContext: string, request: http.IncomingMessage, parsedUrl: url.Url): Promise<HttpResponse> {
+  public async handle(
+    logContext: string,
+    request: http.IncomingMessage,
+    parsedUrl: url.Url
+  ): Promise<HttpResponse> {
     let matched = parsedUrl.pathname.match(this.urlRegex);
     if (!matched) {
-      throw newInternalError(`Pathname, ${parsedUrl.pathname}, didn't match url regex, ${this.urlRegex}.`);
+      throw newInternalError(
+        `Pathname, ${parsedUrl.pathname}, didn't match url regex, ${this.urlRegex}.`
+      );
     }
 
     let filePath = matched[1];
@@ -55,8 +69,7 @@ export class StaticDirHandler implements HttpHandler {
     let contentType = findType(fullPath);
     return {
       contentType: contentType,
-      contentFile: fullPath
+      contentFile: fullPath,
     };
   }
 }
-

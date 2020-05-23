@@ -1,9 +1,9 @@
 export class SingletonFactory<T> {
   private singleton: T;
 
-  public get: (() => T) = this.getFirstTime;
+  public get: () => T = this.getFirstTime;
 
-  public constructor(private constructSingleton: (() => T)) {  }
+  public constructor(private constructSingleton: () => T) {}
 
   private getFirstTime(): T {
     this.singleton = this.constructSingleton();

@@ -1,6 +1,6 @@
-import http = require('http');
-import url = require('url');
-import { HttpMethod } from './common';
+import http = require("http");
+import url = require("url");
+import { HttpMethod } from "./common";
 
 export class HttpResponse {
   contentType: string;
@@ -10,7 +10,11 @@ export class HttpResponse {
 }
 
 export interface HttpHandler {
-  method: HttpMethod,
-  urlRegex: RegExp,
-  handle: ((logContext: string, request: http.IncomingMessage, parsedUrl: url.Url) => Promise<HttpResponse>),
+  method: HttpMethod;
+  urlRegex: RegExp;
+  handle: (
+    logContext: string,
+    request: http.IncomingMessage,
+    parsedUrl: url.Url
+  ) => Promise<HttpResponse>;
 }

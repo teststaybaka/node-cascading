@@ -1,10 +1,10 @@
-import http = require('http');
-import url = require('url');
-import { HttpMethod } from './common';
-import { newInternalError } from './errors';
-import { TestCase, assert, assertContains, runTests } from './test_base';
-import { HttpResponse } from './http_handler';
-import { Router } from './router';
+import http = require("http");
+import url = require("url");
+import { HttpMethod } from "./common";
+import { newInternalError } from "./errors";
+import { TestCase, assert, assertContains, runTests } from "./test_base";
+import { HttpResponse } from "./http_handler";
+import { Router } from "./router";
 
 class MockResponse {
   public statusCode: number;
@@ -26,12 +26,20 @@ class MockResponse {
 }
 
 class MockHttpServer {
-  public callback: ((request: http.IncomingMessage, response: http.ServerResponse) => Promise<void>);
+  public callback: (
+    request: http.IncomingMessage,
+    response: http.ServerResponse
+  ) => Promise<void>;
   public request: any;
   public response: any;
 
-  public addListener(eventName: string,
-                     callback: ((request: http.IncomingMessage, response: http.ServerResponse) => Promise<void>)) {
+  public addListener(
+    eventName: string,
+    callback: (
+      request: http.IncomingMessage,
+      response: http.ServerResponse
+    ) => Promise<void>
+  ) {
     this.callback = callback;
   }
 
@@ -44,10 +52,10 @@ class MockHttpHandler {
   public urlRegex: RegExp;
   public method: HttpMethod;
   public error: any;
-  public handled = false
+  public handled = false;
   public res: HttpResponse = {
-    contentType: '',
-    content: 'any content'
+    contentType: "",
+    content: "any content",
   };
 
   public getMethod() {
@@ -56,9 +64,11 @@ class MockHttpHandler {
   public getUrlRegex() {
     return this.urlRegex;
   }
-  public handle(logContext: string,
-                request: http.IncomingMessage,
-                url: url.Url): Promise<HttpResponse> {
+  public handle(
+    logContext: string,
+    request: http.IncomingMessage,
+    url: url.Url
+  ): Promise<HttpResponse> {
     this.handled = true;
     if (this.error) {
       return Promise.reject(this.error);
@@ -69,16 +79,16 @@ class MockHttpHandler {
 }
 
 class MatchHandler implements TestCase {
-  public name = 'MatchHandler';
+  public name = "MatchHandler";
 
   public async execute() {
     // Prepare
-    let mockRequest = {url: '/static/file', method: 'get'};
+    let mockRequest = { url: "/static/file", method: "get" };
     let mockResponse = new MockResponse();
     let mockHttpServer = new MockHttpServer();
     mockHttpServer.request = mockRequest;
     mockHttpServer.response = mockResponse;
-    let router = new Router('any hostname', mockHttpServer as any);
+    let router = new Router("any hostname", mockHttpServer as any);
     let mockHandler = new MockHttpHandler();
     mockHandler.method = HttpMethod.GET;
     mockHandler.urlRegex = /^\/static\/123\/.*$/;
@@ -101,7 +111,7 @@ class MatchHandler implements TestCase {
 
     // Verify
     assert(mockResponse.statusCode === 200);
-    assert(mockResponse.endData === 'any content');
+    assert(mockResponse.endData === "any content");
     assert(!mockHandler.handled);
     assert(!mockHandler2.handled);
     assert(mockHandler3.handled);
@@ -110,20 +120,20 @@ class MatchHandler implements TestCase {
 }
 
 class RejectHandler implements TestCase {
-  public name = 'RejectHandler';
+  public name = "RejectHandler";
 
   public async execute() {
     // Prepare
-    let mockRequest = {url: '/static/file', method: 'get'};
+    let mockRequest = { url: "/static/file", method: "get" };
     let mockResponse = new MockResponse();
     let mockHttpServer = new MockHttpServer();
     mockHttpServer.request = mockRequest;
     mockHttpServer.response = mockResponse;
-    let router = new Router('any hostname', mockHttpServer as any);
+    let router = new Router("any hostname", mockHttpServer as any);
     let mockHandler = new MockHttpHandler();
     mockHandler.method = HttpMethod.GET;
     mockHandler.urlRegex = /^\/static\/.*$/;
-    mockHandler.error = newInternalError('Reject handle.');
+    mockHandler.error = newInternalError("Reject handle.");
     router.addHandler(mockHandler);
 
     // Execute
@@ -131,22 +141,22 @@ class RejectHandler implements TestCase {
 
     // Verify
     assert(mockResponse.statusCode === 500);
-    assertContains(mockResponse.endData, 'Reject handle.');
+    assertContains(mockResponse.endData, "Reject handle.");
     assert(mockHandler.handled);
   }
 }
 
 class NotFound implements TestCase {
-  public name = 'NotFound';
+  public name = "NotFound";
 
   public async execute() {
     // Prepare
-    let mockRequest = {url: '/file', method: 'get'};
+    let mockRequest = { url: "/file", method: "get" };
     let mockResponse = new MockResponse();
     let mockHttpServer = new MockHttpServer();
     mockHttpServer.request = mockRequest;
     mockHttpServer.response = mockResponse;
-    let router = new Router('any hostname', mockHttpServer as any);
+    let router = new Router("any hostname", mockHttpServer as any);
     let mockHandler = new MockHttpHandler();
     mockHandler.method = HttpMethod.GET;
     mockHandler.urlRegex = /^\/static\/.*$/;
@@ -157,12 +167,12 @@ class NotFound implements TestCase {
 
     // Verify
     assert(mockResponse.statusCode === 500);
-    assertContains(mockResponse.endData, 'Not Found');
+    assertContains(mockResponse.endData, "Not Found");
     assert(!mockHandler.handled);
   }
 }
 
-runTests('RouterTest', [
+runTests("RouterTest", [
   new MatchHandler(),
   new RejectHandler(),
   new NotFound(),
