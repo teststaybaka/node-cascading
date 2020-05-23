@@ -199,9 +199,9 @@ export class Formatter {
             }
             if (typeParameter.constraint) {
               this.flushLineIfOverLineLimit('extends', true);
-              this.flushLineIfOverLineLimit(
-                typeParameter.constraint.typeName.text, true
-              );
+              // this.flushLineIfOverLineLimit(
+              //  typeParameter.constraint.typeName.text, true
+           
             }
           }
         }
