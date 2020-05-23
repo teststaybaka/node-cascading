@@ -1,7 +1,7 @@
-import { MessageSerializer } from "./message_serializer";
+import { MessageParser } from "./message_parser";
 
 export interface SchemaDescriptor<T> {
-  valueSerializer: MessageSerializer<T>;
+  valueParser: MessageParser<T>;
   getKey: (value: T) => string;
   getIndex: (value: T) => string[];
 }

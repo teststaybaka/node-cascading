@@ -43,7 +43,7 @@ export class BaseSignedInServiceHandler<Request, Response>
     let obj = await this.streamReader.readJson(request);
     let response = await this.subServiceHandler.handle(
       logContext,
-      this.serviceDescriptor.requestSerializer.fromObj(obj),
+      this.serviceDescriptor.requestParser.from(obj),
       userId
     );
     let httpResponse: HttpResponse = {
@@ -73,7 +73,7 @@ export class BaseSignedOutServiceHandler<Request, Response>
     let obj = await this.streamReader.readJson(request);
     let response = await this.subServiceHandler.handle(
       logContext,
-      this.serviceDescriptor.requestSerializer.fromObj(obj)
+      this.serviceDescriptor.requestParser.from(obj)
     );
     let httpResponse: HttpResponse = {
       contentType: CONTENT_TYPE_JSON,
