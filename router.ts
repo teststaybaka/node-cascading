@@ -56,7 +56,7 @@ export class Router {
     response.setHeader(Router.ALLOW_ORIGIN_HEADER, '*');
     response.setHeader(Router.ALLOW_METHODS_HEADER, '*');
     response.setHeader(Router.ALLOW_HEADERS_HEADER, '*');
-    response.writeHead(Router.REDIRECT_CODE, {[Router.LOCATION_HEADER]: this.hostname + request.url});
+    response.writeHead(Router.REDIRECT_CODE, {[Router.LOCATION_HEADER]: Router.HTTPS_PROTOCAL + this.hostname + request.url});
     response.end();
   }
 
