@@ -17,6 +17,8 @@ export class Router {
   private static ALLOW_METHODS_HEADER = "Access-Control-Allow-Methods";
   private static ALLOW_HEADERS_HEADER = "Access-Control-Allow-Headers";
   private static LOCATION_HEADER = "Location";
+  private static CACHE_CONTROL_HEADER = "Cache-Control";
+  private static CACHE_RESPONSE = "max-age=86400";
   private static REDIRECT_CODE = 307;
   private static OK_CODE = 200;
   private static REQUEST_ID_RANDOM_MAX = 10000;
@@ -100,25 +102,24 @@ export class Router {
       httpResponse = await this.dispatch(logContext, request);
     } catch (error) {
       LOGGER.error(logContext + error.stack);
+      response.setHeader(Router.CONTENT_TYPE_HEADER, CONTENT_TYPE_TEXT);
       if (error.errorType) {
-        response.writeHead((error as TypedError).errorType, {
-          [Router.CONTENT_TYPE_HEADER]: CONTENT_TYPE_TEXT,
-        });
+        response.writeHead((error as TypedError).errorType);
       } else {
-        response.writeHead(ErrorType.Internal, {
-          [Router.CONTENT_TYPE_HEADER]: CONTENT_TYPE_TEXT,
-        });
+        response.writeHead(ErrorType.Internal);
       }
       response.end(error.message);
       return;
     }
 
-    response.writeHead(Router.OK_CODE, {
-      [Router.CONTENT_TYPE_HEADER]: httpResponse.contentType,
-    });
+    response.setHeader(Router.CONTENT_TYPE_HEADER, httpResponse.contentType);
     if (!httpResponse.contentFile) {
+      response.writeHead(Router.OK_CODE);
       response.end(httpResponse.content);
     } else {
+      response.setHeader(Router.CACHE_CONTROL_HEADER, Router.CACHE_RESPONSE);
+      response.writeHead(Router.OK_CODE);
+
       let readStream = fs.createReadStream(httpResponse.contentFile);
       readStream.on("error", (err: Error): void => {
         LOGGER.error(logContext + err.stack);
