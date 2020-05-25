@@ -1,7 +1,7 @@
-import { MessageParser } from "./message_parser";
+import { MessageUtil } from "./message_util";
 
 export interface SchemaDescriptor<T> {
-  valueParser: MessageParser<T>;
+  valueParser: MessageUtil<T>;
   getKey: (value: T) => string;
   getIndex: (value: T) => string[];
 }

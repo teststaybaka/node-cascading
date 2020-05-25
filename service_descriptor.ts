@@ -1,10 +1,10 @@
-import { MessageParser } from "./message_parser";
+import { MessageUtil } from "./message_util";
 
 export interface ServiceDescriptor<Request, Response> {
   name: string;
   pathname: string;
-  requestParser: MessageParser<Request>;
-  responseParser: MessageParser<Response>;
+  requestParser: MessageUtil<Request>;
+  responseParser: MessageUtil<Response>;
 }
 
 export interface SignedOutServiceDescriptor<Request, Response>
