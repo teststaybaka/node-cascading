@@ -1,11 +1,11 @@
-import { MessageUtil } from "selfage/message_util";
+import { MessageUtil } from "./message_util";
 
-export enum BundleTarget {
+enum BundleTarget {
   JS = 1,
   HTML = 2,
 }
 
-export class BundleTargetUtil implements MessageUtil<BundleTarget> {
+class BundleTargetUtil implements MessageUtil<BundleTarget> {
   public from(obj?: any): BundleTarget {
     if (!obj || typeof obj !== "number" || !(obj in BundleTarget)) {
       return undefined;
@@ -15,7 +15,7 @@ export class BundleTargetUtil implements MessageUtil<BundleTarget> {
   }
 }
 
-export let BUNDLE_TARGET_UTIL = new BundleTargetUtil();
+let BUNDLE_TARGET_UTIL = new BundleTargetUtil();
 
 export interface UrlToBundle {
   // Without protocol or domain, starting with "/", and ending without "/". Only
