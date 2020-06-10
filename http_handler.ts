@@ -2,11 +2,13 @@ import http = require("http");
 import url = require("url");
 import { HttpMethod } from "./common";
 
-export class HttpResponse {
+export interface HttpResponse {
   contentType: string;
   // One of the below.
   content?: string;
   contentFile?: string;
+  // Only applies to contentFile.
+  encoding?: string;
 }
 
 export interface HttpHandler {

@@ -2,21 +2,30 @@ import fs = require("fs");
 import http = require("http");
 import https = require("https");
 import url = require("url");
-import { CONTENT_TYPE_TEXT, HttpMethod } from "./common";
+import {
+  ACCEPT_ENCODING_HEADER,
+  CONTENT_TYPE_TEXT,
+  DEFAULT_URL_TO_BUNDLES_FILE,
+  HttpMethod,
+} from "./common";
 import { ErrorType, TypedError, newInternalError } from "./errors";
 import { HttpHandler, HttpResponse } from "./http_handler";
 import { LOGGER } from "./logger";
 import { PreflightHandler } from "./preflight_handler";
+import { StaticBundleHandler } from "./static_handler";
+import { URL_TO_BUNDLES_HOLDER_UTIL } from "./url_to_bundle";
 
 // TODO: Rate limit requests.
 export class Router {
   private static HTTP_PORT = 80;
   private static HTTPS_PORT = 443;
   private static CONTENT_TYPE_HEADER = "Content-Type";
+  private static CONTENT_ENCODING_HEADER = "Content-Encoding";
   private static ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
   private static ALLOW_METHODS_HEADER = "Access-Control-Allow-Methods";
   private static ALLOW_HEADERS_HEADER = "Access-Control-Allow-Headers";
   private static LOCATION_HEADER = "Location";
+  private static VARY_HEADER = "Vary";
   private static CACHE_CONTROL_HEADER = "Cache-Control";
   private static CACHE_RESPONSE = "max-age=86400";
   private static REDIRECT_CODE = 307;
@@ -37,6 +46,15 @@ export class Router {
     }
     let router = new Router(hostname, httpServer, httpsServer);
     router.addHandler(new PreflightHandler());
+
+    if (fs.existsSync(DEFAULT_URL_TO_BUNDLES_FILE)) {
+      let urlToBundlesHolder = URL_TO_BUNDLES_HOLDER_UTIL.from(
+        JSON.parse(fs.readFileSync(DEFAULT_URL_TO_BUNDLES_FILE).toString())
+      );
+      for (let urlToBundle of urlToBundlesHolder.urlToBundles) {
+        router.addHandler(new StaticBundleHandler(urlToBundle));
+      }
+    }
     return router;
   }
 
@@ -96,6 +114,7 @@ export class Router {
     response.setHeader(Router.ALLOW_ORIGIN_HEADER, "*");
     response.setHeader(Router.ALLOW_METHODS_HEADER, "*");
     response.setHeader(Router.ALLOW_HEADERS_HEADER, "*");
+    response.setHeader(Router.VARY_HEADER, ACCEPT_ENCODING_HEADER);
 
     let httpResponse: HttpResponse;
     try {
@@ -117,6 +136,12 @@ export class Router {
       response.writeHead(Router.OK_CODE);
       response.end(httpResponse.content);
     } else {
+      if (httpResponse.encoding) {
+        response.setHeader(
+          Router.CONTENT_ENCODING_HEADER,
+          httpResponse.encoding
+        );
+      }
       response.setHeader(Router.CACHE_CONTROL_HEADER, Router.CACHE_RESPONSE);
       response.writeHead(Router.OK_CODE);
 

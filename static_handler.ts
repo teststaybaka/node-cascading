@@ -2,26 +2,35 @@ import http = require("http");
 import path = require("path");
 import url = require("url");
 import {
+  ACCEPT_ENCODING_HEADER,
+  GZIP_EXT,
+  BUNDLE_EXT,
   CONTENT_TYPE_BINARY_STREAM,
+  CONTENT_TYPE_GIF,
+  CONTENT_TYPE_HTML,
+  CONTENT_TYPE_JAVASCRIPT,
+  CONTENT_TYPE_JPEG,
+  CONTENT_TYPE_PNG,
   HttpMethod,
   findWithDefault,
 } from "./common";
 import { newInternalError } from "./errors";
 import { HttpHandler, HttpResponse } from "./http_handler";
+import { BundleFormat, UrlToBundle } from "./url_to_bundle";
 
 let MIME_TYPES = new Map<string, string>([
-  ["jpeg", "image/jpeg"],
-  ["jpg", "image/jpeg"],
-  ["png", "image/png"],
-  ["gif", "image/gif"],
-  ["js", "text/javascript"],
+  [".jpeg", CONTENT_TYPE_JPEG],
+  [".jpg", CONTENT_TYPE_JPEG],
+  [".png", CONTENT_TYPE_PNG],
+  [".gif", CONTENT_TYPE_GIF],
 ]);
 
 function findType(filePath: string): string {
-  let extname = path.extname(filePath).substr(1);
+  let extname = path.extname(filePath);
   return findWithDefault(MIME_TYPES, extname, CONTENT_TYPE_BINARY_STREAM);
 }
 
+// Returns files as it is.
 export class StaticFileHandler implements HttpHandler {
   public urlRegex: RegExp;
   public method = HttpMethod.GET;
@@ -44,6 +53,7 @@ export class StaticFileHandler implements HttpHandler {
   }
 }
 
+// Returns files under the directory as it is.
 export class StaticDirHandler implements HttpHandler {
   public urlRegex: RegExp;
   public method = HttpMethod.GET;
@@ -60,7 +70,8 @@ export class StaticDirHandler implements HttpHandler {
     let matched = parsedUrl.pathname.match(this.urlRegex);
     if (!matched) {
       throw newInternalError(
-        `Pathname, ${parsedUrl.pathname}, didn't match url regex, ${this.urlRegex}.`
+        `Pathname, ${parsedUrl.pathname}, didn't match url regex, ` +
+          `${this.urlRegex}.`
       );
     }
 
@@ -71,5 +82,50 @@ export class StaticDirHandler implements HttpHandler {
       contentType: contentType,
       contentFile: fullPath,
     };
+  }
+}
+
+// Returns bundled files with compression if possible.
+export class StaticBundleHandler implements HttpHandler {
+  private static GZIP_ACCEPT_ENCODING = /\bgzip\b/;
+  private static GZIP_CONTENT_ENCODING = "gzip";
+
+  public urlRegex: RegExp;
+  public method = HttpMethod.GET;
+  private bundlePath: string;
+  private contentType: string;
+
+  public constructor(urlToBundle: UrlToBundle) {
+    this.urlRegex = new RegExp(`^${urlToBundle.url}$`);
+    this.bundlePath = urlToBundle.modulePath + BUNDLE_EXT;
+    if (urlToBundle.bundleFormat === BundleFormat.JS) {
+      this.contentType = CONTENT_TYPE_JAVASCRIPT;
+    } else if (urlToBundle.bundleFormat === BundleFormat.HTML) {
+      this.contentType = CONTENT_TYPE_HTML;
+    } else {
+      this.contentType = CONTENT_TYPE_BINARY_STREAM;
+    }
+  }
+
+  public async handle(
+    logContext: string,
+    request: http.IncomingMessage,
+    parsedUrl: url.Url
+  ): Promise<HttpResponse> {
+    let acceptEncoding =
+      request.headers[ACCEPT_ENCODING_HEADER.toLowerCase()] as string;
+    if (!acceptEncoding) {
+      acceptEncoding = "";
+    }
+
+    if (StaticBundleHandler.GZIP_ACCEPT_ENCODING.test(acceptEncoding)) {
+      return {
+        contentType: this.contentType,
+        contentFile: this.bundlePath + GZIP_EXT,
+        encoding: StaticBundleHandler.GZIP_CONTENT_ENCODING,
+      };
+    } else {
+      return { contentType: this.contentType, contentFile: this.bundlePath };
+    }
   }
 }
