@@ -38,7 +38,7 @@ export class BaseSignedInServiceHandler<Request, Response>
     request: http.IncomingMessage,
     parsedUrl: url.Url
   ): Promise<HttpResponse> {
-    let session = request.headers[SESSION_HEADER] as string;
+    let session = request.headers[SESSION_HEADER.toLowerCase()] as string;
     let userId = this.secureSessionVerifier.verifyAndGetUserId(session);
     let obj = await this.streamReader.readJson(request);
     let response = await this.subServiceHandler.handle(
