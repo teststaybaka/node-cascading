@@ -31,12 +31,6 @@ export function findWithDefault<Key, Value>(
   }
 }
 
-export function extendArray<Value>(list: Value[], fromList: Value[]): void {
-  for (let value of fromList) {
-    list.push(value);
-  }
-}
-
 export function extendSet<Value>(set: Set<Value>, fromSet: Set<Value>): void {
   for (
     let iter = fromSet.values(), result = iter.next();
