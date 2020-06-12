@@ -9,12 +9,11 @@ export class StreamReader {
       let buffers: Buffer[] = [];
       let size = 0;
       incoming.on("data", (chunk): void => {
-        if (size + chunk.length> StreamReader.BUFFER_LIMIT) {
+        if (size + chunk.length > StreamReader.BUFFER_LIMIT) {
           let error = newInternalError(
-              `Stream data exceeds buffer limit, ${StreamReader.BUFFER_LIMIT}.`
-            )
-          reject(error
+            `Stream data exceeds buffer limit, ${StreamReader.BUFFER_LIMIT}.`
           );
+          reject(error);
           incoming.destroy(error);
           return;
         }
@@ -42,3 +41,5 @@ export class StreamReader {
     return JSON.parse(str);
   }
 }
+
+export let STREAM_READER = new StreamReader();
