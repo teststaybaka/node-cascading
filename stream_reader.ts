@@ -31,7 +31,7 @@ export class StreamReader {
     return Buffer.concat(buffers);
   }
 
-  public async readString(incoming: stream.Readable): Promise<any> {
+  public async readString(incoming: stream.Readable): Promise<string> {
     let buffer = await this.readBuffer(incoming);
     return buffer.toString();
   }
@@ -41,5 +41,3 @@ export class StreamReader {
     return JSON.parse(str);
   }
 }
-
-export let STREAM_READER = new StreamReader();
