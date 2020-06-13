@@ -1,10 +1,9 @@
-import stream = require("stream");
 import { newInternalError } from "./errors";
 
 export class StreamReader {
   private static BUFFER_LIMIT = 50 * 1024 * 1024;
 
-  public async readBuffer(incoming: stream.Readable): Promise<Buffer> {
+  public async readBuffer(incoming: NodeJS.ReadableStream): Promise<Buffer> {
     let buffers = await new Promise<Buffer[]>((resolve, reject): void => {
       let buffers: Buffer[] = [];
       let size = 0;
@@ -14,7 +13,7 @@ export class StreamReader {
             `Stream data exceeds buffer limit, ${StreamReader.BUFFER_LIMIT}.`
           );
           reject(error);
-          incoming.destroy(error);
+          incoming.pause();
           return;
         }
 
@@ -31,12 +30,12 @@ export class StreamReader {
     return Buffer.concat(buffers);
   }
 
-  public async readString(incoming: stream.Readable): Promise<string> {
+  public async readString(incoming: NodeJS.ReadableStream): Promise<string> {
     let buffer = await this.readBuffer(incoming);
     return buffer.toString();
   }
 
-  public async readJson(incoming: stream.Readable): Promise<any> {
+  public async readJson(incoming: NodeJS.ReadableStream): Promise<any> {
     let str = await this.readString(incoming);
     return JSON.parse(str);
   }
