@@ -40,3 +40,8 @@ export function extendSet<Value>(set: Set<Value>, fromSet: Set<Value>): void {
     set.add(result.value);
   }
 }
+
+export function invoke<T>(toBeInvoked: () => T): T {
+  return toBeInvoked();
+}
+
