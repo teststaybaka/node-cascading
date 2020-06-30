@@ -1,33 +1,12 @@
 import { MessageUtil } from "./message_util";
 
-export enum BundleFormat {
-  JS = 1,
-  HTML = 2,
-}
-
-export class BundleFormatUtil implements MessageUtil<BundleFormat> {
-  public from(obj?: any): BundleFormat {
-    if (typeof obj === "number" && obj in BundleFormat) {
-      return obj;
-    }
-    if (typeof obj === "string" && obj in BundleFormat) {
-      return BundleFormat[obj as keyof typeof BundleFormat];
-    }
-    return undefined;
-  }
-}
-
-export let BUNDLE_FORMAT_UTIL = new BundleFormatUtil();
-
 export interface UrlToBundle {
   // Without protocol or domain, starting with "/", and ending without "/". Only
   // Applies to GET method.
   url?: string;
-  // TypeScript file path to be served to the url, ending without ".ts".
+  // TypeScript file path to be served to the url, ending without ".ts", which
+  // will be served inside an HTML file.
   modulePath?: string;
-  // Default to HTML. Defines which format the TypeScript file needs to be
-  // compiled/bundled, before serving to the url.
-  bundleFormat?: BundleFormat;
 }
 
 export class UrlToBundleUtil implements MessageUtil<UrlToBundle> {
@@ -48,7 +27,6 @@ export class UrlToBundleUtil implements MessageUtil<UrlToBundle> {
     if (typeof obj.modulePath === "string") {
       ret.modulePath = obj.modulePath;
     }
-    ret.bundleFormat = BUNDLE_FORMAT_UTIL.from(obj.bundleFormat);
     return ret;
   }
 }

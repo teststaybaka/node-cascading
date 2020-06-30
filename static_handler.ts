@@ -3,20 +3,19 @@ import path = require("path");
 import url = require("url");
 import {
   ACCEPT_ENCODING_HEADER,
-  GZIP_EXT,
   BUNDLE_EXT,
   CONTENT_TYPE_BINARY_STREAM,
   CONTENT_TYPE_GIF,
-  CONTENT_TYPE_HTML,
   CONTENT_TYPE_JAVASCRIPT,
   CONTENT_TYPE_JPEG,
   CONTENT_TYPE_PNG,
+  GZIP_EXT,
   HttpMethod,
   findWithDefault,
 } from "./common";
 import { newInternalError } from "./errors";
 import { HttpHandler, HttpResponse } from "./http_handler";
-import { BundleFormat, UrlToBundle } from "./url_to_bundle";
+import { UrlToBundle } from "./url_to_bundle";
 
 let MIME_TYPES = new Map<string, string>([
   [".jpeg", CONTENT_TYPE_JPEG],
@@ -93,18 +92,11 @@ export class StaticBundleHandler implements HttpHandler {
   public urlRegex: RegExp;
   public method = HttpMethod.GET;
   private bundlePath: string;
-  private contentType: string;
+  private contentType = CONTENT_TYPE_JAVASCRIPT;
 
   public constructor(urlToBundle: UrlToBundle) {
     this.urlRegex = new RegExp(`^${urlToBundle.url}$`);
     this.bundlePath = urlToBundle.modulePath + BUNDLE_EXT;
-    if (urlToBundle.bundleFormat === BundleFormat.JS) {
-      this.contentType = CONTENT_TYPE_JAVASCRIPT;
-    } else if (urlToBundle.bundleFormat === BundleFormat.HTML) {
-      this.contentType = CONTENT_TYPE_HTML;
-    } else {
-      this.contentType = CONTENT_TYPE_BINARY_STREAM;
-    }
   }
 
   public async handle(
@@ -112,8 +104,9 @@ export class StaticBundleHandler implements HttpHandler {
     request: http.IncomingMessage,
     parsedUrl: url.Url
   ): Promise<HttpResponse> {
-    let acceptEncoding =
-      request.headers[ACCEPT_ENCODING_HEADER.toLowerCase()] as string;
+    let acceptEncoding = request.headers[
+      ACCEPT_ENCODING_HEADER.toLowerCase()
+    ] as string;
     if (!acceptEncoding) {
       acceptEncoding = "";
     }
