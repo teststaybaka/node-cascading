@@ -5,15 +5,16 @@ import url = require("url");
 import {
   ACCEPT_ENCODING_HEADER,
   CONTENT_TYPE_TEXT,
-  DEFAULT_URL_TO_BUNDLES_FILE,
+  FILE_NOT_EXISTS_ERROR_CODE,
   HttpMethod,
+  URL_TO_BUNDLES_CONFIG_FILE,
 } from "./common";
 import { ErrorType, TypedError, newInternalError } from "./errors";
 import { HttpHandler, HttpResponse } from "./http_handler";
 import { LOGGER } from "./logger";
 import { PreflightHandler } from "./preflight_handler";
 import { StaticBundleHandler } from "./static_handler";
-import { URL_TO_BUNDLES_HOLDER_UTIL } from "./url_to_bundle";
+import { URL_TO_BUNDLES_HOLDER_UTIL, UrlToBundle } from "./url_to_bundle";
 
 // TODO: Rate limit requests.
 export class Router {
@@ -47,15 +48,33 @@ export class Router {
     let router = new Router(hostname, httpServer, httpsServer);
     router.addHandler(new PreflightHandler());
 
-    if (fs.existsSync(DEFAULT_URL_TO_BUNDLES_FILE)) {
-      let urlToBundlesHolder = URL_TO_BUNDLES_HOLDER_UTIL.from(
-        JSON.parse(fs.readFileSync(DEFAULT_URL_TO_BUNDLES_FILE).toString())
-      );
-      for (let urlToBundle of urlToBundlesHolder.urlToBundles) {
-        router.addHandler(new StaticBundleHandler(urlToBundle));
-      }
+    let urlToBundles = Router.readUrlToBundles();
+    for (let urlToBundle of urlToBundles) {
+      router.addHandler(new StaticBundleHandler(urlToBundle));
     }
     return router;
+  }
+
+  private static readUrlToBundles(): UrlToBundle[] {
+    let urlToBundlesBuffer: Buffer;
+    try {
+      urlToBundlesBuffer = fs.readFileSync(URL_TO_BUNDLES_CONFIG_FILE);
+    } catch (e) {
+      if (e.code !== FILE_NOT_EXISTS_ERROR_CODE) {
+        return [];
+      } else {
+        throw e;
+      }
+    }
+
+    let urlToBundlesHolder = URL_TO_BUNDLES_HOLDER_UTIL.from(
+      JSON.parse(urlToBundlesBuffer.toString())
+    );
+    if (urlToBundlesHolder && urlToBundlesHolder.urlToBundles) {
+      return urlToBundlesHolder.urlToBundles;
+    } else {
+      return [];
+    }
   }
 
   public constructor(

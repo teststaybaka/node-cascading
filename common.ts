@@ -4,7 +4,8 @@ export enum HttpMethod {
   OPTIONS,
 }
 
-export let DEFAULT_URL_TO_BUNDLES_FILE = "./url_to_bundles.json";
+export let FILE_NOT_EXISTS_ERROR_CODE = "ENOENT";
+export let URL_TO_BUNDLES_CONFIG_FILE = "./url_to_bundles.json";
 export let CONTENT_TYPE_TEXT = "text/plain";
 export let CONTENT_TYPE_HTML = "text/html";
 export let CONTENT_TYPE_JAVASCRIPT = "text/javascript";
