@@ -70,7 +70,7 @@ export class Router {
     let urlToBundlesHolder = URL_TO_BUNDLES_HOLDER_UTIL.from(
       JSON.parse(urlToBundlesBuffer.toString())
     );
-    if (urlToBundlesHolder && urlToBundlesHolder.urlToBundles) {
+    if (urlToBundlesHolder) {
       return urlToBundlesHolder.urlToBundles;
     } else {
       return [];

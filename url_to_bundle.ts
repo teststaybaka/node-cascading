@@ -49,8 +49,8 @@ export class UrlToBundlesHolderUtil implements MessageUtil<UrlToBundlesHolder> {
     } else {
       ret = {};
     }
+    ret.urlToBundles = [];
     if (Array.isArray(obj.urlToBundles)) {
-      ret.urlToBundles = [];
       for (let element of obj.urlToBundles) {
         let parsedElement = URL_TO_BUNDLE_UTIL.from(element);
         if (parsedElement !== undefined) {
