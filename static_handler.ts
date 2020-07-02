@@ -69,12 +69,19 @@ export class StaticDirHandler implements HttpHandler {
     let matched = parsedUrl.pathname.match(this.urlRegex);
     if (!matched) {
       throw newInternalError(
-        `Pathname, ${parsedUrl.pathname}, didn't match url regex, ` +
+        `Pathname ${parsedUrl.pathname} didn't match url regex ` +
           `${this.urlRegex}.`
       );
     }
 
-    let filePath = matched[1];
+    let filePath = path.normalize(matched[1]);
+    if (filePath.startsWith("../")) {
+      throw newInternalError(
+        `Pathname ${parsedUrl.pathname} is not allowed to navigate to the ` +
+          `parent directory of root.`
+      );
+    }
+
     let fullPath = path.join(this.localDir, filePath);
     let contentType = findType(fullPath);
     return {

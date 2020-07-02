@@ -2,6 +2,7 @@ import fs = require("fs");
 import url = require("url");
 import { CONTENT_TYPE_BINARY_STREAM } from "./common";
 import { newInternalError } from "./errors";
+import { StaticDirHandler, StaticFileHandler } from "./static_handler";
 import {
   TestCase,
   assert,
@@ -9,21 +10,20 @@ import {
   expectRejection,
   runTests,
 } from "./test_base";
-import { StaticDirHandler, StaticFileHandler } from "./static_handler";
 
-class FileHandlerSuffix implements TestCase {
-  public name = "FileHandlerSuffix";
+class FileHandlerMatchJpgFile implements TestCase {
+  public name = "FileHandlerMatchJpgFile";
 
   public async execute() {
     // Prepare
-    let handler = new StaticFileHandler("/url", "path.js");
+    let handler = new StaticFileHandler("/url", "path.jpg");
 
     // Execute
     let response = await handler.handle(undefined, undefined, undefined);
 
     // Verify
-    assert(response.contentFile === "path.js");
-    assert(response.contentType === "text/javascript");
+    assert(response.contentFile === "path.jpg");
+    assert(response.contentType === "image/jpeg");
   }
 }
 
@@ -97,10 +97,29 @@ class DirHandlerMatchBinaryFile implements TestCase {
   }
 }
 
+class DirHandlerPreventsParentDirectory implements TestCase {
+  public name = "DirHandlerPreventsParentDirectory";
+
+  public async execute() {
+    // Prepare
+    let handler = new StaticDirHandler("/xxx", "test_data");
+    let urlPath = url.parse("/xxx/../../file");
+
+    // Execute
+    let error = await expectRejection(
+      handler.handle(undefined, undefined, urlPath)
+    );
+
+    // Verify
+    assertError(error, newInternalError("navigate to the parent directory"));
+  }
+}
+
 runTests("StaticHttpHandlerTest", [
-  new FileHandlerSuffix(),
+  new FileHandlerMatchJpgFile(),
   new FileHandlerBinaryType(),
   new DirHandlerUrlNotMatch(),
   new DirHandlerMatchJpgFile(),
   new DirHandlerMatchBinaryFile(),
+  new DirHandlerPreventsParentDirectory(),
 ]);
