@@ -90,7 +90,6 @@ export function assertContains(
 }
 
 export function assertError(actualError: any, expectedError: Error) {
-  console.log(actualError);
   if (actualError instanceof Error) {
     assert(
       actualError.name === expectedError.name,
