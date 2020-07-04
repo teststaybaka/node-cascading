@@ -1,5 +1,5 @@
-import process = require("process");
 import { LOGGER } from "./logger";
+import { Command } from "commander";
 import "source-map-support/register";
 
 export interface TestEnvironment {
@@ -16,7 +16,14 @@ export async function runTests(
   testCases: TestCase[],
   testEnvironment?: TestEnvironment
 ) {
-  let child = process.argv[2];
+  let program = new Command();
+  program.option(
+    "-c, --child <which>",
+    "The name of the test or its 0-based index."
+  );
+  program.parse();
+
+  let child = program.child;
   if (child === undefined) {
     console.log("\n\x1b[35m%s test result:\x1b[0m", testSetName);
     for (let i = 0, len = testCases.length; i < len; i++) {
@@ -44,9 +51,18 @@ export async function runTests(
     }
   } else {
     let whichChild = parseInt(child);
+    let testCaseToBeRun: TestCase;
+    if (!Number.isNaN(whichChild)) {
+      testCaseToBeRun = testCases[whichChild];
+    } else {
+      testCaseToBeRun = testCases.find((testCase): boolean => {
+        return testCase.name === child;
+      });
+    }
+
     LOGGER.switchToLocal();
     try {
-      await testCases[whichChild].execute();
+      await testCaseToBeRun.execute();
     } catch (e) {
       console.log(e);
     }
