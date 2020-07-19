@@ -8,7 +8,7 @@ export class LazyConstructor<T> {
   private getFirstTime(): T {
     this.obj = this.construct();
     this.get = this.getObj;
-    return this.get();
+    return this.obj;
   }
 
   private getObj(): T {
