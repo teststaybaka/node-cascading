@@ -55,8 +55,8 @@ export class Navigator {
       if (handler.pathname === pathname) {
         this.lastHandler = handler;
         await handler.show(params);
+        return;
       }
-      return;
     }
   }
 }
