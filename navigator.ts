@@ -43,10 +43,13 @@ export class Navigator {
       url = pathname;
     }
     this.window.history.pushState(undefined, "", url);
-    await this.dispatch(pathname, params);
+    let handled = await this.dispatch(pathname, params);
+    if (!handled) {
+      this.window.location.reload();
+    }
   }
 
-  private async dispatch(pathname: string, params?: any): Promise<void> {
+  private async dispatch(pathname: string, params?: any): Promise<boolean> {
     if (this.lastHandler) {
       this.lastHandler.hide();
       this.lastHandler = undefined;
@@ -55,9 +58,10 @@ export class Navigator {
       if (handler.pathname === pathname) {
         this.lastHandler = handler;
         await handler.show(params);
-        return;
+        return true;
       }
     }
+    return false;
   }
 }
 
