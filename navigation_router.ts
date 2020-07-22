@@ -2,8 +2,8 @@ import querystring = require("querystring");
 import { LazyConstructor } from "./lazy_constructor";
 import { NavigationHandler } from "./navigation_handler";
 
-export class Navigator {
-  private static PARAMS_KEY_IN_QUERY_STRING = "params=";
+export class NavigationRouter {
+  private static PARAMS_KEY_IN_QUERY_STRING = "params";
 
   private handlers: NavigationHandler[] = [];
   private lastHandler: NavigationHandler;
@@ -14,10 +14,10 @@ export class Navigator {
     this.handlers.push(handler);
   }
 
-  public async goForTheFirstTime(): Promise<void> {
+  public async dispatchFromCurrentUrl(): Promise<void> {
     let paramsAsQueryString = querystring.parse(
       this.window.location.search.substr(1)
-    )[Navigator.PARAMS_KEY_IN_QUERY_STRING];
+    )[NavigationRouter.PARAMS_KEY_IN_QUERY_STRING];
 
     let params;
     if (typeof paramsAsQueryString === "string") {
@@ -27,29 +27,30 @@ export class Navigator {
         console.warn(`${paramsAsQueryString} cannot be parsed into JSON.`);
       }
     }
-    await this.dispatch(this.window.location.pathname, params);
+    await this.dispatchOnly(this.window.location.pathname, params);
   }
 
-  public async go(pathname: string, params?: any): Promise<void> {
+  public async dispatch(pathname: string, params?: any): Promise<void> {
     let url;
     if (params) {
       url =
         pathname +
         "?" +
         querystring.stringify({
-          [Navigator.PARAMS_KEY_IN_QUERY_STRING]: encodeURIComponent(params),
+          [NavigationRouter.PARAMS_KEY_IN_QUERY_STRING]: JSON.stringify(params),
         });
     } else {
       url = pathname;
     }
+    console.log(url);
     this.window.history.pushState(undefined, "", url);
-    let handled = await this.dispatch(pathname, params);
+    let handled = await this.dispatchOnly(pathname, params);
     if (!handled) {
       this.window.location.reload();
     }
   }
 
-  private async dispatch(pathname: string, params?: any): Promise<boolean> {
+  private async dispatchOnly(pathname: string, params?: any): Promise<boolean> {
     if (this.lastHandler) {
       this.lastHandler.hide();
       this.lastHandler = undefined;
@@ -65,8 +66,8 @@ export class Navigator {
   }
 }
 
-export let LAZY_NAVIGATOR = new LazyConstructor(
-  (): Navigator => {
-    return new Navigator(window);
+export let LAZY_NAVIGATION_ROUTER = new LazyConstructor(
+  (): NavigationRouter => {
+    return new NavigationRouter(window);
   }
 );

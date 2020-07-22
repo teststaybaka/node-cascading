@@ -2,7 +2,7 @@ import { NavigationDescriptor } from "./navigation_descriptor";
 
 export interface NavigationHandler {
   pathname: string;
-  show: (params?: any) => Promise<void>;
+  show: (params?: any) => Promise<void> | void;
   hide: () => void;
 }
 

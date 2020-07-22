@@ -41,7 +41,7 @@ export async function runTests(
         await testCases[i].execute();
         statusMsg = `\x1b[32mTest(${i}), ${testCases[i].name}, success!\x1b[0m`;
       } catch (e) {
-        statusMsg = `\x1b[31mTest(${i}),  ${testCases[i].name}, failed!\x1b[0m`;
+        statusMsg = `\x1b[31mTest(${i}), ${testCases[i].name}, failed!\x1b[0m`;
       }
       console.log = oldLog;
       console.info = oldInfo;
