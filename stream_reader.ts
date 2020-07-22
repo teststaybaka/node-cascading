@@ -7,7 +7,7 @@ export class StreamReader {
     let buffers = await new Promise<Buffer[]>((resolve, reject): void => {
       let buffers: Buffer[] = [];
       let size = 0;
-      incoming.on("data", (chunk): void => {
+      incoming.on("data", (chunk: Buffer): void => {
         if (size + chunk.length > StreamReader.BUFFER_LIMIT) {
           let error = newInternalError(
             `Stream data exceeds buffer limit, ${StreamReader.BUFFER_LIMIT}.`
@@ -20,7 +20,7 @@ export class StreamReader {
         buffers.push(chunk);
         size += chunk.length;
       });
-      incoming.on("error", (err): void => {
+      incoming.on("error", (err: Error): void => {
         reject(newInternalError("Stream encountered an error!", err));
       });
       incoming.on("end", (): void => {
