@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/teststaybaka/selfage#readme",
   "dependencies": {
-    "@google-cloud/logging": "^7.3.0",
+    "@google-cloud/logging": "^8.0.1",
     "@types/node": "^13.13.5",
     "commander": "^5.1.0",
     "source-map-support": "^0.5.19"
