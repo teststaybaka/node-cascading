@@ -16,19 +16,19 @@ class Logger {
     this.error = console.error;
   }
 
-  public infoRemote(message: string): void {
+  private infoRemote(message: string): void {
     console.log(message);
     let entry = this.remoteLogger.entry(message);
     this.remoteLogger.info(entry);
   }
 
-  public warningRemote(message: string): void {
+  private warningRemote(message: string): void {
     console.warn(message);
     let entry = this.remoteLogger.entry(message);
     this.remoteLogger.warning(entry);
   }
 
-  public errorRemote(message: string): void {
+  private errorRemote(message: string): void {
     console.error(message);
     let entry = this.remoteLogger.entry(message);
     this.remoteLogger.error(entry);
