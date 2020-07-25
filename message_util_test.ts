@@ -3,7 +3,7 @@ import {
   MessageDescriptorUntyped,
   MessageFieldType,
 } from "./message_descriptor";
-import { MessageParser } from "./message_util";
+import { parseEnumUntyped, parseMessageUntyped } from "./message_util";
 import { TestCase, assert, runTests } from "./test_base";
 
 function testParseEnum(input: string | number, expected: number) {
@@ -18,7 +18,7 @@ function testParseEnum(input: string | number, expected: number) {
   };
 
   // Execute
-  let parsed = MessageParser.parseEnumUntyped(input, colorEnumDescriptor);
+  let parsed = parseEnumUntyped(input, colorEnumDescriptor);
 
   // Verify
   assert(parsed === expected);
@@ -73,7 +73,7 @@ function testParsingMessageWithPrimitiveTypes(raw: any) {
   };
 
   // Execute
-  let parsed = MessageParser.parseMessageUntyped(raw, userMessageDescriptor);
+  let parsed = parseMessageUntyped(raw, userMessageDescriptor);
 
   // Verify
   return parsed;
@@ -206,7 +206,7 @@ function testParsingNestedMessages(raw: any) {
   };
 
   // Execute
-  let parsed = MessageParser.parseMessageUntyped(raw, userMessageDescriptor);
+  let parsed = parseMessageUntyped(raw, userMessageDescriptor);
 
   // Verify
   return parsed;

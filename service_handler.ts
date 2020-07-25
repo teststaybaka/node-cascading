@@ -2,12 +2,13 @@ import http = require("http");
 import url = require("url");
 import { CONTENT_TYPE_JSON, HttpMethod, SESSION_HEADER } from "./common";
 import { HttpHandler, HttpResponse } from "./http_handler";
-import { StreamReader } from "./stream_reader";
+import { parseMessage } from "./message_util";
 import {
   SignedInServiceDescriptor,
   SignedOutServiceDescriptor,
 } from "./service_descriptor";
 import { SecureSessionVerifier } from "./session";
+import { StreamReader } from "./stream_reader";
 
 export interface SignedInServiceHandler<Request, Response> {
   handle: (
@@ -43,7 +44,7 @@ export class BaseSignedInServiceHandler<Request, Response>
     let obj = await this.streamReader.readJson(request);
     let response = await this.subServiceHandler.handle(
       logContext,
-      this.serviceDescriptor.requestParser.from(obj),
+      parseMessage(obj, this.serviceDescriptor.requestDescriptor),
       userId
     );
     let httpResponse: HttpResponse = {
@@ -73,7 +74,7 @@ export class BaseSignedOutServiceHandler<Request, Response>
     let obj = await this.streamReader.readJson(request);
     let response = await this.subServiceHandler.handle(
       logContext,
-      this.serviceDescriptor.requestParser.from(obj)
+      parseMessage(obj, this.serviceDescriptor.requestDescriptor)
     );
     let httpResponse: HttpResponse = {
       contentType: CONTENT_TYPE_JSON,

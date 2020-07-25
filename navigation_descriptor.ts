@@ -1,7 +1,7 @@
-import { MessageUtil } from "./message_util";
+import { MessageDescriptor } from "./message_descriptor";
 
 export interface NavigationDescriptor<Params> {
   name: string;
   pathname: string;
-  paramsUtil: MessageUtil<Params>;
+  paramsDescriptor: MessageDescriptor<Params>;
 }

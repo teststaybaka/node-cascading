@@ -12,9 +12,10 @@ import {
 import { ErrorType, TypedError, newInternalError } from "./errors";
 import { HttpHandler, HttpResponse } from "./http_handler";
 import { LOGGER } from "./logger";
+import { parseJsonString } from "./message_util";
 import { PreflightHandler } from "./preflight_handler";
 import { StaticBundleHandler } from "./static_handler";
-import { URL_TO_BUNDLES_HOLDER_UTIL, UrlToBundle } from "./url_to_bundle";
+import { URL_TO_BUNDLES_HOLDER_DESCRIPTOR, UrlToBundle } from "./url_to_bundle";
 
 // TODO: Rate limit requests.
 export class Router {
@@ -67,8 +68,9 @@ export class Router {
       }
     }
 
-    let urlToBundlesHolder = URL_TO_BUNDLES_HOLDER_UTIL.from(
-      JSON.parse(urlToBundlesBuffer.toString())
+    let urlToBundlesHolder = parseJsonString(
+      urlToBundlesBuffer.toString(),
+      URL_TO_BUNDLES_HOLDER_DESCRIPTOR
     );
     if (urlToBundlesHolder) {
       return urlToBundlesHolder.urlToBundles;

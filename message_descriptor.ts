@@ -21,9 +21,9 @@ export enum MessageFieldType {
 export interface MessageField {
   name: string;
   type: MessageFieldType;
-  isArray?: boolean;
   enumDescriptor?: EnumDescriptorUntyped;
   messageDescriptor?: MessageDescriptorUntyped;
+  isArray?: boolean;
 }
 
 export interface MessageDescriptorUntyped {

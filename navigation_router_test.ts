@@ -1,14 +1,5 @@
-import { NavigationHandler } from "./navigation_handler";
 import { NavigationRouter } from "./navigation_router";
 import { TestCase, assert, runTests } from "./test_base";
-
-class MockNavigationHandler implements NavigationHandler {
-  public constructor(
-    public pathname: string,
-    public show: (params?: any) => Promise<void> | void,
-    public hide: () => void
-  ) {}
-}
 
 async function testMatchCurrentUrl(
   currentPathname: string,
@@ -21,25 +12,21 @@ async function testMatchCurrentUrl(
   } as any);
 
   let handled1 = false;
-  navigationRouter.addHandler(
-    new MockNavigationHandler(
-      "/path1",
-      (params) => {
-        handled1 = true;
-      },
-      undefined
-    )
-  );
+  navigationRouter.addHandler({
+    pathname: "/path1",
+    show: (params) => {
+      handled1 = true;
+    },
+    hide: undefined,
+  });
   let handled2 = false;
-  navigationRouter.addHandler(
-    new MockNavigationHandler(
-      "/path2",
-      (params) => {
-        handled2 = true;
-      },
-      undefined
-    )
-  );
+  navigationRouter.addHandler({
+    pathname: "/path2",
+    show: (params) => {
+      handled2 = true;
+    },
+    hide: undefined,
+  });
 
   // Execute
   await navigationRouter.dispatchFromCurrentUrl();
@@ -72,15 +59,13 @@ async function testParsingParamsFromQueryString(queryString: string) {
   } as any);
 
   let paramsCaptured: any;
-  navigationRouter.addHandler(
-    new MockNavigationHandler(
-      "/path",
-      (params) => {
-        paramsCaptured = params;
-      },
-      undefined
-    )
-  );
+  navigationRouter.addHandler({
+    pathname: "/path",
+    show: (params) => {
+      paramsCaptured = params;
+    },
+    hide: undefined,
+  });
 
   // Execute
   await navigationRouter.dispatchFromCurrentUrl();
@@ -154,25 +139,21 @@ async function testMatchFromPathname(
   } as any);
 
   let handled1 = false;
-  navigationRouter.addHandler(
-    new MockNavigationHandler(
-      "/path1",
-      (params) => {
-        handled1 = true;
-      },
-      undefined
-    )
-  );
+  navigationRouter.addHandler({
+    pathname: "/path1",
+    show: (params) => {
+      handled1 = true;
+    },
+    hide: undefined,
+  });
   let handled2 = false;
-  navigationRouter.addHandler(
-    new MockNavigationHandler(
-      "/path2",
-      (params) => {
-        handled2 = true;
-      },
-      undefined
-    )
-  );
+  navigationRouter.addHandler({
+    pathname: "/path2",
+    show: (params) => {
+      handled2 = true;
+    },
+    hide: undefined,
+  });
 
   // Execute
   await navigationRouter.dispatch(pathname);
@@ -209,25 +190,21 @@ class DispatchTwiceToHidePreviousHandler implements TestCase {
     } as any);
 
     let hidden1 = false;
-    navigationRouter.addHandler(
-      new MockNavigationHandler(
-        "/path1",
-        (params) => {},
-        () => {
-          hidden1 = true;
-        }
-      )
-    );
+    navigationRouter.addHandler({
+      pathname: "/path1",
+      show: (params) => {},
+      hide: () => {
+        hidden1 = true;
+      },
+    });
     let hidden2 = false;
-    navigationRouter.addHandler(
-      new MockNavigationHandler(
-        "/path2",
-        (params) => {},
-        () => {
-          hidden2 = true;
-        }
-      )
-    );
+    navigationRouter.addHandler({
+      pathname: "/path2",
+      show: (params) => {},
+      hide: () => {
+        hidden2 = true;
+      },
+    });
     await navigationRouter.dispatch("/path1");
 
     // Execute

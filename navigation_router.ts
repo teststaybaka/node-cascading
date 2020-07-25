@@ -1,16 +1,16 @@
 import querystring = require("querystring");
 import { LazyConstructor } from "./lazy_constructor";
-import { NavigationHandler } from "./navigation_handler";
+import { NavigationHandlerUntyped } from "./navigation_handler";
 
 export class NavigationRouter {
   private static PARAMS_KEY_IN_QUERY_STRING = "params";
 
-  private handlers: NavigationHandler[] = [];
-  private lastHandler: NavigationHandler;
+  private handlers: NavigationHandlerUntyped[] = [];
+  private lastHandler: NavigationHandlerUntyped;
 
   public constructor(private window: Window) {}
 
-  public addHandler(handler: NavigationHandler) {
+  public addHandler(handler: NavigationHandlerUntyped) {
     this.handlers.push(handler);
   }
 

@@ -1,30 +1,34 @@
+import { parseMessage } from "./message_util";
 import { NavigationDescriptor } from "./navigation_descriptor";
 
-export interface NavigationHandler {
+export interface NavigationHandlerUntyped {
   pathname: string;
   show: (params?: any) => Promise<void> | void;
   hide: () => void;
 }
 
-export interface SubNavigationHandlerTyped<Params> {
-  show: (params: Params) => Promise<void> | void;
+export interface SubNavigationHandler<Params> {
+  show: (params?: Params) => Promise<void> | void;
   hide: () => void;
 }
 
-export class NavigationHandlerTyped<Params> implements NavigationHandler {
-  public pathname = this.descriptor.pathname;
+export class NavigationHandler<Params> implements NavigationHandlerUntyped {
+  public pathname = this.navigationDescriptor.pathname;
 
   public constructor(
-    private descriptor: NavigationDescriptor<Params>,
-    private subHandlerTyped: SubNavigationHandlerTyped<Params>
+    private navigationDescriptor: NavigationDescriptor<Params>,
+    private subHandler: SubNavigationHandler<Params>
   ) {}
 
   public async show(params?: any): Promise<void> {
-    let paramsTyped = this.descriptor.paramsUtil.from(params);
-    await this.subHandlerTyped.show(paramsTyped);
+    let paramsTyped = parseMessage(
+      params,
+      this.navigationDescriptor.paramsDescriptor
+    );
+    await this.subHandler.show(paramsTyped);
   }
 
   public hide(): void {
-    this.subHandlerTyped.hide();
+    this.subHandler.hide();
   }
 }
