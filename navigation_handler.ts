@@ -1,4 +1,4 @@
-import { parseMessage } from "./message_util";
+import { parseNamedType } from "./named_type_util";
 import { NavigationDescriptor } from "./navigation_descriptor";
 
 export interface NavigationHandlerUntyped {
@@ -21,7 +21,7 @@ export class NavigationHandler<Params> implements NavigationHandlerUntyped {
   ) {}
 
   public async show(params?: any): Promise<void> {
-    let paramsTyped = parseMessage(
+    let paramsTyped = parseNamedType(
       params,
       this.navigationDescriptor.paramsDescriptor
     );

@@ -1,27 +1,52 @@
 import {
-  EnumDescriptor,
-  EnumDescriptorUntyped,
   EnumValue,
-  MessageDescriptor,
-  MessageDescriptorUntyped,
+  MessageField,
   MessageFieldType,
-} from "./message_descriptor";
+  NamedTypeDescriptor,
+  NamedTypeDescriptorUntyped,
+  NamedTypeKind,
+} from "./named_type_descriptor";
 
-export function parseEnum<T>(raw: any, descriptor: EnumDescriptor<T>): T {
-  return parseEnumUntyped(raw, descriptor) as T;
+export function parseJsonString<T>(
+  json: string,
+  descriptor: NamedTypeDescriptor<T>
+): T {
+  return parseJsonStringUntyped(json, descriptor) as T;
 }
 
-export function parseEnumUntyped(
-  raw: any,
-  descriptor: EnumDescriptorUntyped
+export function parseJsonStringUntyped(
+  json: string,
+  descriptor: NamedTypeDescriptorUntyped
 ): any {
+  return parseNamedTypeUntyped(JSON.parse(json), descriptor);
+}
+
+export function parseNamedType<T>(
+  raw: any,
+  descriptor: NamedTypeDescriptor<T>
+): T {
+  return parseNamedTypeUntyped(raw, descriptor);
+}
+
+export function parseNamedTypeUntyped(
+  raw: any,
+  descriptor: NamedTypeDescriptorUntyped
+): any {
+  if (descriptor.kind === NamedTypeKind.ENUM) {
+    return parseEnum(raw, descriptor.enumValues);
+  } else if (descriptor.kind === NamedTypeKind.MESSAGE) {
+    return parseMessage(raw, descriptor.messageFields);
+  }
+}
+
+function parseEnum<T>(raw: any, enumValues: EnumValue[]): any {
   let enumValueFound: EnumValue;
   if (typeof raw === "string") {
-    enumValueFound = descriptor.enumValues.find((enumValue): boolean => {
+    enumValueFound = enumValues.find((enumValue): boolean => {
       return enumValue.name === raw;
     });
   } else if (typeof raw === "number") {
-    enumValueFound = descriptor.enumValues.find((enumValue): boolean => {
+    enumValueFound = enumValues.find((enumValue): boolean => {
       return enumValue.value === raw;
     });
   }
@@ -32,34 +57,13 @@ export function parseEnumUntyped(
   }
 }
 
-export function parseJsonString<T>(
-  json: string,
-  descriptor: MessageDescriptor<T>
-): T {
-  return parseJsonStringUntyped(json, descriptor) as T;
-}
-
-export function parseJsonStringUntyped(
-  json: string,
-  descriptor: MessageDescriptorUntyped
-): any {
-  return parseMessageUntyped(JSON.parse(json), descriptor);
-}
-
-export function parseMessage<T>(raw: any, descriptor: MessageDescriptor<T>): T {
-  return parseMessageUntyped(raw, descriptor) as T;
-}
-
-export function parseMessageUntyped(
-  raw: any,
-  descriptor: MessageDescriptorUntyped
-): any {
+function parseMessage(raw: any, messageFields: MessageField[]): any {
   if (!raw || typeof raw !== "object") {
     return undefined;
   }
 
   let ret: any = {};
-  for (let field of descriptor.fields) {
+  for (let field of messageFields) {
     let parseField: (rawField: any) => any;
     if (field.type === MessageFieldType.NUMBER) {
       parseField = (rawField: any): any => {
@@ -85,13 +89,9 @@ export function parseMessageUntyped(
           return undefined;
         }
       };
-    } else if (field.type === MessageFieldType.ENUM) {
+    } else if (field.type === MessageFieldType.NAMED_TYPE) {
       parseField = (rawField: any): any => {
-        return parseEnumUntyped(rawField, field.enumDescriptor);
-      };
-    } else if (field.type === MessageFieldType.MESSAGE) {
-      parseField = (rawField: any): any => {
-        return parseMessageUntyped(rawField, field.messageDescriptor);
+        return parseNamedTypeUntyped(rawField, field.namedTypeDescriptor);
       };
     }
 

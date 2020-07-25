@@ -1,4 +1,8 @@
-import { MessageDescriptor, MessageFieldType } from "./message_descriptor";
+import {
+  MessageFieldType,
+  NamedTypeDescriptor,
+  NamedTypeKind,
+} from "./named_type_descriptor";
 
 export interface UrlToBundle {
   // Without protocol or domain, starting with "/", and ending without "/". Only
@@ -9,9 +13,10 @@ export interface UrlToBundle {
   modulePath?: string;
 }
 
-export let URL_TO_BUNDLE_DESCRIPTOR: MessageDescriptor<UrlToBundle> = {
+export let URL_TO_BUNDLE_DESCRIPTOR: NamedTypeDescriptor<UrlToBundle> = {
   name: "UrlToBundle",
-  fields: [
+  kind: NamedTypeKind.MESSAGE,
+  messageFields: [
     {
       name: "url",
       type: MessageFieldType.STRING,
@@ -27,13 +32,14 @@ export interface UrlToBundlesHolder {
   urlToBundles?: UrlToBundle[];
 }
 
-export let URL_TO_BUNDLES_HOLDER_DESCRIPTOR: MessageDescriptor<UrlToBundlesHolder> = {
+export let URL_TO_BUNDLES_HOLDER_DESCRIPTOR: NamedTypeDescriptor<UrlToBundlesHolder> = {
   name: "UrlToBundlesHolder",
-  fields: [
+  kind: NamedTypeKind.MESSAGE,
+  messageFields: [
     {
       name: "urlToBundles?",
-      type: MessageFieldType.MESSAGE,
-      messageDescriptor: URL_TO_BUNDLE_DESCRIPTOR,
+      type: MessageFieldType.NAMED_TYPE,
+      namedTypeDescriptor: URL_TO_BUNDLE_DESCRIPTOR,
       isArray: true,
     },
   ],

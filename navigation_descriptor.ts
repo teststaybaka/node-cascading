@@ -1,7 +1,7 @@
-import { MessageDescriptor } from "./message_descriptor";
+import { NamedTypeDescriptor } from "./named_type_descriptor";
 
 export interface NavigationDescriptor<Params> {
   name: string;
   pathname: string;
-  paramsDescriptor: MessageDescriptor<Params>;
+  paramsDescriptor: NamedTypeDescriptor<Params>;
 }

@@ -1,15 +1,16 @@
 import {
-  EnumDescriptorUntyped,
-  MessageDescriptorUntyped,
   MessageFieldType,
-} from "./message_descriptor";
-import { parseEnumUntyped, parseMessageUntyped } from "./message_util";
+  NamedTypeDescriptorUntyped,
+  NamedTypeKind,
+} from "./named_type_descriptor";
+import { parseNamedTypeUntyped } from "./named_type_util";
 import { TestCase, assert, runTests } from "./test_base";
 
 function testParseEnum(input: string | number, expected: number) {
   // Prepare
-  let colorEnumDescriptor: EnumDescriptorUntyped = {
+  let colorEnumDescriptor: NamedTypeDescriptorUntyped = {
     name: "Color",
+    kind: NamedTypeKind.ENUM,
     enumValues: [
       { name: "RED", value: 10 },
       { name: "BLUE", value: 1 },
@@ -18,7 +19,7 @@ function testParseEnum(input: string | number, expected: number) {
   };
 
   // Execute
-  let parsed = parseEnumUntyped(input, colorEnumDescriptor);
+  let parsed = parseNamedTypeUntyped(input, colorEnumDescriptor);
 
   // Verify
   assert(parsed === expected);
@@ -58,9 +59,10 @@ class ParseEnumValueFromNonexistingString implements TestCase {
 
 function testParsingMessageWithPrimitiveTypes(raw: any) {
   // Prepare
-  let userMessageDescriptor: MessageDescriptorUntyped = {
+  let userMessageDescriptor: NamedTypeDescriptorUntyped = {
     name: "User",
-    fields: [
+    kind: NamedTypeKind.MESSAGE,
+    messageFields: [
       { name: "id", type: MessageFieldType.NUMBER },
       { name: "isPaid", type: MessageFieldType.BOOLEAN },
       { name: "nickname", type: MessageFieldType.STRING },
@@ -73,7 +75,7 @@ function testParsingMessageWithPrimitiveTypes(raw: any) {
   };
 
   // Execute
-  let parsed = parseMessageUntyped(raw, userMessageDescriptor);
+  let parsed = parseNamedTypeUntyped(raw, userMessageDescriptor);
 
   // Verify
   return parsed;
@@ -150,63 +152,67 @@ class ParseMessagePrimtivesSkipUnmatched implements TestCase {
 
 function testParsingNestedMessages(raw: any) {
   // Prepare
-  let colorEnumDescriptor: EnumDescriptorUntyped = {
+  let colorEnumDescriptor: NamedTypeDescriptorUntyped = {
     name: "Color",
+    kind: NamedTypeKind.ENUM,
     enumValues: [
       { name: "RED", value: 10 },
       { name: "BLUE", value: 1 },
       { name: "GREEN", value: 2 },
     ],
   };
-  let userInfoMessaeDescriptor: MessageDescriptorUntyped = {
+  let userInfoMessaeDescriptor: NamedTypeDescriptorUntyped = {
     name: "UserInfo",
-    fields: [
+    kind: NamedTypeKind.MESSAGE,
+    messageFields: [
       {
         name: "intro",
         type: MessageFieldType.STRING,
       },
       {
         name: "backgroundColor",
-        type: MessageFieldType.ENUM,
-        enumDescriptor: colorEnumDescriptor,
+        type: MessageFieldType.NAMED_TYPE,
+        namedTypeDescriptor: colorEnumDescriptor,
       },
       {
         name: "preferredColor",
-        type: MessageFieldType.ENUM,
-        enumDescriptor: colorEnumDescriptor,
+        type: MessageFieldType.NAMED_TYPE,
+        namedTypeDescriptor: colorEnumDescriptor,
       },
       {
         name: "colorHistory",
-        type: MessageFieldType.ENUM,
-        enumDescriptor: colorEnumDescriptor,
+        type: MessageFieldType.NAMED_TYPE,
+        namedTypeDescriptor: colorEnumDescriptor,
         isArray: true,
       },
     ],
   };
-  let creditCardMessageDescriptor: MessageDescriptorUntyped = {
+  let creditCardMessageDescriptor: NamedTypeDescriptorUntyped = {
     name: "CreditCard",
-    fields: [{ name: "cardNumber", type: MessageFieldType.NUMBER }],
+    kind: NamedTypeKind.MESSAGE,
+    messageFields: [{ name: "cardNumber", type: MessageFieldType.NUMBER }],
   };
-  let userMessageDescriptor: MessageDescriptorUntyped = {
+  let userMessageDescriptor: NamedTypeDescriptorUntyped = {
     name: "User",
-    fields: [
+    kind: NamedTypeKind.MESSAGE,
+    messageFields: [
       { name: "id", type: MessageFieldType.NUMBER },
       {
         name: "userInfo",
-        type: MessageFieldType.MESSAGE,
-        messageDescriptor: userInfoMessaeDescriptor,
+        type: MessageFieldType.NAMED_TYPE,
+        namedTypeDescriptor: userInfoMessaeDescriptor,
       },
       {
         name: "creditCards",
-        type: MessageFieldType.MESSAGE,
-        messageDescriptor: creditCardMessageDescriptor,
+        type: MessageFieldType.NAMED_TYPE,
+        namedTypeDescriptor: creditCardMessageDescriptor,
         isArray: true,
       },
     ],
   };
 
   // Execute
-  let parsed = parseMessageUntyped(raw, userMessageDescriptor);
+  let parsed = parseNamedTypeUntyped(raw, userMessageDescriptor);
 
   // Verify
   return parsed;

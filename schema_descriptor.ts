@@ -1,7 +1,7 @@
-import { MessageDescriptor } from "./message_descriptor";
+import { NamedTypeDescriptor } from "./named_type_descriptor";
 
 export interface SchemaDescriptor<T> {
-  valueDescriptor: MessageDescriptor<T>;
+  valueDescriptor: NamedTypeDescriptor<T>;
   getKey: (value: T) => string;
   getIndex: (value: T) => string[];
 }
