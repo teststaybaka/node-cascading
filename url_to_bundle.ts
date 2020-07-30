@@ -37,7 +37,7 @@ export let URL_TO_BUNDLES_HOLDER_DESCRIPTOR: NamedTypeDescriptor<UrlToBundlesHol
   kind: NamedTypeKind.MESSAGE,
   messageFields: [
     {
-      name: "urlToBundles?",
+      name: "urlToBundles",
       type: MessageFieldType.NAMED_TYPE,
       namedTypeDescriptor: URL_TO_BUNDLE_DESCRIPTOR,
       isArray: true,
