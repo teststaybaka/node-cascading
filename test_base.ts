@@ -2,20 +2,12 @@ import { LOGGER } from "./logger";
 import { Command } from "commander";
 import "source-map-support/register";
 
-export interface TestEnvironment {
-  destroy(): void;
-}
-
 export interface TestCase {
   name: string;
   execute: () => void | Promise<void>;
 }
 
-export async function runTests(
-  testSetName: string,
-  testCases: TestCase[],
-  testEnvironment?: TestEnvironment
-) {
+export async function runTests(testSetName: string, testCases: TestCase[]) {
   let program = new Command();
   program.option(
     "-c, --child <which>",
@@ -39,6 +31,9 @@ export async function runTests(
       let statusMsg: string;
       try {
         await testCases[i].execute();
+        if (Expectation.errors.length !== 0) {
+          throw new Error("There are errors from expectations.");
+        }
         statusMsg = `\x1b[32mTest(${i}), ${testCases[i].name}, success!\x1b[0m`;
       } catch (e) {
         statusMsg = `\x1b[31mTest(${i}), ${testCases[i].name}, failed!\x1b[0m`;
@@ -48,6 +43,7 @@ export async function runTests(
       console.warn = oldWarn;
       console.error = oldErr;
       console.log(statusMsg);
+      Expectation.errors = [];
     }
   } else {
     let whichChild = parseInt(child);
@@ -66,71 +62,82 @@ export async function runTests(
     } catch (e) {
       console.log(e);
     }
-  }
-  if (testEnvironment) {
-    testEnvironment.destroy();
-  }
-}
-
-export function assert(
-  result: boolean,
-  errorMessage: string = "Assert failed!"
-) {
-  if (!result) {
-    throw new Error(errorMessage);
+    for (let error of Expectation.errors) {
+      console.log(error);
+    }
   }
 }
 
-export function assertContains(
-  longStr: string,
-  shortStr: string,
-  errorMessage?: string
-) {
-  assert(longStr.indexOf(shortStr) != -1, errorMessage);
+export function assert(tested: boolean, action?: string) {
+  if (!tested) {
+    if (action) {
+      throw new Error("Assertion failed.");
+    } else {
+      throw new Error(`Failed to assert ${action}.`);
+    }
+  }
+}
+
+export function assertContains(longStr: string, shortStr: string) {
+  assert(longStr.indexOf(shortStr) != -1, `${longStr} containing ${shortStr}`);
 }
 
 export function assertError(actualError: any, expectedError: Error) {
   if (actualError instanceof Error) {
     assert(
       actualError.name === expectedError.name,
-      "Expecting error type [" +
-        expectedError.name +
-        "] but got [" +
-        actualError.name +
-        "] instead."
+      `error to be ${expectedError.name} but got ${actualError.name}`
     );
-    assertContains(
-      actualError.message,
-      expectedError.message,
-      "Expecting message [" +
-        expectedError.message +
-        "] but got [" +
-        actualError.message +
-        "] instead."
-    );
+    assertContains(actualError.message, expectedError.message);
   } else {
     throw new Error(
-      'Expecting error to be of type "Error" but got "' +
-        typeof actualError +
-        '" instead.'
+      `error to be of type "Error" but got "${typeof actualError} instead.`
     );
   }
 }
 
-export async function expectRejection(promise: Promise<any>) {
+export async function assertRejection(promise: Promise<any>) {
   try {
     await promise;
   } catch (e) {
     return e;
   }
-  throw new Error("Expecting the promise to be rejected but did not.");
+  throw new Error("Failed to assert the promise to be rejected.");
 }
 
-export function expectThrow(method: () => void) {
+export function assertThrow(method: () => void) {
   try {
     method();
   } catch (e) {
     return e;
   }
-  throw new Error("Expecting an error to be thrown.");
+  throw new Error("Failed to assert an error to be thrown.");
+}
+
+export class Expectation {
+  public static errors: Error[] = [];
+
+  public static expect(result: boolean) {
+    try {
+      assert(result);
+    } catch (e) {
+      Expectation.errors.push(e as Error);
+    }
+  }
+
+  public static expectContains(longStr: string, shortStr: string) {
+    try {
+      assertContains(longStr, shortStr);
+    } catch (e) {
+      Expectation.errors.push(e as Error);
+    }
+  }
+
+  public static expectError(actualError: any, expectedError: Error) {
+    try {
+      assertError(actualError, expectedError);
+    } catch (e) {
+      Expectation.errors.push(e as Error);
+    }
+  }
 }

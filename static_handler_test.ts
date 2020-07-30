@@ -7,7 +7,7 @@ import {
   TestCase,
   assert,
   assertError,
-  expectRejection,
+  assertRejection,
   runTests,
 } from "./test_base";
 
@@ -52,7 +52,7 @@ class DirHandlerUrlNotMatch implements TestCase {
     let urlPath = url.parse("/xxx");
 
     // Execute
-    let error = await expectRejection(
+    let error = await assertRejection(
       handler.handle(undefined, undefined, urlPath)
     );
 
@@ -106,7 +106,7 @@ class DirHandlerPreventsParentDirectory implements TestCase {
     let urlPath = url.parse("/xxx/../../file");
 
     // Execute
-    let error = await expectRejection(
+    let error = await assertRejection(
       handler.handle(undefined, undefined, urlPath)
     );
 

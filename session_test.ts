@@ -4,7 +4,7 @@ import {
   TestCase,
   assert,
   assertError,
-  expectThrow,
+  assertThrow,
   runTests,
 } from "./test_base";
 
@@ -24,7 +24,7 @@ class InvalidRawSession implements TestCase {
     let verifier = new SecureSessionVerifier(null);
 
     // Execute
-    let error = expectThrow(() => verifier.verifyAndGetUserId("f|s|aa"));
+    let error = assertThrow(() => verifier.verifyAndGetUserId("f|s|aa"));
 
     // Verify
     assertError(error, newUnauthenticatedError("Invalid signed session"));
@@ -41,7 +41,7 @@ class InvalidSignature implements TestCase {
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let error = expectThrow(() => verifier.verifyAndGetUserId("f|s"));
+    let error = assertThrow(() => verifier.verifyAndGetUserId("f|s"));
 
     // Verify
     assertError(error, newUnauthenticatedError("session signature"));
@@ -58,7 +58,7 @@ class InvalidSessionJsonData implements TestCase {
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let error = expectThrow(() => verifier.verifyAndGetUserId("--|xxxx"));
+    let error = assertThrow(() => verifier.verifyAndGetUserId("--|xxxx"));
 
     // Verify
     assertError(error, newUnauthenticatedError("json data"));
@@ -75,7 +75,7 @@ class NoTimestampInSession implements TestCase {
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let error = expectThrow(() => verifier.verifyAndGetUserId("{}|xxxx"));
+    let error = assertThrow(() => verifier.verifyAndGetUserId("{}|xxxx"));
 
     // Verify
     assertError(error, newUnauthenticatedError("session data"));
@@ -92,7 +92,7 @@ class NoUserIdInSession implements TestCase {
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let error = expectThrow(() =>
+    let error = assertThrow(() =>
       verifier.verifyAndGetUserId('{"timestamp":3131}|xxxx')
     );
 
@@ -112,7 +112,7 @@ class SessionExpired implements TestCase {
     let verifier = new SecureSessionVerifier(mockSigner as any);
 
     // Execute
-    let error = expectThrow(() =>
+    let error = assertThrow(() =>
       verifier.verifyAndGetUserId(
         `{"timestamp":${nowTime},"userId":"blabla"}|xxxx`
       )
