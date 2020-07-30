@@ -70,7 +70,7 @@ export async function runTests(testSetName: string, testCases: TestCase[]) {
 
 export function assert(tested: boolean, action?: string) {
   if (!tested) {
-    if (action) {
+    if (!action) {
       throw new Error("Assertion failed.");
     } else {
       throw new Error(`Failed to assert ${action}.`);

@@ -4,9 +4,8 @@ import { CONTENT_TYPE_BINARY_STREAM } from "./common";
 import { newInternalError } from "./errors";
 import { StaticDirHandler, StaticFileHandler } from "./static_handler";
 import {
+  Expectation,
   TestCase,
-  assert,
-  assertError,
   assertRejection,
   runTests,
 } from "./test_base";
@@ -22,8 +21,8 @@ class FileHandlerMatchJpgFile implements TestCase {
     let response = await handler.handle(undefined, undefined, undefined);
 
     // Verify
-    assert(response.contentFile === "path.jpg");
-    assert(response.contentType === "image/jpeg");
+    Expectation.expect(response.contentFile === "path.jpg");
+    Expectation.expect(response.contentType === "image/jpeg");
   }
 }
 
@@ -38,8 +37,8 @@ class FileHandlerBinaryType implements TestCase {
     let response = await handler.handle(undefined, undefined, undefined);
 
     // Verify
-    assert(response.contentFile === "path");
-    assert(response.contentType === CONTENT_TYPE_BINARY_STREAM);
+    Expectation.expect(response.contentFile === "path");
+    Expectation.expect(response.contentType === CONTENT_TYPE_BINARY_STREAM);
   }
 }
 
@@ -57,7 +56,7 @@ class DirHandlerUrlNotMatch implements TestCase {
     );
 
     // Verify
-    assertError(error, newInternalError("match url regex"));
+    Expectation.expectError(error, newInternalError("match url regex"));
   }
 }
 
@@ -74,8 +73,8 @@ class DirHandlerMatchJpgFile implements TestCase {
 
     // Verify
     let stats = fs.statSync(response.contentFile);
-    assert(stats.isFile());
-    assert(response.contentType === "image/jpeg");
+    Expectation.expect(stats.isFile());
+    Expectation.expect(response.contentType === "image/jpeg");
   }
 }
 
@@ -92,8 +91,8 @@ class DirHandlerMatchBinaryFile implements TestCase {
 
     // Verify
     let stats = fs.statSync(response.contentFile);
-    assert(stats.isFile());
-    assert(response.contentType === CONTENT_TYPE_BINARY_STREAM);
+    Expectation.expect(stats.isFile());
+    Expectation.expect(response.contentType === CONTENT_TYPE_BINARY_STREAM);
   }
 }
 
@@ -111,7 +110,10 @@ class DirHandlerPreventsParentDirectory implements TestCase {
     );
 
     // Verify
-    assertError(error, newInternalError("navigate to the parent directory"));
+    Expectation.expectError(
+      error,
+      newInternalError("navigate to the parent directory")
+    );
   }
 }
 

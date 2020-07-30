@@ -2,9 +2,9 @@ import http = require("http");
 import url = require("url");
 import { HttpMethod } from "./common";
 import { newInternalError } from "./errors";
-import { TestCase, assert, assertContains, runTests } from "./test_base";
 import { HttpResponse } from "./http_handler";
 import { Router } from "./router";
+import { Expectation, TestCase, runTests } from "./test_base";
 
 class MockResponse {
   public statusCode: number;
@@ -110,12 +110,12 @@ class MatchHandler implements TestCase {
     await mockHttpServer.triggerEvent();
 
     // Verify
-    assert(mockResponse.statusCode === 200);
-    assert(mockResponse.endData === "any content");
-    assert(!mockHandler.handled);
-    assert(!mockHandler2.handled);
-    assert(mockHandler3.handled);
-    assert(!mockHandler4.handled);
+    Expectation.expect(mockResponse.statusCode === 200);
+    Expectation.expect(mockResponse.endData === "any content");
+    Expectation.expect(!mockHandler.handled);
+    Expectation.expect(!mockHandler2.handled);
+    Expectation.expect(mockHandler3.handled);
+    Expectation.expect(!mockHandler4.handled);
   }
 }
 
@@ -140,9 +140,9 @@ class RejectHandler implements TestCase {
     await mockHttpServer.triggerEvent();
 
     // Verify
-    assert(mockResponse.statusCode === 500);
-    assertContains(mockResponse.endData, "Reject handle.");
-    assert(mockHandler.handled);
+    Expectation.expect(mockResponse.statusCode === 500);
+    Expectation.expectContains(mockResponse.endData, "Reject handle.");
+    Expectation.expect(mockHandler.handled);
   }
 }
 
@@ -166,9 +166,9 @@ class NotFound implements TestCase {
     await mockHttpServer.triggerEvent();
 
     // Verify
-    assert(mockResponse.statusCode === 500);
-    assertContains(mockResponse.endData, "Not Found");
-    assert(!mockHandler.handled);
+    Expectation.expect(mockResponse.statusCode === 500);
+    Expectation.expectContains(mockResponse.endData, "Not Found");
+    Expectation.expect(!mockHandler.handled);
   }
 }
 

@@ -1,5 +1,5 @@
 import { NavigationRouter } from "./navigation_router";
-import { TestCase, assert, runTests } from "./test_base";
+import { Expectation, TestCase, runTests } from "./test_base";
 
 async function testMatchCurrentUrl(
   currentPathname: string,
@@ -32,8 +32,8 @@ async function testMatchCurrentUrl(
   await navigationRouter.dispatchFromCurrentUrl();
 
   // verify
-  assert(handled1 === expectedHandledByPath1);
-  assert(handled2 === expectedHandledByPath2);
+  Expectation.expect(handled1 === expectedHandledByPath1);
+  Expectation.expect(handled2 === expectedHandledByPath2);
 }
 
 class DispatchFromCurrentUrlMatched implements TestCase {
@@ -81,7 +81,7 @@ class DispatchFromCurrentUrlWithoutParams implements TestCase {
     let params = await testParsingParamsFromQueryString("");
 
     // Verify
-    assert(params === undefined);
+    Expectation.expect(params === undefined);
   }
 }
 
@@ -92,7 +92,7 @@ class DispatchFromCurrentUrlWithEmptyParams implements TestCase {
     let params = await testParsingParamsFromQueryString("?params=");
 
     // Verify
-    assert(params === undefined);
+    Expectation.expect(params === undefined);
   }
 }
 
@@ -103,7 +103,7 @@ class DispatchFromCurrentUrlWithInvalidParams implements TestCase {
     let params = await testParsingParamsFromQueryString("?params=xsdfj");
 
     // Verify
-    assert(params === undefined);
+    Expectation.expect(params === undefined);
   }
 }
 
@@ -116,8 +116,8 @@ class DispatchFromCurrentUrlWithValidParams implements TestCase {
     );
 
     // Verify
-    assert(params.a === 10);
-    assert(params.b === "10");
+    Expectation.expect(params.a === 10);
+    Expectation.expect(params.b === "10");
   }
 }
 
@@ -159,9 +159,9 @@ async function testMatchFromPathname(
   await navigationRouter.dispatch(pathname);
 
   // Verify
-  assert(handled1 === expectedHandledByPath1);
-  assert(handled2 === expectedHandledByPath2);
-  assert(reloaded === expectedReloaded);
+  Expectation.expect(handled1 === expectedHandledByPath1);
+  Expectation.expect(handled2 === expectedHandledByPath2);
+  Expectation.expect(reloaded === expectedReloaded);
 }
 
 class DispatchMatched implements TestCase {
@@ -211,8 +211,8 @@ class DispatchTwiceToHidePreviousHandler implements TestCase {
     await navigationRouter.dispatch("/path2");
 
     // Verify
-    assert(hidden1);
-    assert(!hidden2);
+    Expectation.expect(hidden1);
+    Expectation.expect(!hidden2);
   }
 }
 
@@ -237,7 +237,7 @@ class DispatchPushHistoryWithoutParams implements TestCase {
     await navigationRouter.dispatch("/path");
 
     // Verify
-    assert(urlCaptured === "/path");
+    Expectation.expect(urlCaptured === "/path");
   }
 }
 
@@ -262,7 +262,7 @@ class DispatchPushHistoryWithParams implements TestCase {
     await navigationRouter.dispatch("/path", { a: 10, b: "10" });
 
     // Verify
-    assert(
+    Expectation.expect(
       urlCaptured === "/path?params=%7B%22a%22%3A10%2C%22b%22%3A%2210%22%7D"
     );
   }
