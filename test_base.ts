@@ -117,9 +117,9 @@ export function assertThrow(method: () => void) {
 export class Expectation {
   public static errors: Error[] = [];
 
-  public static expect(result: boolean) {
+  public static expect(tested: boolean, action?: string) {
     try {
-      assert(result);
+      assert(tested, action);
     } catch (e) {
       Expectation.errors.push(e as Error);
     }
