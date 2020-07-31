@@ -10,11 +10,10 @@ import {
   CONTENT_TYPE_JPEG,
   CONTENT_TYPE_PNG,
   GZIP_EXT,
-  HttpMethod,
   findWithDefault,
 } from "./common";
 import { newInternalError } from "./errors";
-import { HttpHandler, HttpResponse } from "./http_handler";
+import { HttpHandler, HttpMethod, HttpResponse } from "./http_handler";
 import { UrlToBundle } from "./url_to_bundle";
 
 let MIME_TYPES = new Map<string, string>([

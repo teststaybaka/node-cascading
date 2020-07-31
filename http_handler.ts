@@ -1,6 +1,11 @@
 import http = require("http");
 import url = require("url");
-import { HttpMethod } from "./common";
+
+export enum HttpMethod {
+  GET,
+  POST,
+  OPTIONS,
+}
 
 export interface HttpResponse {
   contentType: string;

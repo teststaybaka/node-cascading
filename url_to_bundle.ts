@@ -4,6 +4,23 @@ import {
   NamedTypeKind,
 } from "./named_type_descriptor";
 
+export interface Bundles {
+  // The root directory the bundle, ending without "/".
+  roots?: string[];
+}
+
+export let BUNDLES_DESCRIPTOR: NamedTypeDescriptor<Bundles> = {
+  name: "Bundles",
+  kind: NamedTypeKind.MESSAGE,
+  messageFields: [
+    {
+      name: "roots",
+      type: MessageFieldType.STRING,
+      isArray: true,
+    },
+  ],
+};
+
 export interface UrlToBundle {
   // Without protocol or domain, starting with "/", and ending without "/". Only
   // Applies to GET method.

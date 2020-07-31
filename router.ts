@@ -6,11 +6,10 @@ import {
   ACCEPT_ENCODING_HEADER,
   CONTENT_TYPE_TEXT,
   FILE_NOT_EXISTS_ERROR_CODE,
-  HttpMethod,
   URL_TO_BUNDLES_CONFIG_FILE,
 } from "./common";
 import { ErrorType, TypedError, newInternalError } from "./errors";
-import { HttpHandler, HttpResponse } from "./http_handler";
+import { HttpHandler, HttpMethod, HttpResponse } from "./http_handler";
 import { LOGGER } from "./logger";
 import { parseJsonString } from "./named_type_util";
 import { PreflightHandler } from "./preflight_handler";
