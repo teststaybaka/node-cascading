@@ -8,7 +8,7 @@ import {
   SignedOutServiceDescriptor,
 } from "./service_descriptor";
 import { SecureSessionVerifier } from "./session";
-import { StreamReader } from "./stream_reader";
+import { STREAM_READER } from "./stream_reader";
 
 export interface SignedInServiceHandler<Request, Response> {
   handle: (
@@ -26,7 +26,6 @@ export class BaseSignedInServiceHandler<Request, Response>
   implements HttpHandler {
   public method = HttpMethod.POST;
   public urlRegex = new RegExp(`^${this.serviceDescriptor.pathname}$`);
-  private streamReader = new StreamReader();
   private secureSessionVerifier = SecureSessionVerifier.create();
 
   public constructor(
@@ -41,7 +40,7 @@ export class BaseSignedInServiceHandler<Request, Response>
   ): Promise<HttpResponse> {
     let session = request.headers[SESSION_HEADER.toLowerCase()] as string;
     let userId = this.secureSessionVerifier.verifyAndGetUserId(session);
-    let obj = await this.streamReader.readJson(request);
+    let obj = await STREAM_READER.readJson(request);
     let response = await this.subServiceHandler.handle(
       logContext,
       parseNamedType(obj, this.serviceDescriptor.requestDescriptor),
@@ -59,7 +58,6 @@ export class BaseSignedOutServiceHandler<Request, Response>
   implements HttpHandler {
   public method = HttpMethod.POST;
   public urlRegex = new RegExp(`^${this.serviceDescriptor.pathname}$`);
-  private streamReader = new StreamReader();
 
   public constructor(
     private serviceDescriptor: SignedOutServiceDescriptor<Request, Response>,
@@ -71,7 +69,7 @@ export class BaseSignedOutServiceHandler<Request, Response>
     request: http.IncomingMessage,
     parsedUrl: url.Url
   ): Promise<HttpResponse> {
-    let obj = await this.streamReader.readJson(request);
+    let obj = await STREAM_READER.readJson(request);
     let response = await this.subServiceHandler.handle(
       logContext,
       parseNamedType(obj, this.serviceDescriptor.requestDescriptor)

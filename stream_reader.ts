@@ -40,3 +40,5 @@ export class StreamReader {
     return JSON.parse(str);
   }
 }
+
+export let STREAM_READER = new StreamReader();
