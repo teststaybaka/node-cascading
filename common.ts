@@ -15,8 +15,7 @@ export let BUNDLE_EXT = ".bundle";
 export let GZIP_EXT = ".tar.gz";
 export let ACCEPT_ENCODING_HEADER = "Accept-Encoding";
 export let URL_TO_BUNDLES_CONFIG_FILE = "./url_to_bundles.json";
-export let CHROME_EXTENSION_BUNDLES_CONFIG_FILE =
-  "./chrome_extension_bundles.json";
+export let CHROME_EXTENSION_MANIFEST_FILE = "./chrome_extension_manifest.json";
 
 export function findWithDefault<Key, Value>(
   map: Map<Key, Value>,
