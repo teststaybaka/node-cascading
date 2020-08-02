@@ -96,12 +96,12 @@ export class StaticHtmlHandler implements HttpHandler {
 
   public urlRegex: RegExp;
   public method = HttpMethod.GET;
-  private modulePath: string;
+  private htmlPath: string;
   private contentType = CONTENT_TYPE_JAVASCRIPT;
 
   public constructor(urlToModule: UrlToModule) {
     this.urlRegex = new RegExp(`^${urlToModule.url}$`);
-    this.modulePath = urlToModule.modulePath + ".html";
+    this.htmlPath = urlToModule.modulePath + ".html";
   }
 
   public async handle(
@@ -119,11 +119,11 @@ export class StaticHtmlHandler implements HttpHandler {
     if (StaticHtmlHandler.GZIP_ACCEPT_ENCODING.test(acceptEncoding)) {
       return {
         contentType: this.contentType,
-        contentFile: this.modulePath + GZIP_EXT,
+        contentFile: this.htmlPath + GZIP_EXT,
         encoding: StaticHtmlHandler.GZIP_CONTENT_ENCODING,
       };
     } else {
-      return { contentType: this.contentType, contentFile: this.modulePath };
+      return { contentType: this.contentType, contentFile: this.htmlPath };
     }
   }
 }
