@@ -6,15 +6,15 @@ import {
   ACCEPT_ENCODING_HEADER,
   CONTENT_TYPE_TEXT,
   FILE_NOT_EXISTS_ERROR_CODE,
-  URL_TO_BUNDLES_CONFIG_FILE,
+  URL_TO_MODULES_CONFIG_FILE,
 } from "./common";
 import { ErrorType, TypedError, newInternalError } from "./errors";
 import { HttpHandler, HttpMethod, HttpResponse } from "./http_handler";
 import { LOGGER } from "./logger";
 import { parseJsonString } from "./named_type_util";
 import { PreflightHandler } from "./preflight_handler";
-import { StaticBundleHandler } from "./static_handler";
-import { URL_TO_BUNDLES_HOLDER_DESCRIPTOR, UrlToBundle } from "./url_to_bundle";
+import { StaticHtmlHandler } from "./static_handler";
+import { URL_TO_MODULE_MAPPING_DESCRIPTOR, UrlToModule } from "./url_to_module";
 
 // TODO: Rate limit requests.
 export class Router {
@@ -48,17 +48,17 @@ export class Router {
     let router = new Router(hostname, httpServer, httpsServer);
     router.addHandler(new PreflightHandler());
 
-    let urlToBundles = Router.readUrlToBundles();
-    for (let urlToBundle of urlToBundles) {
-      router.addHandler(new StaticBundleHandler(urlToBundle));
+    let urlToModules = Router.readUrlToModules();
+    for (let urlToModule of urlToModules) {
+      router.addHandler(new StaticHtmlHandler(urlToModule));
     }
     return router;
   }
 
-  private static readUrlToBundles(): UrlToBundle[] {
-    let urlToBundlesBuffer: Buffer;
+  private static readUrlToModules(): UrlToModule[] {
+    let urlToModulesBuffer: Buffer;
     try {
-      urlToBundlesBuffer = fs.readFileSync(URL_TO_BUNDLES_CONFIG_FILE);
+      urlToModulesBuffer = fs.readFileSync(URL_TO_MODULES_CONFIG_FILE);
     } catch (e) {
       if (e.code !== FILE_NOT_EXISTS_ERROR_CODE) {
         return [];
@@ -67,12 +67,12 @@ export class Router {
       }
     }
 
-    let urlToBundlesHolder = parseJsonString(
-      urlToBundlesBuffer.toString(),
-      URL_TO_BUNDLES_HOLDER_DESCRIPTOR
+    let urlToModuleMapping = parseJsonString(
+      urlToModulesBuffer.toString(),
+      URL_TO_MODULE_MAPPING_DESCRIPTOR
     );
-    if (urlToBundlesHolder) {
-      return urlToBundlesHolder.urlToBundles;
+    if (urlToModuleMapping) {
+      return urlToModuleMapping.urlToModules;
     } else {
       return [];
     }

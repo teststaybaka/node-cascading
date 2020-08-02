@@ -3,7 +3,6 @@ import path = require("path");
 import url = require("url");
 import {
   ACCEPT_ENCODING_HEADER,
-  BUNDLE_EXT,
   CONTENT_TYPE_BINARY_STREAM,
   CONTENT_TYPE_GIF,
   CONTENT_TYPE_JAVASCRIPT,
@@ -14,7 +13,7 @@ import {
 } from "./common";
 import { newInternalError } from "./errors";
 import { HttpHandler, HttpMethod, HttpResponse } from "./http_handler";
-import { UrlToBundle } from "./url_to_bundle";
+import { UrlToModule } from "./url_to_module";
 
 let MIME_TYPES = new Map<string, string>([
   [".jpeg", CONTENT_TYPE_JPEG],
@@ -90,8 +89,8 @@ export class StaticDirHandler implements HttpHandler {
   }
 }
 
-// Returns bundled files with compression if possible.
-export class StaticBundleHandler implements HttpHandler {
+// Returns bundled HTML files with compression if possible.
+export class StaticHtmlHandler implements HttpHandler {
   private static GZIP_ACCEPT_ENCODING = /\bgzip\b/;
   private static GZIP_CONTENT_ENCODING = "gzip";
 
@@ -100,9 +99,9 @@ export class StaticBundleHandler implements HttpHandler {
   private bundlePath: string;
   private contentType = CONTENT_TYPE_JAVASCRIPT;
 
-  public constructor(urlToBundle: UrlToBundle) {
-    this.urlRegex = new RegExp(`^${urlToBundle.url}$`);
-    this.bundlePath = urlToBundle.modulePath + BUNDLE_EXT;
+  public constructor(urlToModule: UrlToModule) {
+    this.urlRegex = new RegExp(`^${urlToModule.url}$`);
+    this.bundlePath = urlToModule.modulePath + ".html";
   }
 
   public async handle(
@@ -117,11 +116,11 @@ export class StaticBundleHandler implements HttpHandler {
       acceptEncoding = "";
     }
 
-    if (StaticBundleHandler.GZIP_ACCEPT_ENCODING.test(acceptEncoding)) {
+    if (StaticHtmlHandler.GZIP_ACCEPT_ENCODING.test(acceptEncoding)) {
       return {
         contentType: this.contentType,
         contentFile: this.bundlePath + GZIP_EXT,
-        encoding: StaticBundleHandler.GZIP_CONTENT_ENCODING,
+        encoding: StaticHtmlHandler.GZIP_CONTENT_ENCODING,
       };
     } else {
       return { contentType: this.contentType, contentFile: this.bundlePath };

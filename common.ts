@@ -11,10 +11,9 @@ export let SESSION_HEADER = "X-SESSION";
 
 export let FILE_NOT_EXISTS_ERROR_CODE = "ENOENT";
 
-export let BUNDLE_EXT = ".bundle";
 export let GZIP_EXT = ".tar.gz";
 export let ACCEPT_ENCODING_HEADER = "Accept-Encoding";
-export let URL_TO_BUNDLES_CONFIG_FILE = "./url_to_bundles.json";
+export let URL_TO_MODULES_CONFIG_FILE = "./url_to_modules.json";
 export let CHROME_EXTENSION_MANIFEST_FILE = "./chrome_extension_manifest.json";
 
 export function findWithDefault<Key, Value>(

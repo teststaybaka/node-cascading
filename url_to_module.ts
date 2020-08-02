@@ -4,7 +4,7 @@ import {
   NamedTypeKind,
 } from "./named_type_descriptor";
 
-export interface UrlToBundle {
+export interface UrlToModule {
   // Without protocol or domain, starting with "/", and ending without "/". Only
   // Applies to GET method.
   url?: string;
@@ -13,8 +13,8 @@ export interface UrlToBundle {
   modulePath?: string;
 }
 
-export let URL_TO_BUNDLE_DESCRIPTOR: NamedTypeDescriptor<UrlToBundle> = {
-  name: "UrlToBundle",
+export let URL_TO_MODULE_DESCRIPTOR: NamedTypeDescriptor<UrlToModule> = {
+  name: "UrlToModule",
   kind: NamedTypeKind.MESSAGE,
   messageFields: [
     {
@@ -28,18 +28,18 @@ export let URL_TO_BUNDLE_DESCRIPTOR: NamedTypeDescriptor<UrlToBundle> = {
   ],
 };
 
-export interface UrlToBundlesHolder {
-  urlToBundles?: UrlToBundle[];
+export interface UrlToModuleMapping {
+  urlToModules?: UrlToModule[];
 }
 
-export let URL_TO_BUNDLES_HOLDER_DESCRIPTOR: NamedTypeDescriptor<UrlToBundlesHolder> = {
-  name: "UrlToBundlesHolder",
+export let URL_TO_MODULE_MAPPING_DESCRIPTOR: NamedTypeDescriptor<UrlToModuleMapping> = {
+  name: "UrlToModuleMapping",
   kind: NamedTypeKind.MESSAGE,
   messageFields: [
     {
-      name: "urlToBundles",
+      name: "urlToModules",
       type: MessageFieldType.NAMED_TYPE,
-      namedTypeDescriptor: URL_TO_BUNDLE_DESCRIPTOR,
+      namedTypeDescriptor: URL_TO_MODULE_DESCRIPTOR,
       isArray: true,
     },
   ],
