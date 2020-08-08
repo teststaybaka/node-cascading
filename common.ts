@@ -11,7 +11,7 @@ export let SESSION_HEADER = "X-SESSION";
 
 export let FILE_NOT_EXISTS_ERROR_CODE = "ENOENT";
 
-export let GZIP_EXT = ".tar.gz";
+export let GZIP_EXT = ".gz";
 export let ACCEPT_ENCODING_HEADER = "Accept-Encoding";
 export let URL_TO_MODULES_CONFIG_FILE = "./url_to_modules.json";
 export let CHROME_EXTENSION_MANIFEST_FILE = "./chrome_extension_manifest.json";
