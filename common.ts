@@ -8,13 +8,12 @@ export let CONTENT_TYPE_JSON = "application/json";
 export let CONTENT_TYPE_BINARY_STREAM = "application/octet-stream";
 
 export let SESSION_HEADER = "X-SESSION";
+export let ACCEPT_ENCODING_HEADER = "Accept-Encoding";
 
 export let FILE_NOT_EXISTS_ERROR_CODE = "ENOENT";
 
 export let GZIP_EXT = ".gz";
-export let ACCEPT_ENCODING_HEADER = "Accept-Encoding";
-export let URL_TO_MODULES_CONFIG_FILE = "./url_to_modules.json";
-export let CHROME_EXTENSION_MANIFEST_FILE = "./chrome_extension_manifest.json";
+export let URL_TO_MODULES_CONFIG_FILE = "url_to_modules.json";
 
 export function findWithDefault<Key, Value>(
   map: Map<Key, Value>,
