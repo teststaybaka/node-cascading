@@ -13,7 +13,7 @@ export interface UrlToModule {
   modulePath?: string;
 }
 
-export let URL_TO_MODULE_DESCRIPTOR: NamedTypeDescriptor<UrlToModule> = {
+export let URL_TO_MODULE: NamedTypeDescriptor<UrlToModule> = {
   name: "UrlToModule",
   kind: NamedTypeKind.MESSAGE,
   messageFields: [
@@ -32,14 +32,14 @@ export interface UrlToModuleMapping {
   urlToModules?: UrlToModule[];
 }
 
-export let URL_TO_MODULE_MAPPING_DESCRIPTOR: NamedTypeDescriptor<UrlToModuleMapping> = {
+export let URL_TO_MODULE_MAPPING: NamedTypeDescriptor<UrlToModuleMapping> = {
   name: "UrlToModuleMapping",
   kind: NamedTypeKind.MESSAGE,
   messageFields: [
     {
       name: "urlToModules",
       type: MessageFieldType.NAMED_TYPE,
-      namedTypeDescriptor: URL_TO_MODULE_DESCRIPTOR,
+      namedTypeDescriptor: URL_TO_MODULE,
       isArray: true,
     },
   ],

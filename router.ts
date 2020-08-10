@@ -14,7 +14,7 @@ import { LOGGER } from "./logger";
 import { parseJsonString } from "./named_type_util";
 import { PreflightHandler } from "./preflight_handler";
 import { StaticHtmlHandler } from "./static_handler";
-import { URL_TO_MODULE_MAPPING_DESCRIPTOR, UrlToModule } from "./url_to_module";
+import { URL_TO_MODULE_MAPPING, UrlToModule } from "./url_to_module";
 
 // TODO: Rate limit requests.
 export class Router {
@@ -69,7 +69,7 @@ export class Router {
 
     let urlToModuleMapping = parseJsonString(
       urlToModulesBuffer.toString(),
-      URL_TO_MODULE_MAPPING_DESCRIPTOR
+      URL_TO_MODULE_MAPPING
     );
     if (urlToModuleMapping) {
       return urlToModuleMapping.urlToModules;
