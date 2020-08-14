@@ -11,8 +11,10 @@ class LinkedNode<T> {
 
 export class LinkedListIterator<T> {
   public constructor(
-    private list: LinkedList<T>,
-    private node: LinkedNode<T>
+    private start: LinkedNode<T>,
+    private end: LinkedNode<T>,
+    private node: LinkedNode<T>,
+    private reduceSizeByOne: () => void
   ) {}
 
   public getValue(): T {
@@ -20,11 +22,11 @@ export class LinkedListIterator<T> {
   }
 
   public isStart(): boolean {
-    return this.list.isStart(this.node);
+    return this.start === this.node;
   }
 
   public isEnd(): boolean {
-    return this.list.isEnd(this.node);
+    return this.end === this.node;
   }
 
   public next(): void {
@@ -36,15 +38,21 @@ export class LinkedListIterator<T> {
   }
 
   public removeAndNext(): void {
-    let next = this.node.next;
-    this.list.remove(this.node);
-    this.node = next;
+    this.remove();
+    this.node = this.node.next;
   }
 
   public removeAndPrev(): void {
+    this.remove();
+    this.node = this.node.prev;
+  }
+
+  private remove(): void {
+    let next = this.node.next;
     let prev = this.node.prev;
-    this.list.remove(this.node);
-    this.node = prev;
+    prev.next = next;
+    next.prev = prev;
+    this.reduceSizeByOne();
   }
 }
 
@@ -57,12 +65,6 @@ export class LinkedList<T> {
     this.clear();
   }
 
-  public clear(): void {
-    this.start.next = this.end;
-    this.end.prev = this.start;
-    this.size = 0;
-  }
-
   public pushBack(value: T): void {
     let node = new LinkedNode(value);
     let prev = this.end.prev;
@@ -73,39 +75,52 @@ export class LinkedList<T> {
     this.size++;
   }
 
-  // External check: Node has to be belonged to this list.
-  public remove(node: LinkedNode<T>): void {
-    let next = node.next;
-    let prev = node.prev;
-    prev.next = next;
-    next.prev = prev;
+  public popFront(): T {
+    let node = this.start.next;
+    this.start.next = this.start.next.next;
+    this.start.next.prev = this.start;
+    this.reduceSizeByOne();
+    return node.getValue();
+  }
+
+  public popBack(): T {
+    let node = this.end.prev;
+    this.end.prev = this.end.prev.prev;
+    this.end.prev.next = this.end;
+    this.reduceSizeByOne();
+    return node.getValue();
+  }
+
+  public clear(): void {
+    this.start.next = this.end;
+    this.end.prev = this.start;
+    this.size = 0;
+  }
+
+  public createLeftIterator(): LinkedListIterator<T> {
+    return new LinkedListIterator(this.start, this.end, this.start.next, () =>
+      this.reduceSizeByOne()
+    );
+  }
+
+  public createRightIterator(): LinkedListIterator<T> {
+    return new LinkedListIterator(this.start, this.end, this.end.prev, () =>
+      this.reduceSizeByOne()
+    );
+  }
+
+  private reduceSizeByOne(): void {
     this.size--;
   }
 
-  public popFront(): T {
-    let node = this.start.next;
-    this.remove(node);
-    return node.getValue();
+  public forEach(callback: (arg: T) => void): void {
+    for (let iter = this.createLeftIterator(); !iter.isEnd(); iter.next()) {
+      callback(iter.getValue());
+    }
   }
 
   public getSize(): number {
     return this.size;
-  }
-
-  public isStart(node: LinkedNode<T>): boolean {
-    return node === this.start;
-  }
-
-  public isEnd(node: LinkedNode<T>): boolean {
-    return node === this.end;
-  }
-
-  public createLeftIterator(): LinkedListIterator<T> {
-    return new LinkedListIterator(this, this.start.next);
-  }
-
-  public createRightIterator(): LinkedListIterator<T> {
-    return new LinkedListIterator(this, this.end.prev);
   }
 
   public sort(shouldKeep?: (l: T, r: T) => boolean): void {

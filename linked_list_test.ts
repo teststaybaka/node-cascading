@@ -1,6 +1,22 @@
 import { LinkedList } from "./linked_list";
 import { Expectation, TestCase, assert, runTests } from "./test_base";
 
+function verifyFromBothSides<T>(linkedList: LinkedList<T>, expectedList: T[]) {
+  assert(linkedList.getSize() === expectedList.length);
+  let iter = linkedList.createLeftIterator();
+  for (let i = 0; i < expectedList.length; i++, iter.next()) {
+    assert(!iter.isEnd());
+    Expectation.expect(iter.getValue() === expectedList[i]);
+  }
+  assert(iter.isEnd());
+  iter = linkedList.createRightIterator();
+  for (let i = expectedList.length - 1; i >= 0; i--, iter.prev()) {
+    assert(!iter.isStart());
+    Expectation.expect(iter.getValue() === expectedList[i]);
+  }
+  assert(iter.isStart());
+}
+
 class CreateEmptyList implements TestCase {
   public name = "CreateEmptyList";
 
@@ -9,9 +25,11 @@ class CreateEmptyList implements TestCase {
     let linkedList = new LinkedList<number>();
 
     // Verify
-    let iter = linkedList.createLeftIterator();
     assert(linkedList.getSize() === 0);
+    let iter = linkedList.createLeftIterator();
     assert(iter.isEnd());
+    iter = linkedList.createRightIterator();
+    assert(iter.isStart());
   }
 }
 
@@ -19,20 +37,14 @@ class PushBackOneValue implements TestCase {
   public name = "PushBackOneValue";
 
   public execute() {
-    // Execute
-    let value = 12311;
+    // Prepare
     let linkedList = new LinkedList<number>();
 
     // Execute
-    linkedList.pushBack(value);
+    linkedList.pushBack(12311);
 
     // Verify
-    assert(linkedList.getSize() === 1);
-    let iter = linkedList.createLeftIterator();
-    assert(!iter.isEnd());
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [12311]);
   }
 }
 
@@ -40,25 +52,15 @@ class PushBackTwoValues implements TestCase {
   public name = "PushBackTwoValues";
 
   public execute() {
-    // Execute
-    let value = 12311;
-    let value2 = 4332;
+    // Prepare
     let linkedList = new LinkedList<number>();
 
     // Execute
-    linkedList.pushBack(value);
-    linkedList.pushBack(value2);
+    linkedList.pushBack(12311);
+    linkedList.pushBack(4332);
 
     // Verify
-    assert(linkedList.getSize() === 2);
-    let iter = linkedList.createLeftIterator();
-    assert(!iter.isEnd());
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    assert(!iter.isEnd());
-    Expectation.expect(iter.getValue() === value2);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [12311, 4332]);
   }
 }
 
@@ -66,20 +68,16 @@ class ClearWithTwoValues implements TestCase {
   public name = "ClearWithTwoValues";
 
   public execute() {
-    // Execute
-    let value = 12311;
-    let value2 = 4332;
+    // Prepare
     let linkedList = new LinkedList<number>();
-    linkedList.pushBack(value);
-    linkedList.pushBack(value2);
+    linkedList.pushBack(12311);
+    linkedList.pushBack(4332);
 
     // Execute
     linkedList.clear();
 
     // Verify
-    assert(linkedList.getSize() === 0);
-    let iter = linkedList.createLeftIterator();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, []);
   }
 }
 
@@ -87,25 +85,17 @@ class RemoveFirstOutOfTwo implements TestCase {
   public name = "RemoveFirstOutOfTwo";
 
   public execute() {
-    // Execute
-    let value = 31;
+    // Prepare
     let linkedList = new LinkedList<number>();
     linkedList.pushBack(132);
-    linkedList.pushBack(value);
+    linkedList.pushBack(31);
     let iter = linkedList.createLeftIterator();
 
     // Execute
     iter.removeAndNext();
 
     // Verify
-    assert(linkedList.getSize() === 1);
-    assert(!iter.isEnd());
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    assert(iter.isEnd());
-    iter.prev();
-    iter.prev();
-    assert(iter.isStart());
+    verifyFromBothSides(linkedList, [31]);
   }
 }
 
@@ -113,10 +103,9 @@ class RemoveSecondOutOfTwo implements TestCase {
   public name = "RemoveSecondOutOfTwo";
 
   public execute() {
-    // Execute
-    let value = 31;
+    // Prepare
     let linkedList = new LinkedList<number>();
-    linkedList.pushBack(value);
+    linkedList.pushBack(31);
     linkedList.pushBack(333);
     let iter = linkedList.createLeftIterator();
 
@@ -125,12 +114,7 @@ class RemoveSecondOutOfTwo implements TestCase {
     iter.removeAndNext();
 
     // Verify
-    assert(linkedList.getSize() === 1);
-    assert(iter.isEnd());
-    iter.prev();
-    Expectation.expect(iter.getValue() === value);
-    iter.prev();
-    assert(iter.isStart());
+    verifyFromBothSides(linkedList, [31]);
   }
 }
 
@@ -138,7 +122,7 @@ class RemoveTwoOutOfTwo implements TestCase {
   public name = "RemoveTwoOutOfTwo";
 
   public execute() {
-    // Execute
+    // Prepare
     let linkedList = new LinkedList<number>();
     linkedList.pushBack(12121);
     linkedList.pushBack(333);
@@ -149,18 +133,15 @@ class RemoveTwoOutOfTwo implements TestCase {
     iter.removeAndNext();
 
     // Verify
-    assert(linkedList.getSize() === 0);
-    assert(iter.isEnd());
-    iter.prev();
-    assert(iter.isStart());
+    verifyFromBothSides(linkedList, []);
   }
 }
 
-class PopFirstOutOfTwo implements TestCase {
-  public name = "PopFirstOutOfTwo";
+class PopFrontFirstOutOfTwo implements TestCase {
+  public name = "PopFrontFirstOutOfTwo";
 
   public execute() {
-    // Execute
+    // Prepare
     let linkedList = new LinkedList<number>();
     linkedList.pushBack(132);
     linkedList.pushBack(31);
@@ -169,21 +150,16 @@ class PopFirstOutOfTwo implements TestCase {
     let value = linkedList.popFront();
 
     // Verify
-    assert(linkedList.getSize() === 1);
     Expectation.expect(value === 132);
-    let iter = linkedList.createLeftIterator();
-    assert(!iter.isEnd());
-    Expectation.expect(iter.getValue() === 31);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [31]);
   }
 }
 
-class PopTwoOutOfTwo implements TestCase {
-  public name = "PopTwoOutOfTwo";
+class PopFrontTwoOutOfTwo implements TestCase {
+  public name = "PopFrontTwoOutOfTwo";
 
   public execute() {
-    // Execute
+    // Prepare
     let linkedList = new LinkedList<number>();
     linkedList.pushBack(132);
     linkedList.pushBack(31);
@@ -193,10 +169,45 @@ class PopTwoOutOfTwo implements TestCase {
     let value = linkedList.popFront();
 
     // Verify
-    assert(linkedList.getSize() === 0);
     Expectation.expect(value === 31);
-    let iter = linkedList.createLeftIterator();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, []);
+  }
+}
+
+class PopBackLastOutOfTwo implements TestCase {
+  public name = "PopBackLastOutOfTwo";
+
+  public execute() {
+    // Prepare
+    let linkedList = new LinkedList<number>();
+    linkedList.pushBack(132);
+    linkedList.pushBack(31);
+
+    // Execute
+    let value = linkedList.popBack();
+
+    // Verify
+    Expectation.expect(value === 31);
+    verifyFromBothSides(linkedList, [132]);
+  }
+}
+
+class PopBackTwoOutOfTwo implements TestCase {
+  public name = "PopBackTwoOutOfTwo";
+
+  public execute() {
+    // Prepare
+    let linkedList = new LinkedList<number>();
+    linkedList.pushBack(132);
+    linkedList.pushBack(31);
+    linkedList.popBack();
+
+    // Execute
+    let value = linkedList.popBack();
+
+    // Verify
+    Expectation.expect(value === 132);
+    verifyFromBothSides(linkedList, []);
   }
 }
 
@@ -204,20 +215,15 @@ class SortOneNumber implements TestCase {
   public name = "SortOneNumber";
 
   public execute() {
-    // Execute
-    let value = 1312;
+    // Prepare
     let linkedList = new LinkedList<number>();
-    linkedList.pushBack(value);
+    linkedList.pushBack(1312);
 
     // Execute
     linkedList.sort();
 
     // Verify
-    let iter = linkedList.createLeftIterator();
-    assert(linkedList.getSize() === 1);
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [1312]);
   }
 }
 
@@ -225,24 +231,16 @@ class SortTwoNumbers implements TestCase {
   public name = "SortTwoNumbers";
 
   public execute() {
-    // Execute
-    let value = 1312;
-    let value2 = 132;
+    // Prepare
     let linkedList = new LinkedList<number>();
-    linkedList.pushBack(value);
-    linkedList.pushBack(value2);
+    linkedList.pushBack(1312);
+    linkedList.pushBack(132);
 
     // Execute
     linkedList.sort();
 
     // Verify
-    let iter = linkedList.createLeftIterator();
-    assert(linkedList.getSize() === 2);
-    Expectation.expect(iter.getValue() === value2);
-    iter.next();
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [132, 1312]);
   }
 }
 
@@ -250,28 +248,17 @@ class SortThreeNumbers implements TestCase {
   public name = "SortThreeNumbers";
 
   public execute() {
-    // Execute
-    let value = 5;
-    let value2 = 3;
-    let value3 = 4;
+    // Prepare
     let linkedList = new LinkedList<number>();
-    linkedList.pushBack(value);
-    linkedList.pushBack(value2);
-    linkedList.pushBack(value3);
+    linkedList.pushBack(5);
+    linkedList.pushBack(3);
+    linkedList.pushBack(4);
 
     // Execute
     linkedList.sort();
 
     // Verify
-    let iter = linkedList.createLeftIterator();
-    assert(linkedList.getSize() === 3);
-    Expectation.expect(iter.getValue() === value2);
-    iter.next();
-    Expectation.expect(iter.getValue() === value3);
-    iter.next();
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [3, 4, 5]);
   }
 }
 
@@ -279,32 +266,18 @@ class SortFourNumbers implements TestCase {
   public name = "SortFourNumbers";
 
   public execute() {
-    // Execute
-    let value = 5;
-    let value2 = 3;
-    let value3 = 4;
-    let value4 = 9;
+    // Prepare
     let linkedList = new LinkedList<number>();
-    linkedList.pushBack(value);
-    linkedList.pushBack(value2);
-    linkedList.pushBack(value3);
-    linkedList.pushBack(value4);
+    linkedList.pushBack(5);
+    linkedList.pushBack(3);
+    linkedList.pushBack(4);
+    linkedList.pushBack(9);
 
     // Execute
     linkedList.sort();
 
     // Verify
-    let iter = linkedList.createLeftIterator();
-    assert(linkedList.getSize() === 4);
-    Expectation.expect(iter.getValue() === value2);
-    iter.next();
-    Expectation.expect(iter.getValue() === value3);
-    iter.next();
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    Expectation.expect(iter.getValue() === value4);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [3, 4, 5, 9]);
   }
 }
 
@@ -312,36 +285,19 @@ class SortFiveNumbers implements TestCase {
   public name = "SortFiveNumbers";
 
   public execute() {
-    // Execute
-    let value = 5;
-    let value2 = 3;
-    let value3 = 4;
-    let value4 = 9;
-    let value5 = 1;
+    // Prepare
     let linkedList = new LinkedList<number>();
-    linkedList.pushBack(value);
-    linkedList.pushBack(value2);
-    linkedList.pushBack(value3);
-    linkedList.pushBack(value4);
-    linkedList.pushBack(value5);
+    linkedList.pushBack(5);
+    linkedList.pushBack(3);
+    linkedList.pushBack(4);
+    linkedList.pushBack(9);
+    linkedList.pushBack(1);
 
     // Execute
     linkedList.sort();
 
     // Verify
-    let iter = linkedList.createLeftIterator();
-    assert(linkedList.getSize() === 5);
-    Expectation.expect(iter.getValue() === value5);
-    iter.next();
-    Expectation.expect(iter.getValue() === value2);
-    iter.next();
-    Expectation.expect(iter.getValue() === value3);
-    iter.next();
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    Expectation.expect(iter.getValue() === value4);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [1, 3, 4, 5, 9]);
   }
 }
 
@@ -349,40 +305,20 @@ class SortSixNumbers implements TestCase {
   public name = "SortSixNumbers";
 
   public execute() {
-    // Execute
-    let value = 5;
-    let value2 = 3;
-    let value3 = 4;
-    let value4 = 9;
-    let value5 = 1;
-    let value6 = 7;
+    // Prepare
     let linkedList = new LinkedList<number>();
-    linkedList.pushBack(value);
-    linkedList.pushBack(value2);
-    linkedList.pushBack(value3);
-    linkedList.pushBack(value4);
-    linkedList.pushBack(value5);
-    linkedList.pushBack(value6);
+    linkedList.pushBack(5);
+    linkedList.pushBack(3);
+    linkedList.pushBack(4);
+    linkedList.pushBack(9);
+    linkedList.pushBack(1);
+    linkedList.pushBack(7);
 
     // Execute
     linkedList.sort();
 
     // Verify
-    let iter = linkedList.createLeftIterator();
-    assert(linkedList.getSize() === 6);
-    Expectation.expect(iter.getValue() === value5);
-    iter.next();
-    Expectation.expect(iter.getValue() === value2);
-    iter.next();
-    Expectation.expect(iter.getValue() === value3);
-    iter.next();
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    Expectation.expect(iter.getValue() === value6);
-    iter.next();
-    Expectation.expect(iter.getValue() === value4);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [1, 3, 4, 5, 7, 9]);
   }
 }
 
@@ -390,44 +326,21 @@ class SortSevenNumbers implements TestCase {
   public name = "SortSevenNumbers";
 
   public execute() {
-    // Execute
-    let value = 5;
-    let value2 = 3;
-    let value3 = 4;
-    let value4 = 9;
-    let value5 = 1;
-    let value6 = 7;
-    let value7 = 2;
+    // Prepare
     let linkedList = new LinkedList<number>();
-    linkedList.pushBack(value);
-    linkedList.pushBack(value2);
-    linkedList.pushBack(value3);
-    linkedList.pushBack(value4);
-    linkedList.pushBack(value5);
-    linkedList.pushBack(value6);
-    linkedList.pushBack(value7);
+    linkedList.pushBack(5);
+    linkedList.pushBack(3);
+    linkedList.pushBack(4);
+    linkedList.pushBack(9);
+    linkedList.pushBack(1);
+    linkedList.pushBack(7);
+    linkedList.pushBack(2);
 
     // Execute
     linkedList.sort();
 
     // Verify
-    let iter = linkedList.createLeftIterator();
-    assert(linkedList.getSize() === 7);
-    Expectation.expect(iter.getValue() === value5);
-    iter.next();
-    Expectation.expect(iter.getValue() === value7);
-    iter.next();
-    Expectation.expect(iter.getValue() === value2);
-    iter.next();
-    Expectation.expect(iter.getValue() === value3);
-    iter.next();
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    Expectation.expect(iter.getValue() === value6);
-    iter.next();
-    Expectation.expect(iter.getValue() === value4);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [1, 2, 3, 4, 5, 7, 9]);
   }
 }
 
@@ -435,7 +348,7 @@ class SortObjects implements TestCase {
   public name = "SortObjects";
 
   public execute() {
-    // Execute
+    // Prepare
     let value = { num: 5 };
     let value2 = { num: 3 };
     let value3 = { num: 4 };
@@ -452,17 +365,7 @@ class SortObjects implements TestCase {
     });
 
     // Verify
-    let iter = linkedList.createLeftIterator();
-    assert(linkedList.getSize() === 4);
-    Expectation.expect(iter.getValue() === value2);
-    iter.next();
-    Expectation.expect(iter.getValue() === value3);
-    iter.next();
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    Expectation.expect(iter.getValue() === value4);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [value2, value3, value, value4]);
   }
 }
 
@@ -470,7 +373,7 @@ class SortObjectsStable implements TestCase {
   public name = "SortObjectsStable";
 
   public execute() {
-    // Execute
+    // Prepare
     let value = { num: 5 };
     let value2 = { num: 3 };
     let value3 = { num: 3 };
@@ -487,17 +390,7 @@ class SortObjectsStable implements TestCase {
     });
 
     // Verify
-    let iter = linkedList.createLeftIterator();
-    assert(linkedList.getSize() === 4);
-    Expectation.expect(iter.getValue() === value2);
-    iter.next();
-    Expectation.expect(iter.getValue() === value3);
-    iter.next();
-    Expectation.expect(iter.getValue() === value);
-    iter.next();
-    Expectation.expect(iter.getValue() === value4);
-    iter.next();
-    assert(iter.isEnd());
+    verifyFromBothSides(linkedList, [value2, value3, value, value4]);
   }
 }
 
@@ -509,8 +402,10 @@ runTests("LinkedListTest", [
   new RemoveFirstOutOfTwo(),
   new RemoveSecondOutOfTwo(),
   new RemoveTwoOutOfTwo(),
-  new PopFirstOutOfTwo(),
-  new PopTwoOutOfTwo(),
+  new PopFrontFirstOutOfTwo(),
+  new PopFrontTwoOutOfTwo(),
+  new PopBackLastOutOfTwo(),
+  new PopBackTwoOutOfTwo(),
   new SortOneNumber(),
   new SortTwoNumbers(),
   new SortThreeNumbers(),
