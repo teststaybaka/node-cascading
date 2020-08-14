@@ -97,6 +97,10 @@ export class LinkedList<T> {
     this.size = 0;
   }
 
+  public getSize(): number {
+    return this.size;
+  }
+
   public createLeftIterator(): LinkedListIterator<T> {
     return new LinkedListIterator(this.start, this.end, this.start.next, () =>
       this.reduceSizeByOne()
@@ -119,8 +123,12 @@ export class LinkedList<T> {
     }
   }
 
-  public getSize(): number {
-    return this.size;
+  public toArray(): T[] {
+    let ret: T[] = [];
+    this.forEach((element): void => {
+      ret.push(element);
+    });
+    return ret;
   }
 
   public sort(shouldKeep?: (l: T, r: T) => boolean): void {
