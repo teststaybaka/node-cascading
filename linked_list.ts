@@ -2,11 +2,7 @@ class LinkedNode<T> {
   public prev: LinkedNode<T>;
   public next: LinkedNode<T>;
 
-  public constructor(private value?: T) {}
-
-  public getValue(): T {
-    return this.value;
-  }
+  public constructor(public value?: T) {}
 }
 
 export class LinkedListIterator<T> {
@@ -18,7 +14,7 @@ export class LinkedListIterator<T> {
   ) {}
 
   public getValue(): T {
-    return this.node.getValue();
+    return this.node.value;
   }
 
   public isStart(): boolean {
@@ -80,7 +76,7 @@ export class LinkedList<T> {
     this.start.next = this.start.next.next;
     this.start.next.prev = this.start;
     this.reduceSizeByOne();
-    return node.getValue();
+    return node.value;
   }
 
   public popBack(): T {
@@ -88,7 +84,7 @@ export class LinkedList<T> {
     this.end.prev = this.end.prev.prev;
     this.end.prev.next = this.end;
     this.reduceSizeByOne();
-    return node.getValue();
+    return node.value;
   }
 
   public clear(): void {
@@ -161,8 +157,8 @@ export class LinkedList<T> {
       lCount < length && rCount < length && rStart !== this.end;
 
     ) {
-      let lValue = lStart.getValue();
-      let rValue = rStart.getValue();
+      let lValue = lStart.value;
+      let rValue = rStart.value;
       if (
         (shouldKeep && shouldKeep(lValue, rValue)) ||
         (!shouldKeep && lValue <= rValue)
