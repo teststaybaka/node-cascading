@@ -1,71 +1,17 @@
-import { LOGGER } from "./logger";
-import { Command } from "commander";
-import "source-map-support/register";
-
 export interface TestCase {
   name: string;
   execute: () => void | Promise<void>;
 }
 
-export async function runTests(testSetName: string, testCases: TestCase[]) {
-  let program = new Command();
-  program.option(
-    "-c, --child <which>",
-    "The name of the test or its 0-based index."
-  );
-  program.parse();
+export interface Environment {
+  setUp: () => void | Promise<void>;
+  tearDown: () => void | Promise<void>;
+}
 
-  let child = program.child;
-  if (child === undefined) {
-    console.log("\n\x1b[35m%s test result:\x1b[0m", testSetName);
-    for (let i = 0, len = testCases.length; i < len; i++) {
-      let oldLog = console.log;
-      let oldInfo = console.info;
-      let oldWarn = console.warn;
-      let oldErr = console.error;
-      console.log = () => {};
-      console.info = () => {};
-      console.warn = () => {};
-      console.error = () => {};
-      LOGGER.switchToLocal();
-      let statusMsg: string;
-      try {
-        await testCases[i].execute();
-        if (Expectation.errors.length !== 0) {
-          throw new Error("There are errors from expectations.");
-        }
-        statusMsg = `\x1b[32mTest(${i}), ${testCases[i].name}, success!\x1b[0m`;
-      } catch (e) {
-        statusMsg = `\x1b[31mTest(${i}), ${testCases[i].name}, failed!\x1b[0m`;
-      }
-      console.log = oldLog;
-      console.info = oldInfo;
-      console.warn = oldWarn;
-      console.error = oldErr;
-      console.log(statusMsg);
-      Expectation.errors = [];
-    }
-  } else {
-    let whichChild = parseInt(child);
-    let testCaseToBeRun: TestCase;
-    if (!Number.isNaN(whichChild)) {
-      testCaseToBeRun = testCases[whichChild];
-    } else {
-      testCaseToBeRun = testCases.find((testCase): boolean => {
-        return testCase.name === child;
-      });
-    }
-
-    LOGGER.switchToLocal();
-    try {
-      await testCaseToBeRun.execute();
-    } catch (e) {
-      console.log(e);
-    }
-    for (let error of Expectation.errors) {
-      console.log(error);
-    }
-  }
+export interface TestSet {
+  name: string;
+  cases: TestCase[];
+  environment?: Environment;
 }
 
 export function assert(tested: boolean, action?: string) {

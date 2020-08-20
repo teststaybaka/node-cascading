@@ -3,12 +3,7 @@ import url = require("url");
 import { CONTENT_TYPE_BINARY_STREAM } from "./common";
 import { newInternalError } from "./errors";
 import { StaticDirHandler, StaticFileHandler } from "./static_handler";
-import {
-  Expectation,
-  TestCase,
-  assertRejection,
-  runTests,
-} from "./test_base";
+import { Expectation, TestCase, TestSet, assertRejection } from "./test_base";
 
 class FileHandlerMatchJpgFile implements TestCase {
   public name = "FileHandlerMatchJpgFile";
@@ -117,11 +112,14 @@ class DirHandlerPreventsParentDirectory implements TestCase {
   }
 }
 
-runTests("StaticHttpHandlerTest", [
-  new FileHandlerMatchJpgFile(),
-  new FileHandlerBinaryType(),
-  new DirHandlerUrlNotMatch(),
-  new DirHandlerMatchJpgFile(),
-  new DirHandlerMatchBinaryFile(),
-  new DirHandlerPreventsParentDirectory(),
-]);
+export let STATIC_HTTP_HANDLER_TEST: TestSet = {
+  name: "StaticHttpHandlerTest",
+  cases: [
+    new FileHandlerMatchJpgFile(),
+    new FileHandlerBinaryType(),
+    new DirHandlerUrlNotMatch(),
+    new DirHandlerMatchJpgFile(),
+    new DirHandlerMatchBinaryFile(),
+    new DirHandlerPreventsParentDirectory(),
+  ],
+};

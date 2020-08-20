@@ -1,5 +1,5 @@
 import { NavigationRouter } from "./navigation_router";
-import { Expectation, TestCase, runTests } from "./test_base";
+import { Expectation, TestCase, TestSet } from "./test_base";
 
 async function testMatchCurrentUrl(
   currentPathname: string,
@@ -268,16 +268,19 @@ class DispatchPushHistoryWithParams implements TestCase {
   }
 }
 
-runTests("NavigationRouterTests", [
-  new DispatchFromCurrentUrlMatched(),
-  new DispatchFromCurrentUrlNoMatch(),
-  new DispatchFromCurrentUrlWithoutParams(),
-  new DispatchFromCurrentUrlWithEmptyParams(),
-  new DispatchFromCurrentUrlWithInvalidParams(),
-  new DispatchFromCurrentUrlWithValidParams(),
-  new DispatchMatched(),
-  new DispatchNoMatch(),
-  new DispatchTwiceToHidePreviousHandler(),
-  new DispatchPushHistoryWithoutParams(),
-  new DispatchPushHistoryWithParams(),
-]);
+export let NAVIGATION_ROUTER_TESTS: TestSet = {
+  name: "NavigationRouterTests",
+  cases: [
+    new DispatchFromCurrentUrlMatched(),
+    new DispatchFromCurrentUrlNoMatch(),
+    new DispatchFromCurrentUrlWithoutParams(),
+    new DispatchFromCurrentUrlWithEmptyParams(),
+    new DispatchFromCurrentUrlWithInvalidParams(),
+    new DispatchFromCurrentUrlWithValidParams(),
+    new DispatchMatched(),
+    new DispatchNoMatch(),
+    new DispatchTwiceToHidePreviousHandler(),
+    new DispatchPushHistoryWithoutParams(),
+    new DispatchPushHistoryWithParams(),
+  ],
+};

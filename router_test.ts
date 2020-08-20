@@ -1,9 +1,9 @@
 import http = require("http");
 import url = require("url");
 import { newInternalError } from "./errors";
-import { HttpMethod, HttpResponse } from "./http_handler";
+import { HttpHandler, HttpMethod, HttpResponse } from "./http_handler";
 import { Router } from "./router";
-import { Expectation, TestCase, runTests } from "./test_base";
+import { Expectation, TestCase, TestSet } from "./test_base";
 
 class MockResponse {
   public statusCode: number;
@@ -47,28 +47,22 @@ class MockHttpServer {
   }
 }
 
-class MockHttpHandler {
+class MockHttpHandler implements HttpHandler {
   public urlRegex: RegExp;
   public method: HttpMethod;
   public error: any;
-  public handled = false;
   public res: HttpResponse = {
     contentType: "",
     content: "any content",
   };
+  public handleCalled = false;
 
-  public getMethod() {
-    return this.method;
-  }
-  public getUrlRegex() {
-    return this.urlRegex;
-  }
   public handle(
     logContext: string,
     request: http.IncomingMessage,
     url: url.Url
   ): Promise<HttpResponse> {
-    this.handled = true;
+    this.handleCalled = true;
     if (this.error) {
       return Promise.reject(this.error);
     } else {
@@ -111,10 +105,10 @@ class MatchHandler implements TestCase {
     // Verify
     Expectation.expect(mockResponse.statusCode === 200);
     Expectation.expect(mockResponse.endData === "any content");
-    Expectation.expect(!mockHandler.handled);
-    Expectation.expect(!mockHandler2.handled);
-    Expectation.expect(mockHandler3.handled);
-    Expectation.expect(!mockHandler4.handled);
+    Expectation.expect(!mockHandler.handleCalled);
+    Expectation.expect(!mockHandler2.handleCalled);
+    Expectation.expect(mockHandler3.handleCalled);
+    Expectation.expect(!mockHandler4.handleCalled);
   }
 }
 
@@ -141,7 +135,7 @@ class RejectHandler implements TestCase {
     // Verify
     Expectation.expect(mockResponse.statusCode === 500);
     Expectation.expectContains(mockResponse.endData, "Reject handle.");
-    Expectation.expect(mockHandler.handled);
+    Expectation.expect(mockHandler.handleCalled);
   }
 }
 
@@ -167,12 +161,11 @@ class NotFound implements TestCase {
     // Verify
     Expectation.expect(mockResponse.statusCode === 500);
     Expectation.expectContains(mockResponse.endData, "Not Found");
-    Expectation.expect(!mockHandler.handled);
+    Expectation.expect(!mockHandler.handleCalled);
   }
 }
 
-runTests("RouterTest", [
-  new MatchHandler(),
-  new RejectHandler(),
-  new NotFound(),
-]);
+export let ROUTER_TEST: TestSet = {
+  name: "RouterTest",
+  cases: [new MatchHandler(), new RejectHandler(), new NotFound()],
+};

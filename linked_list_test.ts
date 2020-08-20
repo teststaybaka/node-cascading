@@ -1,5 +1,5 @@
 import { LinkedList } from "./linked_list";
-import { Expectation, TestCase, assert, runTests } from "./test_base";
+import { Expectation, TestCase, TestSet, assert } from "./test_base";
 
 function verifyFromBothSides<T>(linkedList: LinkedList<T>, expectedList: T[]) {
   assert(linkedList.getSize() === expectedList.length);
@@ -394,25 +394,28 @@ class SortObjectsStable implements TestCase {
   }
 }
 
-runTests("LinkedListTest", [
-  new CreateEmptyList(),
-  new PushBackOneValue(),
-  new PushBackTwoValues(),
-  new ClearWithTwoValues(),
-  new RemoveFirstOutOfTwo(),
-  new RemoveSecondOutOfTwo(),
-  new RemoveTwoOutOfTwo(),
-  new PopFrontFirstOutOfTwo(),
-  new PopFrontTwoOutOfTwo(),
-  new PopBackLastOutOfTwo(),
-  new PopBackTwoOutOfTwo(),
-  new SortOneNumber(),
-  new SortTwoNumbers(),
-  new SortThreeNumbers(),
-  new SortFourNumbers(),
-  new SortFiveNumbers(),
-  new SortSixNumbers(),
-  new SortSevenNumbers(),
-  new SortObjects(),
-  new SortObjectsStable(),
-]);
+export let LINKED_LIST_TEST: TestSet = {
+  name: "LinkedListTest",
+  cases: [
+    new CreateEmptyList(),
+    new PushBackOneValue(),
+    new PushBackTwoValues(),
+    new ClearWithTwoValues(),
+    new RemoveFirstOutOfTwo(),
+    new RemoveSecondOutOfTwo(),
+    new RemoveTwoOutOfTwo(),
+    new PopFrontFirstOutOfTwo(),
+    new PopFrontTwoOutOfTwo(),
+    new PopBackLastOutOfTwo(),
+    new PopBackTwoOutOfTwo(),
+    new SortOneNumber(),
+    new SortTwoNumbers(),
+    new SortThreeNumbers(),
+    new SortFourNumbers(),
+    new SortFiveNumbers(),
+    new SortSixNumbers(),
+    new SortSevenNumbers(),
+    new SortObjects(),
+    new SortObjectsStable(),
+  ],
+};

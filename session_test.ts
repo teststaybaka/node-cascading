@@ -1,14 +1,18 @@
 import { newUnauthenticatedError } from "./errors";
-import { SecureSessionGenerator, SecureSessionVerifier } from "./session";
+import {
+  SecureSessionGenerator,
+  SecureSessionVerifier,
+  Signer,
+} from "./session";
 import {
   TestCase,
+  TestSet,
   assert,
   assertError,
   assertThrow,
-  runTests,
 } from "./test_base";
 
-class MockSigner {
+class MockSigner extends Signer {
   public signature: string = null;
 
   public sign(str: string) {
@@ -164,13 +168,16 @@ class GenerateSessionSuccess implements TestCase {
   }
 }
 
-runTests("SessionTest", [
-  new InvalidRawSession(),
-  new InvalidSignature(),
-  new InvalidSessionJsonData(),
-  new NoTimestampInSession(),
-  new NoUserIdInSession(),
-  new SessionExpired(),
-  new ExtractUserIdSuccess(),
-  new GenerateSessionSuccess(),
-]);
+export let SESSION_TEST: TestSet = {
+  name: "SessionTest",
+  cases: [
+    new InvalidRawSession(),
+    new InvalidSignature(),
+    new InvalidSessionJsonData(),
+    new NoTimestampInSession(),
+    new NoUserIdInSession(),
+    new SessionExpired(),
+    new ExtractUserIdSuccess(),
+    new GenerateSessionSuccess(),
+  ],
+};

@@ -4,7 +4,7 @@ import {
   NamedTypeKind,
 } from "./named_type_descriptor";
 import { parseNamedTypeUntyped } from "./named_type_util";
-import { Expectation, TestCase, assert, runTests } from "./test_base";
+import { Expectation, TestCase, TestSet, assert } from "./test_base";
 
 function testParseEnum(input: string | number, expected: number) {
   // Prepare
@@ -277,13 +277,16 @@ class ParseMessageNestedSkipUnmatched implements TestCase {
   }
 }
 
-runTests("MessageUtilTest", [
-  new ParseEnumValueFromNumber(),
-  new ParseEnumValueFromExceededNumber(),
-  new ParseEnumValueFromString(),
-  new ParseEnumValueFromNonexistingString(),
-  new ParseMessagePrimtivesAllPopulated(),
-  new ParseMessagePrimtivesSkipUnmatched(),
-  new ParseMessageNestedAllPopulated(),
-  new ParseMessageNestedSkipUnmatched(),
-]);
+export let MESSAGE_UTIL_TEST: TestSet = {
+  name: "MessageUtilTest",
+  cases: [
+    new ParseEnumValueFromNumber(),
+    new ParseEnumValueFromExceededNumber(),
+    new ParseEnumValueFromString(),
+    new ParseEnumValueFromNonexistingString(),
+    new ParseMessagePrimtivesAllPopulated(),
+    new ParseMessagePrimtivesSkipUnmatched(),
+    new ParseMessageNestedAllPopulated(),
+    new ParseMessageNestedSkipUnmatched(),
+  ],
+};
