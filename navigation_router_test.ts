@@ -268,8 +268,8 @@ class DispatchPushHistoryWithParams implements TestCase {
   }
 }
 
-export let NAVIGATION_ROUTER_TESTS: TestSet = {
-  name: "NavigationRouterTests",
+export let NAVIGATION_ROUTER_TEST: TestSet = {
+  name: "NavigationRouterTest",
   cases: [
     new DispatchFromCurrentUrlMatched(),
     new DispatchFromCurrentUrlNoMatch(),

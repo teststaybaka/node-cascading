@@ -277,8 +277,8 @@ class ParseMessageNestedSkipUnmatched implements TestCase {
   }
 }
 
-export let MESSAGE_UTIL_TEST: TestSet = {
-  name: "MessageUtilTest",
+export let NAMED_TYPE_UTIL_TEST: TestSet = {
+  name: "NamedTypeUilTest",
   cases: [
     new ParseEnumValueFromNumber(),
     new ParseEnumValueFromExceededNumber(),
