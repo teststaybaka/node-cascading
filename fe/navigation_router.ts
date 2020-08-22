@@ -1,5 +1,5 @@
 import querystring = require("querystring");
-import { LazyConstructor } from "./lazy_constructor";
+import { LazyConstructor } from "../lazy_constructor";
 import { NavigationHandlerUntyped } from "./navigation_handler";
 
 export class NavigationRouter {

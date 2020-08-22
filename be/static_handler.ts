@@ -10,10 +10,10 @@ import {
   CONTENT_TYPE_PNG,
   GZIP_EXT,
   findWithDefault,
-} from "./common";
-import { newInternalError } from "./errors";
+} from "../common";
+import { newInternalError } from "../errors";
+import { UrlToModule } from "../url_to_module";
 import { HttpHandler, HttpMethod, HttpResponse } from "./http_handler";
-import { UrlToModule } from "./url_to_module";
 
 let MIME_TYPES = new Map<string, string>([
   [".jpeg", CONTENT_TYPE_JPEG],

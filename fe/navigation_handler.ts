@@ -1,4 +1,4 @@
-import { parseNamedType } from "./named_type_util";
+import { parseNamedType } from "../named_type_util";
 import { NavigationDescriptor } from "./navigation_descriptor";
 
 export interface NavigationHandlerUntyped {

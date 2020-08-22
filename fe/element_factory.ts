@@ -1,4 +1,4 @@
-import { Ref } from "./ref";
+import { Ref } from "../ref";
 
 class ElementFactory {
   private static appendChildren(

@@ -1,4 +1,4 @@
-import { NamedTypeDescriptor } from "./named_type_descriptor";
+import { NamedTypeDescriptor } from "../named_type_descriptor";
 
 export interface NavigationDescriptor<Params> {
   name: string;

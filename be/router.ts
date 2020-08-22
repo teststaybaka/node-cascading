@@ -7,14 +7,14 @@ import {
   CONTENT_TYPE_TEXT,
   FILE_NOT_EXISTS_ERROR_CODE,
   URL_TO_MODULES_CONFIG_FILE,
-} from "./common";
-import { ErrorType, TypedError, newInternalError } from "./errors";
+} from "../common";
+import { ErrorType, TypedError, newInternalError } from "../errors";
+import { parseJsonString } from "../named_type_util";
+import { URL_TO_MODULE_MAPPING, UrlToModule } from "../url_to_module";
 import { HttpHandler, HttpMethod, HttpResponse } from "./http_handler";
 import { LOGGER } from "./logger";
-import { parseJsonString } from "./named_type_util";
 import { PreflightHandler } from "./preflight_handler";
 import { StaticHtmlHandler } from "./static_handler";
-import { URL_TO_MODULE_MAPPING, UrlToModule } from "./url_to_module";
 
 // TODO: Rate limit requests.
 export class Router {

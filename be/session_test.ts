@@ -1,4 +1,4 @@
-import { newUnauthenticatedError } from "./errors";
+import { newUnauthenticatedError } from "../errors";
 import {
   SecureSessionGenerator,
   SecureSessionVerifier,
@@ -10,7 +10,7 @@ import {
   assert,
   assertError,
   assertThrow,
-} from "./test_base";
+} from "../test_base";
 
 class MockSigner extends Signer {
   public signature: string = null;

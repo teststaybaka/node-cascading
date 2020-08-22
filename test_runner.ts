@@ -1,4 +1,4 @@
-import { LOGGER } from "./logger";
+import { LOGGER } from "./be/logger";
 import { Expectation, TestSet } from "./test_base";
 import { Command } from "commander";
 import "source-map-support/register";

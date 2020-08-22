@@ -1,9 +1,9 @@
 import http = require("http");
 import url = require("url");
-import { newInternalError } from "./errors";
+import { newInternalError } from "../errors";
+import { Expectation, TestCase, TestSet } from "../test_base";
 import { HttpHandler, HttpMethod, HttpResponse } from "./http_handler";
 import { Router } from "./router";
-import { Expectation, TestCase, TestSet } from "./test_base";
 
 class MockResponse {
   public statusCode: number;

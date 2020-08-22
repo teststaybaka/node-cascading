@@ -1,5 +1,5 @@
+import { Expectation, TestCase, TestSet } from "../test_base";
 import { NavigationRouter } from "./navigation_router";
-import { Expectation, TestCase, TestSet } from "./test_base";
 
 async function testMatchCurrentUrl(
   currentPathname: string,

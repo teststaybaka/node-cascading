@@ -1,9 +1,9 @@
 import fs = require("fs");
 import url = require("url");
-import { CONTENT_TYPE_BINARY_STREAM } from "./common";
-import { newInternalError } from "./errors";
+import { CONTENT_TYPE_BINARY_STREAM } from "../common";
+import { newInternalError } from "../errors";
+import { Expectation, TestCase, TestSet, assertRejection } from "../test_base";
 import { StaticDirHandler, StaticFileHandler } from "./static_handler";
-import { Expectation, TestCase, TestSet, assertRejection } from "./test_base";
 
 class FileHandlerMatchJpgFile implements TestCase {
   public name = "FileHandlerMatchJpgFile";

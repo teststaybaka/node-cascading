@@ -1,5 +1,5 @@
 import crypto = require("crypto");
-import { newUnauthenticatedError } from "./errors";
+import { newUnauthenticatedError } from "../errors";
 
 let SESSION_SEPARATOR = "|";
 
