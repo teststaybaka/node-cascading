@@ -15,6 +15,12 @@ export let FILE_NOT_EXISTS_ERROR_CODE = "ENOENT";
 export let GZIP_EXT = ".gz";
 export let URL_TO_MODULES_CONFIG_FILE = "url_to_modules.json";
 
+export enum HttpMethod {
+  GET,
+  POST,
+  OPTIONS,
+}
+
 export function findWithDefault<Key, Value>(
   map: Map<Key, Value>,
   key: Key,

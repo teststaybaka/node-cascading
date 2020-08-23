@@ -1,13 +1,13 @@
 import http = require("http");
 import url = require("url");
-import { CONTENT_TYPE_JSON, SESSION_HEADER } from "../common";
+import { CONTENT_TYPE_JSON, HttpMethod, SESSION_HEADER } from "../common";
 import { parseNamedType } from "../named_type_util";
 import {
   SignedInServiceDescriptor,
   SignedOutServiceDescriptor,
 } from "../service_descriptor";
 import { STREAM_READER } from "../stream_reader";
-import { HttpHandler, HttpMethod, HttpResponse } from "./http_handler";
+import { HttpHandler, HttpResponse } from "./http_handler";
 import { SecureSessionVerifier } from "./session";
 
 export interface SignedInServiceHandler<Request, Response> {

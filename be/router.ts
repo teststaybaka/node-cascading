@@ -6,12 +6,13 @@ import {
   ACCEPT_ENCODING_HEADER,
   CONTENT_TYPE_TEXT,
   FILE_NOT_EXISTS_ERROR_CODE,
+  HttpMethod,
   URL_TO_MODULES_CONFIG_FILE,
 } from "../common";
 import { ErrorType, TypedError, newInternalError } from "../errors";
 import { parseJsonString } from "../named_type_util";
 import { URL_TO_MODULE_MAPPING, UrlToModule } from "../url_to_module";
-import { HttpHandler, HttpMethod, HttpResponse } from "./http_handler";
+import { HttpHandler, HttpResponse } from "./http_handler";
 import { LOGGER } from "./logger";
 import { PreflightHandler } from "./preflight_handler";
 import { StaticHtmlHandler } from "./static_handler";

@@ -5,7 +5,7 @@ export enum ErrorType {
 }
 
 export class TypedError extends Error {
-  constructor(public errorType: ErrorType, message: string, err?: any) {
+  constructor(public errorType: number, message: string, err?: any) {
     super(message);
     if (err && err.message) {
       this.message = `${message} ${err.message}`;

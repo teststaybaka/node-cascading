@@ -13,5 +13,3 @@ export class SessionStorage {
     localStorage.removeItem(SessionStorage.NAME);
   }
 }
-
-export let SESSION_STORAGE = new SessionStorage();
