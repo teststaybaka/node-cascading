@@ -8,14 +8,16 @@ import {
 } from "../service_descriptor";
 import { SessionStorage } from "./session_storage";
 
-// TODO: Switch local and prod environment.
-let HOST_NAME = "locahost";
-
 export class ServiceClient {
+  public hostName: string;
   public onUnauthenticated: () => Promise<void> | void;
   public onError: (errorMessage: string) => Promise<void> | void;
 
   public constructor(private sessionStorage: SessionStorage) {}
+
+  public static create(hostName: string): ServiceClient {
+    return new ServiceClient(new SessionStorage());
+  }
 
   public async fetchSignedOut<Request, Response>(
     request: Request,
@@ -45,11 +47,14 @@ export class ServiceClient {
     headers: Headers,
     onUnauthenticated?: () => Promise<void> | void
   ): Promise<Response> {
-    let response = await fetch(`${HOST_NAME}${serviceDescriptor.pathname}`, {
-      method: HttpMethod[HttpMethod.POST],
-      body: JSON.stringify(request),
-      headers: headers,
-    });
+    let response = await fetch(
+      `${this.hostName}${serviceDescriptor.pathname}`,
+      {
+        method: HttpMethod[HttpMethod.POST],
+        body: JSON.stringify(request),
+        headers: headers,
+      }
+    );
     if (!response.ok) {
       let errorMessage = await response.text();
       let error = new TypedError(response.status, errorMessage);
@@ -66,5 +71,3 @@ export class ServiceClient {
     return parseNamedType(data, serviceDescriptor.responseDescriptor);
   }
 }
-
-export let SERVICE_CLIENT = new ServiceClient(new SessionStorage());
