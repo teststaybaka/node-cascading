@@ -7,7 +7,7 @@ export async function runTests(testSets: TestSet[]) {
   let program = new Command();
   program.option("-s, --set-name <name>", "The name of the test set.");
   program.option(
-    "-c, --case-name [name]",
+    "-c, --case-name <name>",
     "The name of the test case within a test set."
   );
   program.parse();
