@@ -57,17 +57,24 @@ class ElementFactory {
     return assignRef(ref, this.input(attributeStr));
   }
 
-  public button(attributeStr: string): HTMLButtonElement {
+  public button(
+    attributeStr: string,
+    ...childElements: HTMLElement[]
+  ): HTMLButtonElement {
     let ele = document.createElement("template");
     ele.innerHTML = `<button ${attributeStr}/>`;
-    return ele.content.firstElementChild as HTMLButtonElement;
+    return ElementFactory.appendChildren(
+      ele.content.firstElementChild,
+      childElements
+    ) as HTMLButtonElement;
   }
 
   public buttonRef(
     ref: Ref<HTMLButtonElement>,
-    attributeStr: string
+    attributeStr: string,
+    ...childElements: HTMLElement[]
   ): HTMLButtonElement {
-    return assignRef(ref, this.button(attributeStr));
+    return assignRef(ref, this.button(attributeStr, ...childElements));
   }
 
   public a(attributeStr: string): HTMLAnchorElement {
