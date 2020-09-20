@@ -13,7 +13,7 @@ class ElementFactory {
 
   public div(
     attributeStr: string,
-    ...childElements: HTMLElement[]
+    ...childElements: Element[]
   ): HTMLDivElement {
     let ele = document.createElement("template");
     ele.innerHTML = `<div ${attributeStr}></div>`;
@@ -26,7 +26,7 @@ class ElementFactory {
   public divRef(
     ref: Ref<HTMLDivElement>,
     attributeStr: string,
-    ...childElements: HTMLElement[]
+    ...childElements: Element[]
   ): HTMLDivElement {
     return assignRef(ref, this.div(attributeStr, ...childElements));
   }
@@ -59,7 +59,7 @@ class ElementFactory {
 
   public button(
     attributeStr: string,
-    ...childElements: HTMLElement[]
+    ...childElements: Element[]
   ): HTMLButtonElement {
     let ele = document.createElement("template");
     ele.innerHTML = `<button ${attributeStr}/>`;
@@ -72,7 +72,7 @@ class ElementFactory {
   public buttonRef(
     ref: Ref<HTMLButtonElement>,
     attributeStr: string,
-    ...childElements: HTMLElement[]
+    ...childElements: Element[]
   ): HTMLButtonElement {
     return assignRef(ref, this.button(attributeStr, ...childElements));
   }
