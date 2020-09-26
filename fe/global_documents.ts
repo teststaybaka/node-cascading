@@ -1,4 +1,4 @@
-class GlobalDcouments {
+export class GlobalDcouments {
   public constructor(private documents: Document[]) {}
 
   public hideWhenMousedown(hide: (event: Event) => void): void {
