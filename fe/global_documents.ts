@@ -1,9 +1,14 @@
 export class GlobalDocuments {
   public constructor(private documents: Document[]) {}
 
-  public hideWhenMousedown(hide: (event: Event) => void): void {
+  public hideWhenMousedown(carvedElement: HTMLElement, hide: () => void): void {
     for (let document of this.documents) {
-      document.addEventListener("mousedown", hide);
+      document.addEventListener("mousedown", (event) => {
+        if (carvedElement.contains(event.target as HTMLElement)) {
+          return;
+        }
+        hide();
+      });
     }
   }
 }
