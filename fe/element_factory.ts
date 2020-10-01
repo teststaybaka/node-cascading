@@ -31,6 +31,14 @@ class ElementFactory {
     return assignRef(ref, this.div(attributeStr, ...childElements));
   }
 
+  public text(content: string): Text {
+    return document.createTextNode(content);
+  }
+
+  public textRef(ref: Ref<Text>, content: string): Text {
+    return assignRef(ref, this.text(content));
+  }
+
   public image(attributeStr: string): HTMLImageElement {
     let ele = document.createElement("template");
     ele.innerHTML = `<img ${attributeStr}/>`;
