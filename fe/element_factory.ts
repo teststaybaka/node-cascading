@@ -25,11 +25,11 @@ class ElementFactory {
     return assignRef(ref, this.div(attributeStr, ...childNodes));
   }
 
-  public text(content: string): Text {
+  public text(content = ""): Text {
     return document.createTextNode(content);
   }
 
-  public textRef(ref: Ref<Text>, content: string): Text {
+  public textRef(ref: Ref<Text>, content = ""): Text {
     return assignRef(ref, this.text(content));
   }
 
