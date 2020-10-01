@@ -61,22 +61,22 @@ class ElementFactory {
 
   public button(
     attributeStr: string,
-    ...childElements: Element[]
+    ...childNodes: Node[]
   ): HTMLButtonElement {
     let ele = document.createElement("template");
     ele.innerHTML = `<button ${attributeStr}/>`;
     return ElementFactory.appendChildren(
       ele.content.firstElementChild,
-      childElements
+      childNodes
     ) as HTMLButtonElement;
   }
 
   public buttonRef(
     ref: Ref<HTMLButtonElement>,
     attributeStr: string,
-    ...childElements: Element[]
+    ...childNodes: Node[]
   ): HTMLButtonElement {
-    return assignRef(ref, this.button(attributeStr, ...childElements));
+    return assignRef(ref, this.button(attributeStr, ...childNodes));
   }
 
   public a(attributeStr: string): HTMLAnchorElement {
