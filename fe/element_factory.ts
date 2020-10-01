@@ -1,34 +1,28 @@
 import { Ref, assignRef } from "../ref";
 
 class ElementFactory {
-  private static appendChildren(
-    parent: Element,
-    childElements: Element[]
-  ): Element {
-    for (let childElement of childElements) {
-      parent.appendChild(childElement);
+  private static appendChildren(parent: Node, childNodes: Node[]): Node {
+    for (let childNode of childNodes) {
+      parent.appendChild(childNode);
     }
     return parent;
   }
 
-  public div(
-    attributeStr: string,
-    ...childElements: Element[]
-  ): HTMLDivElement {
+  public div(attributeStr: string, ...childNodes: Node[]): HTMLDivElement {
     let ele = document.createElement("template");
     ele.innerHTML = `<div ${attributeStr}></div>`;
     return ElementFactory.appendChildren(
       ele.content.firstElementChild,
-      childElements
+      childNodes
     ) as HTMLDivElement;
   }
 
   public divRef(
     ref: Ref<HTMLDivElement>,
     attributeStr: string,
-    ...childElements: Element[]
+    ...childNodes: Node[]
   ): HTMLDivElement {
-    return assignRef(ref, this.div(attributeStr, ...childElements));
+    return assignRef(ref, this.div(attributeStr, ...childNodes));
   }
 
   public text(content: string): Text {
