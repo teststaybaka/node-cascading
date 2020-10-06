@@ -1,7 +1,7 @@
 import http = require("http");
 import url = require("url");
-import { HttpMethod } from "../common";
 import { newInternalError } from "../errors";
+import { HttpMethod } from "../http_method";
 import { Expectation, TestCase, TestSet } from "../test_base";
 import { HttpHandler, HttpResponse } from "./http_handler";
 import { Router } from "./router";

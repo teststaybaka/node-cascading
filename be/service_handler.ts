@@ -1,6 +1,7 @@
 import http = require("http");
 import url = require("url");
-import { CONTENT_TYPE_JSON, HttpMethod, SESSION_HEADER } from "../common";
+import { CONTENT_TYPE_JSON, SESSION_HEADER } from "../constants";
+import { HttpMethod } from "../http_method";
 import { parseNamedType } from "../named_type_util";
 import {
   SignedInServiceDescriptor,

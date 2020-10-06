@@ -1,6 +1,6 @@
 import fs = require("fs");
 import url = require("url");
-import { CONTENT_TYPE_BINARY_STREAM } from "../common";
+import { CONTENT_TYPE_BINARY_STREAM } from "../constants";
 import { newInternalError } from "../errors";
 import { Expectation, TestCase, TestSet, assertRejection } from "../test_base";
 import { StaticDirHandler, StaticFileHandler } from "./static_handler";

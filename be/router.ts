@@ -6,10 +6,10 @@ import {
   ACCEPT_ENCODING_HEADER,
   CONTENT_TYPE_TEXT,
   FILE_NOT_EXISTS_ERROR_CODE,
-  HttpMethod,
   URL_TO_MODULES_CONFIG_FILE,
-} from "../common";
+} from "../constants";
 import { ErrorType, TypedError, newInternalError } from "../errors";
+import { HttpMethod } from "../http_method";
 import { parseJsonString } from "../named_type_util";
 import { URL_TO_MODULE_MAPPING, UrlToModule } from "../url_to_module";
 import { HttpHandler, HttpResponse } from "./http_handler";

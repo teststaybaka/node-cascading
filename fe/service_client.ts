@@ -1,5 +1,6 @@
-import { HttpMethod, SESSION_HEADER } from "../common";
+import { SESSION_HEADER } from "../constants";
 import { ErrorType, TypedError } from "../errors";
+import { HttpMethod } from "../http_method";
 import { parseNamedType } from "../named_type_util";
 import {
   ServiceDescriptor,

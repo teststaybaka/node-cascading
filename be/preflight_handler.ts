@@ -1,6 +1,7 @@
 import http = require("http");
 import url = require("url");
-import { CONTENT_TYPE_TEXT, HttpMethod } from "../common";
+import { CONTENT_TYPE_TEXT } from "../constants";
+import { HttpMethod } from "../http_method";
 import { HttpHandler, HttpResponse } from "./http_handler";
 
 export class PreflightHandler implements HttpHandler {

@@ -9,10 +9,10 @@ import {
   CONTENT_TYPE_JPEG,
   CONTENT_TYPE_PNG,
   GZIP_EXT,
-  HttpMethod,
-  findWithDefault,
-} from "../common";
+} from "../constants";
 import { newInternalError } from "../errors";
+import { HttpMethod } from "../http_method";
+import { findWithDefault } from "../map_util";
 import { UrlToModule } from "../url_to_module";
 import { HttpHandler, HttpResponse } from "./http_handler";
 

@@ -1,6 +1,6 @@
 import http = require("http");
 import url = require("url");
-import { HttpMethod } from "../common";
+import { HttpMethod } from "../http_method";
 
 export interface HttpResponse {
   contentType: string;
