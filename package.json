@@ -1,6 +1,6 @@
 {
   "name": "selfage",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Yet another http/https framework",
   "repository": {
     "type": "git",
