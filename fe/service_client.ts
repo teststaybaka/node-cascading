@@ -16,10 +16,6 @@ export class ServiceClient {
 
   public constructor(private sessionStorage: SessionStorage) {}
 
-  public static create(hostName: string): ServiceClient {
-    return new ServiceClient(new SessionStorage());
-  }
-
   public async fetchSignedOut<Request, Response>(
     request: Request,
     serviceDescriptor: SignedOutServiceDescriptor<Request, Response>
