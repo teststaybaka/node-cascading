@@ -55,8 +55,11 @@ export class ServiceClient {
     if (!response.ok) {
       let errorMessage = await response.text();
       let error = new TypedError(response.status, errorMessage);
-      if (onUnauthenticated && response.status === ErrorType.Unauthenticated) {
-        onUnauthenticated();
+      if (response.status === ErrorType.Unauthenticated) {
+        await this.sessionStorage.clear();
+        if (onUnauthenticated) {
+          onUnauthenticated();
+        }
       }
       if (this.onError) {
         this.onError(error.message);
