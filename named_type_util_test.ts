@@ -142,7 +142,7 @@ class ParseMessagePrimtivesSkipUnmatched implements TestCase {
     Expectation.expect(parsed.random === undefined);
     assert(parsed.idHistory.length === 1);
     Expectation.expect(parsed.idHistory[0] === 11);
-    Expectation.expect(parsed.isPaidHistory.length === 0);
+    Expectation.expect(parsed.isPaidHistory === undefined);
     Expectation.expect(parsed.nicknameHistory.length === 0);
     assert(parsed.emailHistory.length === 2);
     Expectation.expect(parsed.emailHistory[0] === "test1@test.com");
@@ -278,7 +278,7 @@ class ParseMessageNestedSkipUnmatched implements TestCase {
 }
 
 export let NAMED_TYPE_UTIL_TEST: TestSet = {
-  name: "NamedTypeUilTest",
+  name: "NamedTypeUtilTest",
   cases: [
     new ParseEnumValueFromNumber(),
     new ParseEnumValueFromExceededNumber(),

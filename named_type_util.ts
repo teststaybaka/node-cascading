@@ -97,14 +97,14 @@ function parseMessage(raw: any, messageFields: MessageField[]): any {
 
     if (!field.isArray) {
       ret[field.name] = parseField(raw[field.name]);
+    } else if (!Array.isArray(raw[field.name])) {
+      ret[field.name] = undefined;
     } else {
       let values: any[] = [];
-      if (Array.isArray(raw[field.name])) {
-        for (let element of raw[field.name]) {
-          let parsedValue = parseField(element);
-          if (parsedValue !== undefined) {
-            values.push(parsedValue);
-          }
+      for (let element of raw[field.name]) {
+        let parsedValue = parseField(element);
+        if (parsedValue !== undefined) {
+          values.push(parsedValue);
         }
       }
       ret[field.name] = values;
