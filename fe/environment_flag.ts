@@ -1,6 +1,6 @@
-import { ENVIRONMENT, Environment } from "./environment";
-import { findWithDefault } from "./map_util";
-import { parseJsonString } from "./named_type_util";
+import { ENVIRONMENT, Environment } from "../environment";
+import { findWithDefault } from "../map_util";
+import { parseJsonString } from "../named_type_util";
 
 declare let environment_flag: string;
 
