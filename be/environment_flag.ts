@@ -4,6 +4,7 @@ import { ENVIRONMENT, Environment } from "../environment";
 import { findWithDefault } from "../map_util";
 import { parseJsonString } from "../named_type_util";
 
+// An exception to load the flag value on startup.
 let ENVIRONMENT_FLAG = fs.readFileSync(ENVIRONMENT_FLAG_VALUE_FILE).toString();
 
 export function mapEnvironment<Value>(
