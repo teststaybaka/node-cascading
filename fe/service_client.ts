@@ -7,6 +7,7 @@ import {
   SignedInServiceDescriptor,
   SignedOutServiceDescriptor,
 } from "../service_descriptor";
+import { LocalSessionStorage } from "./local_session_storage";
 import { SessionStorage } from "./session_storage";
 
 export class ServiceClient {
@@ -15,6 +16,10 @@ export class ServiceClient {
   public onError: (errorMessage: string) => Promise<void> | void;
 
   public constructor(private sessionStorage: SessionStorage) {}
+
+  public static createWithLocalStorage(): ServiceClient {
+    return new ServiceClient(new LocalSessionStorage());
+  }
 
   public async fetchSignedOut<Request, Response>(
     request: Request,
