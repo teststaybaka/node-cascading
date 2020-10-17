@@ -79,22 +79,18 @@ class ElementFactory {
     return assignRef(ref, this.button(attributeStr, ...childNodes));
   }
 
-  public a(attributeStr: string, text?: Text): HTMLAnchorElement {
+  public a(attributeStr: string, text: Text): HTMLAnchorElement {
     let ele = document.createElement("template");
     ele.innerHTML = `<a ${attributeStr}/>`;
-    if (text) {
-      return ElementFactory.appendChildren(ele.content.firstElementChild, [
-        text,
-      ]) as HTMLAnchorElement;
-    } else {
-      return ele.content.firstElementChild as HTMLAnchorElement;
-    }
+    return ElementFactory.appendChildren(ele.content.firstElementChild, [
+      text,
+    ]) as HTMLAnchorElement;
   }
 
   public aRef(
     ref: Ref<HTMLAnchorElement>,
     attributeStr: string,
-    text?: Text
+    text: Text
   ): HTMLAnchorElement {
     return assignRef(ref, this.a(attributeStr, text));
   }
