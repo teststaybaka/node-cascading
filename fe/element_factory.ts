@@ -79,17 +79,24 @@ class ElementFactory {
     return assignRef(ref, this.button(attributeStr, ...childNodes));
   }
 
-  public a(attributeStr: string): HTMLAnchorElement {
+  public a(attributeStr: string, text?: Text): HTMLAnchorElement {
     let ele = document.createElement("template");
     ele.innerHTML = `<a ${attributeStr}/>`;
-    return ele.content.firstElementChild as HTMLAnchorElement;
+    if (text) {
+      return ElementFactory.appendChildren(ele.content.firstElementChild, [
+        text,
+      ]) as HTMLAnchorElement;
+    } else {
+      return ele.content.firstElementChild as HTMLAnchorElement;
+    }
   }
 
   public aRef(
     ref: Ref<HTMLAnchorElement>,
-    attributeStr: string
+    attributeStr: string,
+    text?: Text
   ): HTMLAnchorElement {
-    return assignRef(ref, this.a(attributeStr));
+    return assignRef(ref, this.a(attributeStr, text));
   }
 
   public svg(attributeStr: string, svgPath: SVGPathElement): SVGSVGElement {
