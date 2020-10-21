@@ -12,6 +12,7 @@ import { HttpHandler, HttpResponse } from "./http_handler";
 import { SecureSessionVerifier } from "./session";
 
 export interface SignedInServiceHandler<Request, Response> {
+  serviceDescriptor: SignedInServiceDescriptor<Request, Response>;
   handle: (
     logContext: string,
     request: Request,
@@ -20,18 +21,20 @@ export interface SignedInServiceHandler<Request, Response> {
 }
 
 export interface SignedOutServiceHandler<Request, Response> {
+  serviceDescriptor: SignedOutServiceDescriptor<Request, Response>;
   handle: (logContext: string, request: Request) => Promise<Response>;
 }
 
-export class BaseSignedInServiceHandler<Request, Response>
+export class SuperSignedInServiceHandler<Request, Response>
   implements HttpHandler {
   public method = HttpMethod.POST;
-  public urlRegex = new RegExp(`^${this.serviceDescriptor.pathname}$`);
+  public urlRegex = new RegExp(
+    `^${this.serviceHandler.serviceDescriptor.pathname}$`
+  );
   private secureSessionVerifier = SecureSessionVerifier.create();
 
   public constructor(
-    private serviceDescriptor: SignedInServiceDescriptor<Request, Response>,
-    private subServiceHandler: SignedInServiceHandler<Request, Response>
+    private serviceHandler: SignedInServiceHandler<Request, Response>
   ) {}
 
   public async handle(
@@ -42,9 +45,12 @@ export class BaseSignedInServiceHandler<Request, Response>
     let session = request.headers[SESSION_HEADER.toLowerCase()] as string;
     let userId = this.secureSessionVerifier.verifyAndGetUserId(session);
     let obj = await STREAM_READER.readJson(request);
-    let response = await this.subServiceHandler.handle(
+    let response = await this.serviceHandler.handle(
       logContext,
-      parseNamedType(obj, this.serviceDescriptor.requestDescriptor),
+      parseNamedType(
+        obj,
+        this.serviceHandler.serviceDescriptor.requestDescriptor
+      ),
       userId
     );
     let httpResponse: HttpResponse = {
@@ -55,14 +61,15 @@ export class BaseSignedInServiceHandler<Request, Response>
   }
 }
 
-export class BaseSignedOutServiceHandler<Request, Response>
+export class SuperSignedOutServiceHandler<Request, Response>
   implements HttpHandler {
   public method = HttpMethod.POST;
-  public urlRegex = new RegExp(`^${this.serviceDescriptor.pathname}$`);
+  public urlRegex = new RegExp(
+    `^${this.serviceHandler.serviceDescriptor.pathname}$`
+  );
 
   public constructor(
-    private serviceDescriptor: SignedOutServiceDescriptor<Request, Response>,
-    private subServiceHandler: SignedOutServiceHandler<Request, Response>
+    private serviceHandler: SignedOutServiceHandler<Request, Response>
   ) {}
 
   public async handle(
@@ -71,9 +78,12 @@ export class BaseSignedOutServiceHandler<Request, Response>
     parsedUrl: url.Url
   ): Promise<HttpResponse> {
     let obj = await STREAM_READER.readJson(request);
-    let response = await this.subServiceHandler.handle(
+    let response = await this.serviceHandler.handle(
       logContext,
-      parseNamedType(obj, this.serviceDescriptor.requestDescriptor)
+      parseNamedType(
+        obj,
+        this.serviceHandler.serviceDescriptor.requestDescriptor
+      )
     );
     let httpResponse: HttpResponse = {
       contentType: CONTENT_TYPE_JSON,
