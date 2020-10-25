@@ -1,14 +1,14 @@
 import {
   MessageFieldType,
-  NamedTypeDescriptorUntyped,
+  NamedTypeDescriptor,
   NamedTypeKind,
 } from "./named_type_descriptor";
-import { parseNamedTypeUntyped } from "./named_type_util";
+import { parseNamedType } from "./named_type_util";
 import { Expectation, TestCase, TestSet, assert } from "./test_base";
 
 function testParseEnum(input: string | number, expected: number) {
   // Prepare
-  let colorEnumDescriptor: NamedTypeDescriptorUntyped = {
+  let colorEnumDescriptor: NamedTypeDescriptor<any> = {
     name: "Color",
     kind: NamedTypeKind.ENUM,
     enumValues: [
@@ -19,7 +19,7 @@ function testParseEnum(input: string | number, expected: number) {
   };
 
   // Execute
-  let parsed = parseNamedTypeUntyped(input, colorEnumDescriptor);
+  let parsed = parseNamedType(input, colorEnumDescriptor);
 
   // Verify
   Expectation.expect(parsed === expected);
@@ -59,7 +59,7 @@ class ParseEnumValueFromNonexistingString implements TestCase {
 
 function testParsingMessageWithPrimitiveTypes(raw: any) {
   // Prepare
-  let userMessageDescriptor: NamedTypeDescriptorUntyped = {
+  let userMessageDescriptor: NamedTypeDescriptor<any> = {
     name: "User",
     kind: NamedTypeKind.MESSAGE,
     messageFields: [
@@ -75,7 +75,7 @@ function testParsingMessageWithPrimitiveTypes(raw: any) {
   };
 
   // Execute
-  let parsed = parseNamedTypeUntyped(raw, userMessageDescriptor);
+  let parsed = parseNamedType(raw, userMessageDescriptor);
 
   // Verify
   return parsed;
@@ -152,7 +152,7 @@ class ParseMessagePrimtivesSkipUnmatched implements TestCase {
 
 function testParsingNestedMessages(raw: any) {
   // Prepare
-  let colorEnumDescriptor: NamedTypeDescriptorUntyped = {
+  let colorEnumDescriptor: NamedTypeDescriptor<any> = {
     name: "Color",
     kind: NamedTypeKind.ENUM,
     enumValues: [
@@ -161,7 +161,7 @@ function testParsingNestedMessages(raw: any) {
       { name: "GREEN", value: 2 },
     ],
   };
-  let userInfoMessaeDescriptor: NamedTypeDescriptorUntyped = {
+  let userInfoMessaeDescriptor: NamedTypeDescriptor<any> = {
     name: "UserInfo",
     kind: NamedTypeKind.MESSAGE,
     messageFields: [
@@ -187,12 +187,12 @@ function testParsingNestedMessages(raw: any) {
       },
     ],
   };
-  let creditCardMessageDescriptor: NamedTypeDescriptorUntyped = {
+  let creditCardMessageDescriptor: NamedTypeDescriptor<any> = {
     name: "CreditCard",
     kind: NamedTypeKind.MESSAGE,
     messageFields: [{ name: "cardNumber", type: MessageFieldType.NUMBER }],
   };
-  let userMessageDescriptor: NamedTypeDescriptorUntyped = {
+  let userMessageDescriptor: NamedTypeDescriptor<any> = {
     name: "User",
     kind: NamedTypeKind.MESSAGE,
     messageFields: [
@@ -212,7 +212,7 @@ function testParsingNestedMessages(raw: any) {
   };
 
   // Execute
-  let parsed = parseNamedTypeUntyped(raw, userMessageDescriptor);
+  let parsed = parseNamedType(raw, userMessageDescriptor);
 
   // Verify
   return parsed;
