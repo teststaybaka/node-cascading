@@ -3,7 +3,6 @@ import {
   MessageField,
   MessageFieldType,
   NamedTypeDescriptor,
-  NamedTypeDescriptorUntyped,
   NamedTypeKind,
 } from "./named_type_descriptor";
 
@@ -11,27 +10,13 @@ export function parseJsonString<T>(
   json: string,
   descriptor: NamedTypeDescriptor<T>
 ): T {
-  return parseJsonStringUntyped(json, descriptor) as T;
-}
-
-export function parseJsonStringUntyped(
-  json: string,
-  descriptor: NamedTypeDescriptorUntyped
-): any {
-  return parseNamedTypeUntyped(JSON.parse(json), descriptor);
+  return parseNamedType<T>(JSON.parse(json), descriptor);
 }
 
 export function parseNamedType<T>(
   raw: any,
   descriptor: NamedTypeDescriptor<T>
 ): T {
-  return parseNamedTypeUntyped(raw, descriptor);
-}
-
-export function parseNamedTypeUntyped(
-  raw: any,
-  descriptor: NamedTypeDescriptorUntyped
-): any {
   if (descriptor.kind === NamedTypeKind.ENUM) {
     return parseEnum(raw, descriptor.enumValues);
   } else if (descriptor.kind === NamedTypeKind.MESSAGE) {
@@ -39,7 +24,7 @@ export function parseNamedTypeUntyped(
   }
 }
 
-function parseEnum<T>(raw: any, enumValues: EnumValue[]): any {
+function parseEnum(raw: any, enumValues: EnumValue[]): any {
   let enumValueFound: EnumValue;
   if (typeof raw === "string") {
     enumValueFound = enumValues.find((enumValue): boolean => {
@@ -91,7 +76,7 @@ function parseMessage(raw: any, messageFields: MessageField[]): any {
       };
     } else if (field.type === MessageFieldType.NAMED_TYPE) {
       parseField = (rawField: any): any => {
-        return parseNamedTypeUntyped(rawField, field.namedTypeDescriptor);
+        return parseNamedType<any>(rawField, field.namedTypeDescriptor);
       };
     }
 

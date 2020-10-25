@@ -18,15 +18,13 @@ export enum MessageFieldType {
 export interface MessageField {
   name: string;
   type: MessageFieldType;
-  namedTypeDescriptor?: NamedTypeDescriptorUntyped;
+  namedTypeDescriptor?: NamedTypeDescriptor<any>;
   isArray?: boolean;
 }
 
-export interface NamedTypeDescriptorUntyped {
+export interface NamedTypeDescriptor<T> {
   name: string;
   kind: NamedTypeKind;
   enumValues?: EnumValue[];
   messageFields?: MessageField[];
 }
-
-export interface NamedTypeDescriptor<T> extends NamedTypeDescriptorUntyped {}
