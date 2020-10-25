@@ -76,7 +76,7 @@ function parseMessage(raw: any, messageFields: MessageField[]): any {
       };
     } else if (field.type === MessageFieldType.NAMED_TYPE) {
       parseField = (rawField: any): any => {
-        return parseNamedType<any>(rawField, field.namedTypeDescriptor);
+        return parseNamedType(rawField, field.namedTypeDescriptor);
       };
     }
 
