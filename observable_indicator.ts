@@ -1,1 +1,1 @@
-export interface ObservableInidcator {}
+export interface ObservableIndicator {}
