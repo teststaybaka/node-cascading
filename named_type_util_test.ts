@@ -4,6 +4,7 @@ import {
   NamedTypeKind,
 } from "./named_type_descriptor";
 import { parseNamedType } from "./named_type_util";
+import { ObservableArray } from "./observable_array";
 import { Expectation, TestCase, TestSet, assert } from "./test_base";
 
 function testParseEnum(input: string | number, expected: number) {
@@ -277,6 +278,95 @@ class ParseMessageNestedSkipUnmatched implements TestCase {
   }
 }
 
+class Home {
+  [key: string]: any;
+}
+
+class Page {
+  [key: string]: any;
+}
+
+class ParseObservable implements TestCase {
+  public name = "ParseObservable";
+
+  public execute() {
+    // Prepare
+    let homeDescriptor: NamedTypeDescriptor<Home> = {
+      name: "Home",
+      kind: NamedTypeKind.OBSERVABLE,
+      Clazz: Home,
+      messageFields: [
+        {
+          name: "style",
+          type: MessageFieldType.NUMBER,
+        },
+      ],
+    };
+    let recommendedDescriptor: NamedTypeDescriptor<any> = {
+      name: "Recommended",
+      kind: NamedTypeKind.MESSAGE,
+      messageFields: [
+        {
+          name: "adName",
+          type: MessageFieldType.STRING,
+        },
+      ],
+    };
+    let pageDescriptor: NamedTypeDescriptor<Page> = {
+      name: "Page",
+      kind: NamedTypeKind.OBSERVABLE,
+      Clazz: Page,
+      messageFields: [
+        {
+          name: "showHome",
+          type: MessageFieldType.BOOLEAN,
+        },
+        {
+          name: "items",
+          type: MessageFieldType.STRING,
+          isArray: true,
+        },
+        {
+          name: "home",
+          type: MessageFieldType.NAMED_TYPE,
+          namedTypeDescriptor: homeDescriptor,
+        },
+        {
+          name: "recommended",
+          type: MessageFieldType.NAMED_TYPE,
+          namedTypeDescriptor: recommendedDescriptor,
+        },
+      ],
+    };
+
+    // Execute
+    let parsed = parseNamedType(
+      {
+        showHome: true,
+        items: ["watch this!", "horrible!"],
+        home: {
+          style: 10,
+        },
+        recommended: {
+          adName: "Local shop!",
+        },
+      },
+      pageDescriptor
+    );
+
+    // Verify
+    assert(parsed instanceof Page);
+    assert(parsed.showHome);
+    assert(parsed.items instanceof ObservableArray);
+    assert(parsed.items.length() === 2);
+    assert(parsed.items.get(0) === "watch this!");
+    assert(parsed.items.get(1) === "horrible!");
+    assert(parsed.home instanceof Home);
+    assert(parsed.home.style === 10);
+    assert(parsed.recommended.adName === "Local shop!");
+  }
+}
+
 export let NAMED_TYPE_UTIL_TEST: TestSet = {
   name: "NamedTypeUtilTest",
   cases: [
@@ -288,5 +378,6 @@ export let NAMED_TYPE_UTIL_TEST: TestSet = {
     new ParseMessagePrimtivesSkipUnmatched(),
     new ParseMessageNestedAllPopulated(),
     new ParseMessageNestedSkipUnmatched(),
+    new ParseObservable(),
   ],
 };

@@ -1,6 +1,7 @@
 export enum NamedTypeKind {
   ENUM = 1,
   MESSAGE = 2,
+  OBSERVABLE = 3,
 }
 
 export interface EnumValue {
@@ -25,6 +26,7 @@ export interface MessageField {
 export interface NamedTypeDescriptor<T> {
   name: string;
   kind: NamedTypeKind;
+  Clazz?: new () => T;
   enumValues?: EnumValue[];
   messageFields?: MessageField[];
 }
