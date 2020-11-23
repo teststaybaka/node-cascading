@@ -5,7 +5,6 @@ import {
   NamedTypeDescriptor,
   NamedTypeKind,
 } from "./named_type_descriptor";
-import { ObservableArray } from "./observable_array";
 
 export function parseJsonString<T>(
   json: string,
@@ -21,14 +20,7 @@ export function parseNamedType<T>(
   if (descriptor.kind === NamedTypeKind.ENUM) {
     return parseEnum(raw, descriptor.enumValues);
   } else if (descriptor.kind === NamedTypeKind.MESSAGE) {
-    return parseMessage(raw, descriptor.messageFields, Object, Array);
-  } else if (descriptor.kind === NamedTypeKind.OBSERVABLE) {
-    return parseMessage(
-      raw,
-      descriptor.messageFields,
-      descriptor.Clazz,
-      ObservableArray
-    );
+    return parseMessage(raw, descriptor.messageFields, descriptor.factoryFn);
   }
 }
 
@@ -52,15 +44,14 @@ function parseEnum(raw: any, enumValues: EnumValue[]): any {
 
 function parseMessage(
   raw: any,
-  messageFields: MessageField[],
-  Clazz: new () => any,
-  ArrayClazz: new () => Array<any> | ObservableArray<any>
+  messageFields: MessageField<any>[],
+  factoryFn?: () => any
 ): any {
   if (!raw || typeof raw !== "object") {
     return undefined;
   }
 
-  let ret = new Clazz();
+  let ret = factoryFn();
   for (let field of messageFields) {
     let parseField: (rawField: any) => any;
     if (field.type === MessageFieldType.NUMBER) {
@@ -93,12 +84,12 @@ function parseMessage(
       };
     }
 
-    if (!field.isArray) {
+    if (!field.arrayFactoryFn) {
       ret[field.name] = parseField(raw[field.name]);
     } else if (!Array.isArray(raw[field.name])) {
       ret[field.name] = undefined;
     } else {
-      let values = new ArrayClazz();
+      let values = field.arrayFactoryFn();
       for (let element of raw[field.name]) {
         let parsedValue = parseField(element);
         if (parsedValue !== undefined) {

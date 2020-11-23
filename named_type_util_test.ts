@@ -4,7 +4,6 @@ import {
   NamedTypeKind,
 } from "./named_type_descriptor";
 import { parseNamedType } from "./named_type_util";
-import { ObservableArray } from "./observable_array";
 import { Expectation, TestCase, TestSet, assert } from "./test_base";
 
 function testParseEnum(input: string | number, expected: number) {
@@ -63,15 +62,42 @@ function testParsingMessageWithPrimitiveTypes(raw: any) {
   let userMessageDescriptor: NamedTypeDescriptor<any> = {
     name: "User",
     kind: NamedTypeKind.MESSAGE,
+    factoryFn: () => {
+      return new Object();
+    },
     messageFields: [
       { name: "id", type: MessageFieldType.NUMBER },
       { name: "isPaid", type: MessageFieldType.BOOLEAN },
       { name: "nickname", type: MessageFieldType.STRING },
       { name: "email", type: MessageFieldType.STRING },
-      { name: "idHistory", type: MessageFieldType.NUMBER, isArray: true },
-      { name: "isPaidHistory", type: MessageFieldType.BOOLEAN, isArray: true },
-      { name: "nicknameHistory", type: MessageFieldType.STRING, isArray: true },
-      { name: "emailHistory", type: MessageFieldType.STRING, isArray: true },
+      {
+        name: "idHistory",
+        type: MessageFieldType.NUMBER,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
+      },
+      {
+        name: "isPaidHistory",
+        type: MessageFieldType.BOOLEAN,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
+      },
+      {
+        name: "nicknameHistory",
+        type: MessageFieldType.STRING,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
+      },
+      {
+        name: "emailHistory",
+        type: MessageFieldType.STRING,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
+      },
     ],
   };
 
@@ -165,6 +191,9 @@ function testParsingNestedMessages(raw: any) {
   let userInfoMessaeDescriptor: NamedTypeDescriptor<any> = {
     name: "UserInfo",
     kind: NamedTypeKind.MESSAGE,
+    factoryFn: () => {
+      return new Object();
+    },
     messageFields: [
       {
         name: "intro",
@@ -184,18 +213,26 @@ function testParsingNestedMessages(raw: any) {
         name: "colorHistory",
         type: MessageFieldType.NAMED_TYPE,
         namedTypeDescriptor: colorEnumDescriptor,
-        isArray: true,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
       },
     ],
   };
   let creditCardMessageDescriptor: NamedTypeDescriptor<any> = {
     name: "CreditCard",
     kind: NamedTypeKind.MESSAGE,
+    factoryFn: () => {
+      return new Object();
+    },
     messageFields: [{ name: "cardNumber", type: MessageFieldType.NUMBER }],
   };
   let userMessageDescriptor: NamedTypeDescriptor<any> = {
     name: "User",
     kind: NamedTypeKind.MESSAGE,
+    factoryFn: () => {
+      return new Object();
+    },
     messageFields: [
       { name: "id", type: MessageFieldType.NUMBER },
       {
@@ -207,7 +244,9 @@ function testParsingNestedMessages(raw: any) {
         name: "creditCards",
         type: MessageFieldType.NAMED_TYPE,
         namedTypeDescriptor: creditCardMessageDescriptor,
-        isArray: true,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
       },
     ],
   };
@@ -278,95 +317,6 @@ class ParseMessageNestedSkipUnmatched implements TestCase {
   }
 }
 
-class Home {
-  [key: string]: any;
-}
-
-class Page {
-  [key: string]: any;
-}
-
-class ParseObservable implements TestCase {
-  public name = "ParseObservable";
-
-  public execute() {
-    // Prepare
-    let homeDescriptor: NamedTypeDescriptor<Home> = {
-      name: "Home",
-      kind: NamedTypeKind.OBSERVABLE,
-      Clazz: Home,
-      messageFields: [
-        {
-          name: "style",
-          type: MessageFieldType.NUMBER,
-        },
-      ],
-    };
-    let recommendedDescriptor: NamedTypeDescriptor<any> = {
-      name: "Recommended",
-      kind: NamedTypeKind.MESSAGE,
-      messageFields: [
-        {
-          name: "adName",
-          type: MessageFieldType.STRING,
-        },
-      ],
-    };
-    let pageDescriptor: NamedTypeDescriptor<Page> = {
-      name: "Page",
-      kind: NamedTypeKind.OBSERVABLE,
-      Clazz: Page,
-      messageFields: [
-        {
-          name: "showHome",
-          type: MessageFieldType.BOOLEAN,
-        },
-        {
-          name: "items",
-          type: MessageFieldType.STRING,
-          isArray: true,
-        },
-        {
-          name: "home",
-          type: MessageFieldType.NAMED_TYPE,
-          namedTypeDescriptor: homeDescriptor,
-        },
-        {
-          name: "recommended",
-          type: MessageFieldType.NAMED_TYPE,
-          namedTypeDescriptor: recommendedDescriptor,
-        },
-      ],
-    };
-
-    // Execute
-    let parsed = parseNamedType(
-      {
-        showHome: true,
-        items: ["watch this!", "horrible!"],
-        home: {
-          style: 10,
-        },
-        recommended: {
-          adName: "Local shop!",
-        },
-      },
-      pageDescriptor
-    );
-
-    // Verify
-    assert(parsed instanceof Page);
-    assert(parsed.showHome);
-    assert(parsed.items instanceof ObservableArray);
-    assert(parsed.items.length() === 2);
-    assert(parsed.items.get(0) === "watch this!");
-    assert(parsed.items.get(1) === "horrible!");
-    assert(parsed.home instanceof Home);
-    assert(parsed.home.style === 10);
-    assert(parsed.recommended.adName === "Local shop!");
-  }
-}
-
 export let NAMED_TYPE_UTIL_TEST: TestSet = {
   name: "NamedTypeUtilTest",
   cases: [
@@ -378,6 +328,5 @@ export let NAMED_TYPE_UTIL_TEST: TestSet = {
     new ParseMessagePrimtivesSkipUnmatched(),
     new ParseMessageNestedAllPopulated(),
     new ParseMessageNestedSkipUnmatched(),
-    new ParseObservable(),
   ],
 };

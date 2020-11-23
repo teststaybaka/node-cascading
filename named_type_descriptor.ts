@@ -1,7 +1,8 @@
+import { ObservableArray } from "./observable_array";
+
 export enum NamedTypeKind {
   ENUM = 1,
   MESSAGE = 2,
-  OBSERVABLE = 3,
 }
 
 export interface EnumValue {
@@ -16,17 +17,17 @@ export enum MessageFieldType {
   NAMED_TYPE = 4,
 }
 
-export interface MessageField {
+export interface MessageField<T> {
   name: string;
   type: MessageFieldType;
-  namedTypeDescriptor?: NamedTypeDescriptor<any>;
-  isArray?: boolean;
+  namedTypeDescriptor?: NamedTypeDescriptor<T>;
+  arrayFactoryFn?: () => Array<T> | ObservableArray<T>;
 }
 
 export interface NamedTypeDescriptor<T> {
   name: string;
   kind: NamedTypeKind;
-  Clazz?: new () => T;
   enumValues?: EnumValue[];
-  messageFields?: MessageField[];
+  factoryFn?: () => T;
+  messageFields?: MessageField<any>[];
 }
