@@ -63,6 +63,25 @@ class PushSecond implements TestCase {
   }
 }
 
+class Iterate implements TestCase {
+  public name = "Iterate";
+
+  public execute() {
+    // Prepare
+    let arr = new ObservableArray<number>(new NonPropagator());
+    arr.push(100);
+    arr.push(200);
+    let i = 0;
+
+    // Execute
+    for (let element of arr) {
+      // Verify
+      assert(element === arr.get(i));
+      i++;
+    }
+  }
+}
+
 class SetFirst implements TestCase {
   public name = "SetFirst";
 
@@ -256,6 +275,7 @@ export let OBSERVABLE_ARRAY_TEST: TestSet = {
   cases: [
     new PushFirst(),
     new PushSecond(),
+    new Iterate(),
     new SetFirst(),
     new SetSecond(),
     new PopFirst(),
