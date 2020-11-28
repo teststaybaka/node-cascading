@@ -1,9 +1,8 @@
 import {
-  NestedObservablePropagator,
-  NonPropagator,
+  ObservableNestedArray,
   ObservableArray,
 } from "./observable_array";
-import { ObservableIndicator } from "./observable_indicator";
+import { Observable } from "./observable";
 import { TestCase, TestSet, assert } from "./test_base";
 
 class PushFirst implements TestCase {
@@ -11,7 +10,7 @@ class PushFirst implements TestCase {
 
   public execute() {
     // Prepare
-    let arr = new ObservableArray<number>(new NonPropagator());
+    let arr = new ObservableArray<number>();
     let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
       elementChangeCount++;
@@ -19,9 +18,9 @@ class PushFirst implements TestCase {
       assert(newValue === 100);
       assert(oldValue === undefined);
     };
-    let overallChangeCount = 0;
-    arr.onOverallChange = () => {
-      overallChangeCount++;
+    let changeCount = 0;
+    arr.onChange = () => {
+      changeCount++;
     };
 
     // Execute
@@ -30,7 +29,7 @@ class PushFirst implements TestCase {
     // Verify
     assert(arr.get(0) === 100);
     assert(elementChangeCount === 1);
-    assert(overallChangeCount === 1);
+    assert(changeCount === 1);
   }
 }
 
@@ -39,7 +38,7 @@ class PushSecond implements TestCase {
 
   public execute() {
     // Prepare
-    let arr = new ObservableArray<number>(new NonPropagator());
+    let arr = new ObservableArray<number>();
     arr.push(100);
     let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
@@ -48,9 +47,9 @@ class PushSecond implements TestCase {
       assert(newValue === 200);
       assert(oldValue === undefined);
     };
-    let overallChangeCount = 0;
-    arr.onOverallChange = () => {
-      overallChangeCount++;
+    let changeCount = 0;
+    arr.onChange = () => {
+      changeCount++;
     };
 
     // Execute
@@ -59,7 +58,7 @@ class PushSecond implements TestCase {
     // Verify
     assert(arr.get(1) === 200);
     assert(elementChangeCount === 1);
-    assert(overallChangeCount === 1);
+    assert(changeCount === 1);
   }
 }
 
@@ -68,7 +67,7 @@ class Iterate implements TestCase {
 
   public execute() {
     // Prepare
-    let arr = new ObservableArray<number>(new NonPropagator());
+    let arr = new ObservableArray<number>();
     arr.push(100);
     arr.push(200);
     let i = 0;
@@ -87,7 +86,7 @@ class SetFirst implements TestCase {
 
   public execute() {
     // Prepare
-    let arr = new ObservableArray<number>(new NonPropagator());
+    let arr = new ObservableArray<number>();
     arr.push(100);
     arr.push(200);
     let elementChangeCount = 0;
@@ -97,9 +96,9 @@ class SetFirst implements TestCase {
       assert(newValue === 1);
       assert(oldValue === 100);
     };
-    let overallChangeCount = 0;
-    arr.onOverallChange = () => {
-      overallChangeCount++;
+    let changeCount = 0;
+    arr.onChange = () => {
+      changeCount++;
     };
 
     // Execute
@@ -108,7 +107,7 @@ class SetFirst implements TestCase {
     // Verify
     assert(arr.get(0) === 1);
     assert(elementChangeCount === 1);
-    assert(overallChangeCount === 1);
+    assert(changeCount === 1);
   }
 }
 
@@ -117,7 +116,7 @@ class SetSecond implements TestCase {
 
   public execute() {
     // Prepare
-    let arr = new ObservableArray<number>(new NonPropagator());
+    let arr = new ObservableArray<number>();
     arr.push(100);
     arr.push(200);
     let elementChangeCount = 0;
@@ -127,9 +126,9 @@ class SetSecond implements TestCase {
       assert(newValue === 2);
       assert(oldValue === 200);
     };
-    let overallChangeCount = 0;
-    arr.onOverallChange = () => {
-      overallChangeCount++;
+    let changeCount = 0;
+    arr.onChange = () => {
+      changeCount++;
     };
 
     // Execute
@@ -138,7 +137,7 @@ class SetSecond implements TestCase {
     // Verify
     assert(arr.get(1) === 2);
     assert(elementChangeCount === 1);
-    assert(overallChangeCount === 1);
+    assert(changeCount === 1);
   }
 }
 
@@ -147,7 +146,7 @@ class PopFirst implements TestCase {
 
   public execute() {
     // Prepare
-    let arr = new ObservableArray<number>(new NonPropagator());
+    let arr = new ObservableArray<number>();
     arr.push(100);
     let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
@@ -156,9 +155,9 @@ class PopFirst implements TestCase {
       assert(newValue === undefined);
       assert(oldValue === 100);
     };
-    let overallChangeCount = 0;
-    arr.onOverallChange = () => {
-      overallChangeCount++;
+    let changeCount = 0;
+    arr.onChange = () => {
+      changeCount++;
     };
 
     // Execute
@@ -167,7 +166,7 @@ class PopFirst implements TestCase {
     // Verify
     assert(value === 100);
     assert(elementChangeCount === 1);
-    assert(overallChangeCount === 1);
+    assert(changeCount === 1);
   }
 }
 
@@ -176,7 +175,7 @@ class PopSecond implements TestCase {
 
   public execute() {
     // Prepare
-    let arr = new ObservableArray<number>(new NonPropagator());
+    let arr = new ObservableArray<number>();
     arr.push(100);
     arr.push(200);
     let elementChangeCount = 0;
@@ -186,9 +185,9 @@ class PopSecond implements TestCase {
       assert(newValue === undefined);
       assert(oldValue === 200);
     };
-    let overallChangeCount = 0;
-    arr.onOverallChange = () => {
-      overallChangeCount++;
+    let changeCount = 0;
+    arr.onChange = () => {
+      changeCount++;
     };
 
     // Execute
@@ -197,12 +196,12 @@ class PopSecond implements TestCase {
     // Verify
     assert(value === 200);
     assert(elementChangeCount === 1);
-    assert(overallChangeCount === 1);
+    assert(changeCount === 1);
   }
 }
 
-class Fact implements ObservableIndicator {
-  public onOverallChange: () => void;
+class Fact implements Observable {
+  public onChange: () => void;
 
   public emitInitialEvents(): void {}
 }
@@ -212,28 +211,20 @@ class PushObservable implements TestCase {
 
   public execute() {
     // Prepare
-    let arr = new ObservableArray<Fact>(new NestedObservablePropagator());
+    let arr = new ObservableNestedArray<Fact>();
     let fact = new Fact();
     
     // Execute
     arr.push(fact);
     
     // Verify
-    let elementChangeCount = 0;
-    arr.onElementChange = (index, newValue, oldValue) => {
-      elementChangeCount++;
-      assert(index === 0);
-      assert(newValue === fact);
-      assert(oldValue === fact);
+    let changeCount = 0;
+    arr.onChange = () => {
+      changeCount++;
     };
-    let overallChangeCount = 0;
-    arr.onOverallChange = () => {
-      overallChangeCount++;
-    };
-    fact.onOverallChange();
+    fact.onChange();
     assert(arr.get(0) === fact);
-    assert(elementChangeCount === 1);
-    assert(overallChangeCount === 1);
+    assert(changeCount === 1);
   }
 }
 
@@ -242,7 +233,7 @@ class SetObservable implements TestCase {
 
   public execute() {
     // Prepare
-    let arr = new ObservableArray<Fact>(new NestedObservablePropagator());
+    let arr = new ObservableNestedArray<Fact>();
     let fact = new Fact();
     arr.push(fact);
     let fact2 = new Fact();
@@ -251,22 +242,14 @@ class SetObservable implements TestCase {
     arr.set(0, fact2);
     
     // Verify
-    let elementChangeCount = 0;
-    arr.onElementChange = (index, newValue, oldValue) => {
-      elementChangeCount++;
-      assert(index === 0);
-      assert(newValue === fact2);
-      assert(oldValue === fact2);
+    let changeCount = 0;
+    arr.onChange = () => {
+      changeCount++;
     };
-    let overallChangeCount = 0;
-    arr.onOverallChange = () => {
-      overallChangeCount++;
-    };
-    fact2.onOverallChange();
+    fact2.onChange();
     assert(arr.get(0) === fact2);
-    assert(elementChangeCount === 1);
-    assert(overallChangeCount === 1);
-    assert(fact.onOverallChange === undefined);
+    assert(changeCount === 1);
+    assert(fact.onChange === undefined);
   }
 }
 
