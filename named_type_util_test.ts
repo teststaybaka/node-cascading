@@ -62,7 +62,9 @@ function testParsingMessageWithPrimitiveTypes(raw: any) {
   let userMessageDescriptor: NamedTypeDescriptor<any> = {
     name: "User",
     kind: NamedTypeKind.MESSAGE,
-    Clazz: Object,
+    factoryFn: () => {
+      return new Object();
+    },
     messageFields: [
       { name: "id", type: MessageFieldType.NUMBER },
       { name: "isPaid", type: MessageFieldType.BOOLEAN },
@@ -71,22 +73,30 @@ function testParsingMessageWithPrimitiveTypes(raw: any) {
       {
         name: "idHistory",
         type: MessageFieldType.NUMBER,
-        ArrayClazz: Array,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
       },
       {
         name: "isPaidHistory",
         type: MessageFieldType.BOOLEAN,
-        ArrayClazz: Array,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
       },
       {
         name: "nicknameHistory",
         type: MessageFieldType.STRING,
-        ArrayClazz: Array,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
       },
       {
         name: "emailHistory",
         type: MessageFieldType.STRING,
-        ArrayClazz: Array,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
       },
     ],
   };
@@ -181,7 +191,9 @@ function testParsingNestedMessages(raw: any) {
   let userInfoMessaeDescriptor: NamedTypeDescriptor<any> = {
     name: "UserInfo",
     kind: NamedTypeKind.MESSAGE,
-    Clazz: Object,
+    factoryFn: () => {
+      return new Object();
+    },
     messageFields: [
       {
         name: "intro",
@@ -201,20 +213,26 @@ function testParsingNestedMessages(raw: any) {
         name: "colorHistory",
         type: MessageFieldType.NAMED_TYPE,
         namedTypeDescriptor: colorEnumDescriptor,
-        ArrayClazz: Array,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
       },
     ],
   };
   let creditCardMessageDescriptor: NamedTypeDescriptor<any> = {
     name: "CreditCard",
     kind: NamedTypeKind.MESSAGE,
-    Clazz: Object,
+    factoryFn: () => {
+      return new Object();
+    },
     messageFields: [{ name: "cardNumber", type: MessageFieldType.NUMBER }],
   };
   let userMessageDescriptor: NamedTypeDescriptor<any> = {
     name: "User",
     kind: NamedTypeKind.MESSAGE,
-    Clazz: Object,
+    factoryFn: () => {
+      return new Object();
+    },
     messageFields: [
       { name: "id", type: MessageFieldType.NUMBER },
       {
@@ -226,7 +244,9 @@ function testParsingNestedMessages(raw: any) {
         name: "creditCards",
         type: MessageFieldType.NAMED_TYPE,
         namedTypeDescriptor: creditCardMessageDescriptor,
-        ArrayClazz: Array,
+        arrayFactoryFn: () => {
+          return new Array<any>();
+        },
       },
     ],
   };

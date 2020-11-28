@@ -1,4 +1,4 @@
-import { ObservableArray, ObservableNestedArray } from "./observable_array";
+import { ObservableArray } from "./observable_array";
 
 export enum NamedTypeKind {
   ENUM = 1,
@@ -17,20 +17,17 @@ export enum MessageFieldType {
   NAMED_TYPE = 4,
 }
 
-export interface MessageField {
+export interface MessageField<T> {
   name: string;
   type: MessageFieldType;
-  namedTypeDescriptor?: NamedTypeDescriptor<any>;
-  ArrayClazz?: new () =>
-    | Array<any>
-    | ObservableArray<any>
-    | ObservableNestedArray<any>;
+  namedTypeDescriptor?: NamedTypeDescriptor<T>;
+  arrayFactoryFn?: () => Array<T> | ObservableArray<T>;
 }
 
 export interface NamedTypeDescriptor<T> {
   name: string;
   kind: NamedTypeKind;
   enumValues?: EnumValue[];
-  Clazz?: new () => any;
-  messageFields?: MessageField[];
+  factoryFn?: () => T;
+  messageFields?: MessageField<any>[];
 }

@@ -35,13 +35,17 @@ export interface UrlToModuleMapping {
 export let URL_TO_MODULE_MAPPING: NamedTypeDescriptor<UrlToModuleMapping> = {
   name: "UrlToModuleMapping",
   kind: NamedTypeKind.MESSAGE,
-  Clazz: Object,
+  factoryFn: () => {
+    return new Object();
+  },
   messageFields: [
     {
       name: "urlToModules",
       type: MessageFieldType.NAMED_TYPE,
       namedTypeDescriptor: URL_TO_MODULE,
-      ArrayClazz: Array,
+      arrayFactoryFn: () => {
+        return new Array<UrlToModule>();
+      },
     },
   ],
 };
