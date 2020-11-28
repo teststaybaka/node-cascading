@@ -20,7 +20,7 @@ export function parseNamedType<T>(
   if (descriptor.kind === NamedTypeKind.ENUM) {
     return parseEnum(raw, descriptor.enumValues);
   } else if (descriptor.kind === NamedTypeKind.MESSAGE) {
-    return parseMessage(raw, descriptor.messageFields, descriptor.factoryFn);
+    return parseMessage(raw, descriptor.messageFields, descriptor.Clazz);
   }
 }
 
@@ -44,14 +44,14 @@ function parseEnum(raw: any, enumValues: EnumValue[]): any {
 
 function parseMessage(
   raw: any,
-  messageFields: MessageField<any>[],
-  factoryFn?: () => any
+  messageFields: MessageField[],
+  Clazz?: new () => any
 ): any {
   if (!raw || typeof raw !== "object") {
     return undefined;
   }
 
-  let ret = factoryFn();
+  let ret = new Clazz();
   for (let field of messageFields) {
     let parseField: (rawField: any) => any;
     if (field.type === MessageFieldType.NUMBER) {
@@ -84,12 +84,12 @@ function parseMessage(
       };
     }
 
-    if (!field.arrayFactoryFn) {
+    if (!field.ArrayClazz) {
       ret[field.name] = parseField(raw[field.name]);
     } else if (!Array.isArray(raw[field.name])) {
       ret[field.name] = undefined;
     } else {
-      let values = field.arrayFactoryFn();
+      let values = new field.ArrayClazz();
       for (let element of raw[field.name]) {
         let parsedValue = parseField(element);
         if (parsedValue !== undefined) {
