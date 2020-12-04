@@ -45,7 +45,7 @@ function parseEnum(raw: any, enumValues: EnumValue[]): any {
 function parseMessage(
   raw: any,
   messageFields: MessageField<any>[],
-  factoryFn?: () => any
+  factoryFn: () => any
 ): any {
   if (!raw || typeof raw !== "object") {
     return undefined;

@@ -1,7 +1,7 @@
 import {
-  MessageFieldType,
   NamedTypeDescriptor,
   NamedTypeKind,
+  MessageFieldType,
 } from "./named_type_descriptor";
 
 export interface UrlToModule {
@@ -16,6 +16,9 @@ export interface UrlToModule {
 export let URL_TO_MODULE: NamedTypeDescriptor<UrlToModule> = {
   name: "UrlToModule",
   kind: NamedTypeKind.MESSAGE,
+  factoryFn: () => {
+    return new Object();
+  },
   messageFields: [
     {
       name: "url",
@@ -29,7 +32,7 @@ export let URL_TO_MODULE: NamedTypeDescriptor<UrlToModule> = {
 };
 
 export interface UrlToModuleMapping {
-  urlToModules?: UrlToModule[];
+  urlToModules?: Array<UrlToModule>;
 }
 
 export let URL_TO_MODULE_MAPPING: NamedTypeDescriptor<UrlToModuleMapping> = {
@@ -44,7 +47,7 @@ export let URL_TO_MODULE_MAPPING: NamedTypeDescriptor<UrlToModuleMapping> = {
       type: MessageFieldType.NAMED_TYPE,
       namedTypeDescriptor: URL_TO_MODULE,
       arrayFactoryFn: () => {
-        return new Array<UrlToModule>();
+        return new Array<any>();
       },
     },
   ],
