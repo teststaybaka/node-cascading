@@ -56,7 +56,8 @@ export function parseMessage<T>(
         getter = (index) => {
           return values[index];
         };
-      } else { // field.observableArrayFactoryFn
+      } else {
+        // field.observableArrayFactoryFn
         if (!values) {
           values = field.observableArrayFactoryFn();
         }

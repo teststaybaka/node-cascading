@@ -1,8 +1,5 @@
-import {
-  ObservableNestedArray,
-  ObservableArray,
-} from "./observable_array";
 import { Observable } from "./observable";
+import { ObservableArray, ObservableNestedArray } from "./observable_array";
 import { TestCase, TestSet, assert } from "./test_base";
 
 class PushFirst implements TestCase {
@@ -209,10 +206,10 @@ class PushObservable implements TestCase {
     // Prepare
     let arr = new ObservableNestedArray<Fact>();
     let fact = new Fact();
-    
+
     // Execute
     arr.push(fact);
-    
+
     // Verify
     let changeCount = 0;
     arr.onChange = () => {
@@ -233,10 +230,10 @@ class SetObservable implements TestCase {
     let fact = new Fact();
     arr.push(fact);
     let fact2 = new Fact();
-    
+
     // Execute
     arr.set(0, fact2);
-    
+
     // Verify
     let changeCount = 0;
     arr.onChange = () => {

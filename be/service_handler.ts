@@ -80,10 +80,7 @@ export class SuperSignedOutServiceHandler<Request, Response>
     let obj = await STREAM_READER.readJson(request);
     let response = await this.serviceHandler.handle(
       logContext,
-      parseMessage(
-        obj,
-        this.serviceHandler.serviceDescriptor.requestDescriptor
-      )
+      parseMessage(obj, this.serviceHandler.serviceDescriptor.requestDescriptor)
     );
     let httpResponse: HttpResponse = {
       contentType: CONTENT_TYPE_JSON,

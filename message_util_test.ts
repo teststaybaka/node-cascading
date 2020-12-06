@@ -1,11 +1,11 @@
 import {
-  PrimitiveType,
+  EnumDescriptor,
   MessageDescriptor,
-  EnumDescriptor
+  PrimitiveType,
 } from "./message_descriptor";
-import { parseMessage, parseEnum } from "./message_util";
+import { parseEnum, parseMessage } from "./message_util";
+import { ObservableArray } from "./observable_array";
 import { Expectation, TestCase, TestSet, assert } from "./test_base";
-import { ObservableArray } from './observable_array';
 
 function testParseEnum(input: string | number, expected: number) {
   // Prepare
@@ -153,7 +153,7 @@ class ParseMessagePrimtivesOverride implements TestCase {
 
   public execute() {
     let emailHistory = new ObservableArray<string>();
-    emailHistory.push(undefined, "test1@test.com", "123@ttt.com")
+    emailHistory.push(undefined, "test1@test.com", "123@ttt.com");
     let original: any = {
       id: 12,
       email: "0@grmail.com",
@@ -161,12 +161,15 @@ class ParseMessagePrimtivesOverride implements TestCase {
       isPaidHistory: [false, true, false, false],
       emailHistory: emailHistory,
     };
-    let parsed = testParsingMessageWithPrimitiveTypes({
-      nickname: "jack",
-      email: "test@gmail.com",
-      idHistory: [11, 12],
-      emailHistory: ["test1@test.com", "123@ttt.com"],
-    }, original);
+    let parsed = testParsingMessageWithPrimitiveTypes(
+      {
+        nickname: "jack",
+        email: "test@gmail.com",
+        idHistory: [11, 12],
+        emailHistory: ["test1@test.com", "123@ttt.com"],
+      },
+      original
+    );
 
     // Verify
     assert(parsed === original);
@@ -227,7 +230,9 @@ function testParsingNestedMessages(raw: any, output?: any) {
     factoryFn: () => {
       return new Object();
     },
-    messageFields: [{ name: "cardNumber", primitiveType: PrimitiveType.NUMBER }],
+    messageFields: [
+      { name: "cardNumber", primitiveType: PrimitiveType.NUMBER },
+    ],
   };
   let userMessageDescriptor: MessageDescriptor<any> = {
     name: "User",
@@ -299,18 +304,25 @@ class ParseMessageNestedOverride implements TestCase {
     let original: any = {
       userInfo: {
         backgroundColor: "BLUE",
-        colorHistory: ["BLUE"]
+        colorHistory: ["BLUE"],
       },
-      creditCards: creditCards
+      creditCards: creditCards,
     };
-    let parsed = testParsingNestedMessages({
-      userInfo: {
-        backgroundColor: "RED",
-        preferredColor: 1,
-        colorHistory: ["BLUE", "GREEN"],
+    let parsed = testParsingNestedMessages(
+      {
+        userInfo: {
+          backgroundColor: "RED",
+          preferredColor: 1,
+          colorHistory: ["BLUE", "GREEN"],
+        },
+        creditCards: [
+          { cardNumber: 2020 },
+          { cardNumber: 4040 },
+          { cardNumber: 5050 },
+        ],
       },
-      creditCards: [{ cardNumber: 2020 }, { cardNumber: 4040 }, { cardNumber: 5050 }],
-    }, original);
+      original
+    );
 
     // Verify
     assert(parsed === original);
@@ -323,9 +335,13 @@ class ParseMessageNestedOverride implements TestCase {
     Expectation.expect(parsed.userInfo.colorHistory[1] === 2);
     assert(parsed.creditCards === original.creditCards);
     assert(parsed.creditCards.length === 3);
-    Expectation.expect(parsed.creditCards.get(0) === original.creditCards.get(0));
+    Expectation.expect(
+      parsed.creditCards.get(0) === original.creditCards.get(0)
+    );
     Expectation.expect(parsed.creditCards.get(0).cardNumber === 2020);
-    Expectation.expect(parsed.creditCards.get(1) === original.creditCards.get(1));
+    Expectation.expect(
+      parsed.creditCards.get(1) === original.creditCards.get(1)
+    );
     Expectation.expect(parsed.creditCards.get(1).cardNumber === 4040);
     Expectation.expect(parsed.creditCards.get(2).cardNumber === 5050);
   }
