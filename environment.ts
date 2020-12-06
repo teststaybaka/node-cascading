@@ -1,13 +1,12 @@
-import { NamedTypeDescriptor, NamedTypeKind } from "./named_type_descriptor";
+import { EnumDescriptor } from "./message_descriptor";
 
 export enum Environment {
   Local = 1,
   Prod = 2,
 }
 
-export let ENVIRONMENT: NamedTypeDescriptor<Environment> = {
+export let ENVIRONMENT: EnumDescriptor<Environment> = {
   name: "Environment",
-  kind: NamedTypeKind.ENUM,
   enumValues: [
     {
       name: "Local",

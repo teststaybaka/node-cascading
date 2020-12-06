@@ -2,7 +2,7 @@ import http = require("http");
 import url = require("url");
 import { CONTENT_TYPE_JSON, SESSION_HEADER } from "../constants";
 import { HttpMethod } from "../http_method";
-import { parseNamedType } from "../named_type_util";
+import { parseMessage } from "../message_util";
 import {
   SignedInServiceDescriptor,
   SignedOutServiceDescriptor,
@@ -47,7 +47,7 @@ export class SuperSignedInServiceHandler<Request, Response>
     let obj = await STREAM_READER.readJson(request);
     let response = await this.serviceHandler.handle(
       logContext,
-      parseNamedType(
+      parseMessage(
         obj,
         this.serviceHandler.serviceDescriptor.requestDescriptor
       ),
@@ -80,7 +80,7 @@ export class SuperSignedOutServiceHandler<Request, Response>
     let obj = await STREAM_READER.readJson(request);
     let response = await this.serviceHandler.handle(
       logContext,
-      parseNamedType(
+      parseMessage(
         obj,
         this.serviceHandler.serviceDescriptor.requestDescriptor
       )

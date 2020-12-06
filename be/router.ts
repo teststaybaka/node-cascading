@@ -10,7 +10,7 @@ import {
 } from "../constants";
 import { ErrorType, TypedError, newInternalError } from "../errors";
 import { HttpMethod } from "../http_method";
-import { parseJsonString } from "../named_type_util";
+import { parseMessage } from "../message_util";
 import { URL_TO_MODULE_MAPPING, UrlToModule } from "../url_to_module";
 import { HttpHandler, HttpResponse } from "./http_handler";
 import { LOGGER } from "./logger";
@@ -68,8 +68,8 @@ export class Router {
       }
     }
 
-    let urlToModuleMapping = parseJsonString(
-      urlToModulesBuffer.toString(),
+    let urlToModuleMapping = parseMessage(
+      JSON.parse(urlToModulesBuffer.toString()),
       URL_TO_MODULE_MAPPING
     );
     if (urlToModuleMapping) {

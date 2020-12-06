@@ -1,8 +1,7 @@
 import {
-  NamedTypeDescriptor,
-  NamedTypeKind,
-  MessageFieldType,
-} from "./named_type_descriptor";
+  MessageDescriptor,
+  PrimitiveType,
+} from "./message_descriptor";
 
 export interface UrlToModule {
   // Without protocol or domain, starting with "/", and ending without "/". Only
@@ -13,20 +12,19 @@ export interface UrlToModule {
   modulePath?: string;
 }
 
-export let URL_TO_MODULE: NamedTypeDescriptor<UrlToModule> = {
+export let URL_TO_MODULE: MessageDescriptor<UrlToModule> = {
   name: "UrlToModule",
-  kind: NamedTypeKind.MESSAGE,
   factoryFn: () => {
     return new Object();
   },
   messageFields: [
     {
       name: "url",
-      type: MessageFieldType.STRING,
+      primitiveType: PrimitiveType.STRING,
     },
     {
       name: "modulePath",
-      type: MessageFieldType.STRING,
+      primitiveType: PrimitiveType.STRING,
     },
   ],
 };
@@ -35,17 +33,15 @@ export interface UrlToModuleMapping {
   urlToModules?: Array<UrlToModule>;
 }
 
-export let URL_TO_MODULE_MAPPING: NamedTypeDescriptor<UrlToModuleMapping> = {
+export let URL_TO_MODULE_MAPPING: MessageDescriptor<UrlToModuleMapping> = {
   name: "UrlToModuleMapping",
-  kind: NamedTypeKind.MESSAGE,
   factoryFn: () => {
     return new Object();
   },
   messageFields: [
     {
       name: "urlToModules",
-      type: MessageFieldType.NAMED_TYPE,
-      namedTypeDescriptor: URL_TO_MODULE,
+      messageDescriptor: URL_TO_MODULE,
       arrayFactoryFn: () => {
         return new Array<any>();
       },

@@ -1,9 +1,9 @@
-import { NamedTypeDescriptor } from "../named_type_descriptor";
-import { parseNamedType } from "../named_type_util";
+import { MessageDescriptor } from "../message_descriptor";
+import { parseMessage } from "../message_util";
 
 export interface TabDescriptor<Params> {
   name: string;
-  paramsDescriptor?: NamedTypeDescriptor<Params>;
+  paramsDescriptor?: MessageDescriptor<Params>;
 }
 
 export interface TabContainer<Params> {
@@ -23,7 +23,7 @@ export class TabNavigator {
 
   public async showByName(name: string, params?: any): Promise<void> {
     await this.show(name, (paramsDescriptor) =>
-      parseNamedType(params, paramsDescriptor)
+      parseMessage(params, paramsDescriptor)
     );
   }
 
@@ -36,7 +36,7 @@ export class TabNavigator {
 
   private async show<Params>(
     name: string,
-    getParams?: (paramsDescriptor: NamedTypeDescriptor<Params>) => Params
+    getParams?: (paramsDescriptor: MessageDescriptor<Params>) => Params
   ): Promise<void> {
     for (let tabContainer of this.tabContainers) {
       if (tabContainer.tabDescriptor.name === name) {

@@ -34,19 +34,21 @@ export class ObservableArray<T> implements Iterable<T>, Observable {
     }
   }
 
-  public push(newValue: T): void {
-    this.actualArray.push(newValue);
-    let index = this.actualArray.length - 1;
-    this.setPropagator(newValue, () => {
+  public push(...newValues: Array<T>): void {
+    for (let newValue of newValues) {
+      this.actualArray.push(newValue);
+      let index = this.actualArray.length - 1;
+      this.setPropagator(newValue, () => {
+        if (this.onChange) {
+          this.onChange();
+        }
+      });
+      if (this.onElementChange) {
+        this.onElementChange(index, newValue, undefined);
+      }
       if (this.onChange) {
         this.onChange();
       }
-    });
-    if (this.onElementChange) {
-      this.onElementChange(index, newValue, undefined);
-    }
-    if (this.onChange) {
-      this.onChange();
     }
   }
 
@@ -63,7 +65,7 @@ export class ObservableArray<T> implements Iterable<T>, Observable {
     return oldValue;
   }
 
-  public length(): number {
+  get length(): number {
     return this.actualArray.length;
   }
 

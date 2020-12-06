@@ -68,8 +68,7 @@ class Iterate implements TestCase {
   public execute() {
     // Prepare
     let arr = new ObservableArray<number>();
-    arr.push(100);
-    arr.push(200);
+    arr.push(100, 200);
     let i = 0;
 
     // Execute
@@ -87,8 +86,7 @@ class SetFirst implements TestCase {
   public execute() {
     // Prepare
     let arr = new ObservableArray<number>();
-    arr.push(100);
-    arr.push(200);
+    arr.push(100, 200);
     let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
       elementChangeCount++;
@@ -117,8 +115,7 @@ class SetSecond implements TestCase {
   public execute() {
     // Prepare
     let arr = new ObservableArray<number>();
-    arr.push(100);
-    arr.push(200);
+    arr.push(100, 200);
     let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
       elementChangeCount++;
@@ -176,8 +173,7 @@ class PopSecond implements TestCase {
   public execute() {
     // Prepare
     let arr = new ObservableArray<number>();
-    arr.push(100);
-    arr.push(200);
+    arr.push(100, 200);
     let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
       elementChangeCount++;

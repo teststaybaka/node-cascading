@@ -1,7 +1,7 @@
 import { SESSION_HEADER } from "../constants";
 import { ErrorType, TypedError } from "../errors";
 import { HttpMethod } from "../http_method";
-import { parseNamedType } from "../named_type_util";
+import { parseMessage } from "../message_util";
 import {
   ServiceDescriptor,
   SignedInServiceDescriptor,
@@ -73,6 +73,6 @@ export class ServiceClient {
     }
 
     let data = await response.json();
-    return parseNamedType(data, serviceDescriptor.responseDescriptor);
+    return parseMessage(data, serviceDescriptor.responseDescriptor);
   }
 }
