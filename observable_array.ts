@@ -81,6 +81,10 @@ export class ObservableArray<T> implements Iterable<T>, Observable {
     return this.actualArray.includes(value, start);
   }
 
+  public toJSON(): Array<T> {
+    return this.actualArray;
+  }
+
   protected setPropagator(newValue: T, onChange: () => void): void {}
 
   protected unsetPropagator(oldValue: T): void {}

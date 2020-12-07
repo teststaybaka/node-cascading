@@ -226,6 +226,22 @@ class EmitInitialEvents implements TestCase {
   }
 }
 
+class JsonStringify implements TestCase {
+  public name = "JsonStringify";
+
+  public execute() {
+    // Prepare
+    let arr = new ObservableArray<number>();
+    arr.push(100, 200);
+
+    // Execute
+    let serailzied = JSON.stringify(arr);
+
+    // Verify
+    assert(serailzied === "[100,200]");
+  }
+}
+
 class Fact implements Observable {
   public onChange: () => void;
 
@@ -290,6 +306,7 @@ export let OBSERVABLE_ARRAY_TEST: TestSet = {
     new PopFirst(),
     new PopSecond(),
     new EmitInitialEvents(),
+    new JsonStringify(),
     new PushObservable(),
     new SetObservable(),
   ],
