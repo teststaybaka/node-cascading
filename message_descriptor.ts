@@ -1,4 +1,4 @@
-import { ObservableArray } from "./observable_array";
+import { ObservableArray, ObservableNestedArray } from "./observable_array";
 
 export interface EnumValue {
   name: string;
@@ -22,7 +22,9 @@ export interface MessageField {
   enumDescriptor?: EnumDescriptor<any>;
   messageDescriptor?: MessageDescriptor<any>;
   arrayFactoryFn?: () => Array<any>;
-  observableArrayFactoryFn?: () => ObservableArray<any>;
+  observableArrayFactoryFn?: () =>
+    | ObservableArray<any>
+    | ObservableNestedArray<any>;
 }
 
 export interface MessageDescriptor<T> {
