@@ -193,6 +193,39 @@ class PopSecond implements TestCase {
   }
 }
 
+class EmitInitialEvents implements TestCase {
+  public name = "EmitInitialEvents";
+
+  public execute() {
+    // Prepare
+    let arr = new ObservableArray<number>();
+    arr.push(100, 200);
+    let elementChangeCount = 0;
+    arr.onElementChange = (index, newValue, oldValue) => {
+      elementChangeCount++;
+      assert(index === 0 || index === 1);
+      if (index === 0) {
+        assert(newValue === 100);
+        assert(oldValue === undefined);
+      } else {
+        assert(newValue === 200);
+        assert(oldValue === undefined);
+      }
+    };
+    let changeCount = 0;
+    arr.onChange = () => {
+      changeCount++;
+    };
+
+    // Execute
+    arr.emitInitialEvents();
+
+    // Verify
+    assert(elementChangeCount === 2);
+    assert(changeCount === 0);
+  }
+}
+
 class Fact implements Observable {
   public onChange: () => void;
 
@@ -256,6 +289,7 @@ export let OBSERVABLE_ARRAY_TEST: TestSet = {
     new SetSecond(),
     new PopFirst(),
     new PopSecond(),
+    new EmitInitialEvents(),
     new PushObservable(),
     new SetObservable(),
   ],
