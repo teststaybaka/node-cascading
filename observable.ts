@@ -10,4 +10,8 @@ export interface Observable {
   // Emits property change events for all properties, with oldValue set to
   // undefined and newValue set to be the current value.
   emitInitialEvents: () => void;
+
+  // Return an object that can be stringified to JSON. Should only be used by
+  // JSON.stringify().
+  toJSON: () => Object;
 }

@@ -246,6 +246,10 @@ class Fact implements Observable {
   public onChange: () => void;
 
   public emitInitialEvents(): void {}
+
+  public toJSON(): Object {
+    return new Object();
+  }
 }
 
 class PushObservable implements TestCase {
