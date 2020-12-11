@@ -4,7 +4,17 @@ import { newInternalError } from "../errors";
 import { HttpMethod } from "../http_method";
 import { Expectation, TestCase, TestSet } from "../test_base";
 import { HttpHandler, HttpResponse } from "./http_handler";
+import { Logger } from "./logger";
 import { Router } from "./router";
+
+class MockLogger extends Logger {
+  public constructor() {
+    super(undefined);
+  }
+  public info() {}
+  public warning() {}
+  public error() {}
+}
 
 class MockResponse {
   public statusCode: number;
@@ -82,7 +92,11 @@ class MatchHandler implements TestCase {
     let mockHttpServer = new MockHttpServer();
     mockHttpServer.request = mockRequest;
     mockHttpServer.response = mockResponse;
-    let router = new Router("any hostname", mockHttpServer as any);
+    let router = new Router(
+      "any hostname",
+      new MockLogger(),
+      mockHttpServer as any
+    );
     let mockHandler = new MockHttpHandler();
     mockHandler.method = HttpMethod.GET;
     mockHandler.urlRegex = /^\/static\/123\/.*$/;
@@ -123,7 +137,11 @@ class RejectHandler implements TestCase {
     let mockHttpServer = new MockHttpServer();
     mockHttpServer.request = mockRequest;
     mockHttpServer.response = mockResponse;
-    let router = new Router("any hostname", mockHttpServer as any);
+    let router = new Router(
+      "any hostname",
+      new MockLogger(),
+      mockHttpServer as any
+    );
     let mockHandler = new MockHttpHandler();
     mockHandler.method = HttpMethod.GET;
     mockHandler.urlRegex = /^\/static\/.*$/;
@@ -150,7 +168,11 @@ class NotFound implements TestCase {
     let mockHttpServer = new MockHttpServer();
     mockHttpServer.request = mockRequest;
     mockHttpServer.response = mockResponse;
-    let router = new Router("any hostname", mockHttpServer as any);
+    let router = new Router(
+      "any hostname",
+      new MockLogger(),
+      mockHttpServer as any
+    );
     let mockHandler = new MockHttpHandler();
     mockHandler.method = HttpMethod.GET;
     mockHandler.urlRegex = /^\/static\/.*$/;

@@ -1,4 +1,3 @@
-import { LOGGER } from "./be/logger";
 import { Expectation, TestSet } from "./test_base";
 import { Command } from "commander";
 import "source-map-support/register";
@@ -29,7 +28,6 @@ export async function runTests(testSets: TestSet[]) {
       return program.caseName === testCase.name;
     });
 
-    LOGGER.switchToLocal();
     try {
       await testCase.execute();
     } catch (e) {
@@ -55,7 +53,6 @@ async function runTestSet(testSet: TestSet): Promise<void> {
     console.info = () => {};
     console.warn = () => {};
     console.error = () => {};
-    LOGGER.switchToLocal();
     let statusMsg: string;
     try {
       await testCase.execute();

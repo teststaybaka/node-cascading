@@ -13,11 +13,10 @@ import { HttpMethod } from "../http_method";
 import { parseMessage } from "../message_util";
 import { URL_TO_MODULE_MAPPING, UrlToModule } from "../url_to_module";
 import { HttpHandler, HttpResponse } from "./http_handler";
-import { LOGGER } from "./logger";
+import { LAZY_LOGGER, Logger } from "./logger";
 import { PreflightHandler } from "./preflight_handler";
 import { StaticHtmlHandler } from "./static_handler";
 
-// TODO: Rate limit requests.
 export class Router {
   private static HTTP_PORT = 80;
   private static HTTPS_PORT = 443;
@@ -37,6 +36,36 @@ export class Router {
 
   private handlers: HttpHandler[] = [];
 
+  public constructor(
+    private hostname: string,
+    private logger: Logger,
+    private httpServer: http.Server,
+    private httpsServer?: https.Server
+  ) {
+    if (this.httpsServer) {
+      this.httpServer.addListener(
+        "request",
+        (request: http.IncomingMessage, response: http.ServerResponse): void =>
+          this.redirectToHttps(request, response)
+      );
+      this.httpsServer.addListener(
+        "request",
+        (
+          request: http.IncomingMessage,
+          response: http.ServerResponse
+        ): Promise<void> => this.handle(request, response)
+      );
+    } else {
+      this.httpServer.addListener(
+        "request",
+        (
+          request: http.IncomingMessage,
+          response: http.ServerResponse
+        ): Promise<void> => this.handle(request, response)
+      );
+    }
+  }
+
   public static create(
     hostname: string,
     httpsOption?: https.ServerOptions
@@ -46,7 +75,12 @@ export class Router {
     if (httpsOption) {
       httpsServer = https.createServer(httpsOption);
     }
-    let router = new Router(hostname, httpServer, httpsServer);
+    let router = new Router(
+      hostname,
+      LAZY_LOGGER.get(),
+      httpServer,
+      httpsServer
+    );
     router.addHandler(new PreflightHandler());
 
     let urlToModules = Router.readUrlToModules();
@@ -79,40 +113,11 @@ export class Router {
     }
   }
 
-  public constructor(
-    private hostname: string,
-    private httpServer: http.Server,
-    private httpsServer?: https.Server
-  ) {
-    if (this.httpsServer) {
-      this.httpServer.addListener(
-        "request",
-        (request: http.IncomingMessage, response: http.ServerResponse): void =>
-          this.redirectToHttps(request, response)
-      );
-      this.httpsServer.addListener(
-        "request",
-        (
-          request: http.IncomingMessage,
-          response: http.ServerResponse
-        ): Promise<void> => this.handle(request, response)
-      );
-    } else {
-      this.httpServer.addListener(
-        "request",
-        (
-          request: http.IncomingMessage,
-          response: http.ServerResponse
-        ): Promise<void> => this.handle(request, response)
-      );
-    }
-  }
-
   private redirectToHttps(
     request: http.IncomingMessage,
     response: http.ServerResponse
   ): void {
-    LOGGER.info(
+    this.logger.info(
       `Redirecting to ${Router.HTTPS_PROTOCAL + this.hostname + request.url}.`
     );
     response.setHeader(Router.ALLOW_ORIGIN_HEADER, "*");
@@ -141,7 +146,7 @@ export class Router {
     try {
       httpResponse = await this.dispatch(logContext, request);
     } catch (error) {
-      LOGGER.error(logContext + error.stack);
+      this.logger.error(logContext + error.stack);
       response.setHeader(Router.CONTENT_TYPE_HEADER, CONTENT_TYPE_TEXT);
       if (error.errorType) {
         response.writeHead((error as TypedError).errorType);
@@ -168,10 +173,10 @@ export class Router {
 
       let readStream = fs.createReadStream(httpResponse.contentFile);
       readStream.on("error", (err: Error): void => {
-        LOGGER.error(logContext + err.stack);
+        this.logger.error(logContext + err.stack);
       });
       response.on("error", (err): void => {
-        LOGGER.error(logContext + err.stack);
+        this.logger.error(logContext + err.stack);
       });
       readStream.pipe(response);
     }
@@ -184,7 +189,7 @@ export class Router {
     let method = request.method.toUpperCase();
     let parsedUrl = url.parse(request.url);
 
-    LOGGER.info(
+    this.logger.info(
       logContext +
         `Request received:\n` +
         `pathname: ${parsedUrl.pathname}\n` +
@@ -197,7 +202,7 @@ export class Router {
         method === HttpMethod[handler.method] &&
         parsedUrl.pathname.match(handler.urlRegex)
       ) {
-        LOGGER.info(
+        this.logger.info(
           logContext +
             `Handler ${i} matched request with ` +
             `[${handler.urlRegex}, ${handler.method}].`
@@ -211,10 +216,10 @@ export class Router {
 
   public start(): void {
     this.httpServer.listen(Router.HTTP_PORT);
-    LOGGER.info(`Http server started at ${Router.HTTP_PORT}.`);
+    this.logger.info(`Http server started at ${Router.HTTP_PORT}.`);
     if (this.httpsServer) {
       this.httpsServer.listen(Router.HTTPS_PORT);
-      LOGGER.info(`Https server started at ${Router.HTTPS_PORT}.`);
+      this.logger.info(`Https server started at ${Router.HTTPS_PORT}.`);
     }
   }
 
