@@ -2,7 +2,7 @@ import http = require("http");
 import url = require("url");
 import { newInternalError } from "../errors";
 import { HttpMethod } from "../http_method";
-import { Expectation, TestCase, TestSet } from "../test_base";
+import { TestCase, TestSet, assert, assertContains } from "../test_base";
 import { HttpHandler, HttpResponse } from "./http_handler";
 import { Logger } from "./logger";
 import { Router } from "./router";
@@ -118,12 +118,12 @@ class MatchHandler implements TestCase {
     await mockHttpServer.triggerEvent();
 
     // Verify
-    Expectation.expect(mockResponse.statusCode === 200);
-    Expectation.expect(mockResponse.endData === "any content");
-    Expectation.expect(!mockHandler.handleCalled);
-    Expectation.expect(!mockHandler2.handleCalled);
-    Expectation.expect(mockHandler3.handleCalled);
-    Expectation.expect(!mockHandler4.handleCalled);
+    assert(mockResponse.statusCode === 200);
+    assert(mockResponse.endData === "any content");
+    assert(!mockHandler.handleCalled);
+    assert(!mockHandler2.handleCalled);
+    assert(mockHandler3.handleCalled);
+    assert(!mockHandler4.handleCalled);
   }
 }
 
@@ -152,9 +152,9 @@ class RejectHandler implements TestCase {
     await mockHttpServer.triggerEvent();
 
     // Verify
-    Expectation.expect(mockResponse.statusCode === 500);
-    Expectation.expectContains(mockResponse.endData, "Reject handle.");
-    Expectation.expect(mockHandler.handleCalled);
+    assert(mockResponse.statusCode === 500);
+    assertContains(mockResponse.endData, "Reject handle.");
+    assert(mockHandler.handleCalled);
   }
 }
 
@@ -182,9 +182,9 @@ class NotFound implements TestCase {
     await mockHttpServer.triggerEvent();
 
     // Verify
-    Expectation.expect(mockResponse.statusCode === 500);
-    Expectation.expectContains(mockResponse.endData, "Not Found");
-    Expectation.expect(!mockHandler.handleCalled);
+    assert(mockResponse.statusCode === 500);
+    assertContains(mockResponse.endData, "Not Found");
+    assert(!mockHandler.handleCalled);
   }
 }
 

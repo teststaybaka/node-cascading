@@ -59,31 +59,3 @@ export function assertThrow(method: () => void) {
   }
   throw new Error("Failed to assert an error to be thrown.");
 }
-
-export class Expectation {
-  public static errors: Error[] = [];
-
-  public static expect(tested: boolean, action?: string) {
-    try {
-      assert(tested, action);
-    } catch (e) {
-      Expectation.errors.push(e as Error);
-    }
-  }
-
-  public static expectContains(longStr: string, shortStr: string) {
-    try {
-      assertContains(longStr, shortStr);
-    } catch (e) {
-      Expectation.errors.push(e as Error);
-    }
-  }
-
-  public static expectError(actualError: any, expectedError: Error) {
-    try {
-      assertError(actualError, expectedError);
-    } catch (e) {
-      Expectation.errors.push(e as Error);
-    }
-  }
-}

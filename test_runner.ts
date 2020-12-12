@@ -1,4 +1,4 @@
-import { Expectation, TestSet } from "./test_base";
+import { TestSet } from "./test_base";
 import { Command } from "commander";
 import "source-map-support/register";
 
@@ -33,9 +33,6 @@ export async function runTests(testSets: TestSet[]) {
     } catch (e) {
       console.log(e);
     }
-    for (let error of Expectation.errors) {
-      console.log(error);
-    }
   }
 }
 
@@ -56,9 +53,6 @@ async function runTestSet(testSet: TestSet): Promise<void> {
     let statusMsg: string;
     try {
       await testCase.execute();
-      if (Expectation.errors.length !== 0) {
-        throw new Error("There are errors from expectations.");
-      }
       statusMsg = `\x1b[32m${testCase.name} success!\x1b[0m`;
     } catch (e) {
       statusMsg = `\x1b[31m${testCase.name} failed!\x1b[0m`;
@@ -68,7 +62,6 @@ async function runTestSet(testSet: TestSet): Promise<void> {
     console.warn = oldWarn;
     console.error = oldErr;
     console.log(statusMsg);
-    Expectation.errors = [];
   }
   if (testSet.environment) {
     await testSet.environment.tearDown();

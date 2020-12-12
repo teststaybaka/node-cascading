@@ -1,18 +1,18 @@
 import { LinkedList } from "./linked_list";
-import { Expectation, TestCase, TestSet, assert } from "./test_base";
+import { TestCase, TestSet, assert } from "./test_base";
 
 function verifyFromBothSides<T>(linkedList: LinkedList<T>, expectedList: T[]) {
   assert(linkedList.getSize() === expectedList.length);
   let iter = linkedList.createLeftIterator();
   for (let i = 0; i < expectedList.length; i++, iter.next()) {
     assert(!iter.isEnd());
-    Expectation.expect(iter.getValue() === expectedList[i]);
+    assert(iter.getValue() === expectedList[i]);
   }
   assert(iter.isEnd());
   iter = linkedList.createRightIterator();
   for (let i = expectedList.length - 1; i >= 0; i--, iter.prev()) {
     assert(!iter.isStart());
-    Expectation.expect(iter.getValue() === expectedList[i]);
+    assert(iter.getValue() === expectedList[i]);
   }
   assert(iter.isStart());
 }
@@ -150,7 +150,7 @@ class PopFrontFirstOutOfTwo implements TestCase {
     let value = linkedList.popFront();
 
     // Verify
-    Expectation.expect(value === 132);
+    assert(value === 132);
     verifyFromBothSides(linkedList, [31]);
   }
 }
@@ -169,7 +169,7 @@ class PopFrontTwoOutOfTwo implements TestCase {
     let value = linkedList.popFront();
 
     // Verify
-    Expectation.expect(value === 31);
+    assert(value === 31);
     verifyFromBothSides(linkedList, []);
   }
 }
@@ -187,7 +187,7 @@ class PopBackLastOutOfTwo implements TestCase {
     let value = linkedList.popBack();
 
     // Verify
-    Expectation.expect(value === 31);
+    assert(value === 31);
     verifyFromBothSides(linkedList, [132]);
   }
 }
@@ -206,7 +206,7 @@ class PopBackTwoOutOfTwo implements TestCase {
     let value = linkedList.popBack();
 
     // Verify
-    Expectation.expect(value === 132);
+    assert(value === 132);
     verifyFromBothSides(linkedList, []);
   }
 }

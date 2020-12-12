@@ -5,7 +5,7 @@ import {
 } from "./message_descriptor";
 import { parseEnum, parseMessage } from "./message_util";
 import { ObservableArray } from "./observable_array";
-import { Expectation, TestCase, TestSet, assert } from "./test_base";
+import { TestCase, TestSet, assert } from "./test_base";
 
 function testParseEnum(input: string | number, expected: number) {
   // Prepare
@@ -22,7 +22,7 @@ function testParseEnum(input: string | number, expected: number) {
   let parsed = parseEnum(input, colorEnumDescriptor);
 
   // Verify
-  Expectation.expect(parsed === expected);
+  assert(parsed === expected);
 }
 
 class ParseEnumValueFromNumber implements TestCase {
@@ -123,28 +123,28 @@ class ParseMessagePrimtivesAllPopulated implements TestCase {
     });
 
     // Verify
-    Expectation.expect(parsed.id === 12);
-    Expectation.expect(parsed.isPaid === true);
-    Expectation.expect(parsed.nickname === "jack");
-    Expectation.expect(parsed.email === "test@gmail.com");
+    assert(parsed.id === 12);
+    assert(parsed.isPaid === true);
+    assert(parsed.nickname === "jack");
+    assert(parsed.email === "test@gmail.com");
     assert(parsed.idHistory.length === 5);
-    Expectation.expect(parsed.idHistory[0] === 11);
-    Expectation.expect(parsed.idHistory[1] === 20);
-    Expectation.expect(parsed.idHistory[2] === undefined);
-    Expectation.expect(parsed.idHistory[3] === undefined);
-    Expectation.expect(parsed.idHistory[4] === 855);
+    assert(parsed.idHistory[0] === 11);
+    assert(parsed.idHistory[1] === 20);
+    assert(parsed.idHistory[2] === undefined);
+    assert(parsed.idHistory[3] === undefined);
+    assert(parsed.idHistory[4] === 855);
     assert(parsed.isPaidHistory.length === 4);
-    Expectation.expect(parsed.isPaidHistory[0] === false);
-    Expectation.expect(parsed.isPaidHistory[1] === true);
-    Expectation.expect(parsed.isPaidHistory[2] === false);
-    Expectation.expect(parsed.isPaidHistory[3] === false);
+    assert(parsed.isPaidHistory[0] === false);
+    assert(parsed.isPaidHistory[1] === true);
+    assert(parsed.isPaidHistory[2] === false);
+    assert(parsed.isPaidHistory[3] === false);
     assert(parsed.nicknameHistory.length === 3);
-    Expectation.expect(parsed.nicknameHistory[0] === "queen");
-    Expectation.expect(parsed.nicknameHistory[1] === "king");
-    Expectation.expect(parsed.nicknameHistory[2] === "ace");
+    assert(parsed.nicknameHistory[0] === "queen");
+    assert(parsed.nicknameHistory[1] === "king");
+    assert(parsed.nicknameHistory[2] === "ace");
     assert(parsed.emailHistory.length === 2);
-    Expectation.expect(parsed.emailHistory.get(0) === "test1@test.com");
-    Expectation.expect(parsed.emailHistory.get(1) === "123@ttt.com");
+    assert(parsed.emailHistory.get(0) === "test1@test.com");
+    assert(parsed.emailHistory.get(1) === "123@ttt.com");
   }
 }
 
@@ -173,18 +173,18 @@ class ParseMessagePrimtivesOverride implements TestCase {
 
     // Verify
     assert(parsed === original);
-    Expectation.expect(parsed.id === undefined);
-    Expectation.expect(parsed.nickname === "jack");
-    Expectation.expect(parsed.email === "test@gmail.com");
+    assert(parsed.id === undefined);
+    assert(parsed.nickname === "jack");
+    assert(parsed.email === "test@gmail.com");
     assert(parsed.idHistory === original.idHistory);
     assert(parsed.idHistory.length === 2);
-    Expectation.expect(parsed.idHistory[0] === 11);
-    Expectation.expect(parsed.idHistory[1] === 12);
+    assert(parsed.idHistory[0] === 11);
+    assert(parsed.idHistory[1] === 12);
     assert(parsed.isPaidHistory === undefined);
     assert(parsed.emailHistory === original.emailHistory);
     assert(parsed.emailHistory.length === 2);
-    Expectation.expect(parsed.emailHistory.get(0) === "test1@test.com");
-    Expectation.expect(parsed.emailHistory.get(1) === "123@ttt.com");
+    assert(parsed.emailHistory.get(0) === "test1@test.com");
+    assert(parsed.emailHistory.get(1) === "123@ttt.com");
   }
 }
 
@@ -278,20 +278,20 @@ class ParseMessageNestedAllPopulated implements TestCase {
     });
 
     // Verify
-    Expectation.expect(parsed.id === 25);
-    Expectation.expect(parsed.userInfo.intro === "student");
-    Expectation.expect(parsed.userInfo.backgroundColor === 10);
-    Expectation.expect(parsed.userInfo.preferredColor === 1);
+    assert(parsed.id === 25);
+    assert(parsed.userInfo.intro === "student");
+    assert(parsed.userInfo.backgroundColor === 10);
+    assert(parsed.userInfo.preferredColor === 1);
     assert(parsed.userInfo.colorHistory.length === 4);
-    Expectation.expect(parsed.userInfo.colorHistory[0] === undefined);
-    Expectation.expect(parsed.userInfo.colorHistory[1] === 1);
-    Expectation.expect(parsed.userInfo.colorHistory[2] === 2);
-    Expectation.expect(parsed.userInfo.colorHistory[3] === 10);
+    assert(parsed.userInfo.colorHistory[0] === undefined);
+    assert(parsed.userInfo.colorHistory[1] === 1);
+    assert(parsed.userInfo.colorHistory[2] === 2);
+    assert(parsed.userInfo.colorHistory[3] === 10);
     assert(parsed.creditCards.length === 4);
-    Expectation.expect(parsed.creditCards.get(0).cardNumber === undefined);
-    Expectation.expect(parsed.creditCards.get(1) === undefined);
-    Expectation.expect(parsed.creditCards.get(2).cardNumber === undefined);
-    Expectation.expect(parsed.creditCards.get(3).cardNumber === 3030);
+    assert(parsed.creditCards.get(0).cardNumber === undefined);
+    assert(parsed.creditCards.get(1) === undefined);
+    assert(parsed.creditCards.get(2).cardNumber === undefined);
+    assert(parsed.creditCards.get(3).cardNumber === 3030);
   }
 }
 
@@ -327,23 +327,19 @@ class ParseMessageNestedOverride implements TestCase {
     // Verify
     assert(parsed === original);
     assert(parsed.userInfo === original.userInfo);
-    Expectation.expect(parsed.userInfo.backgroundColor === 10);
-    Expectation.expect(parsed.userInfo.preferredColor === 1);
+    assert(parsed.userInfo.backgroundColor === 10);
+    assert(parsed.userInfo.preferredColor === 1);
     assert(parsed.userInfo.colorHistory === original.userInfo.colorHistory);
     assert(parsed.userInfo.colorHistory.length === 2);
-    Expectation.expect(parsed.userInfo.colorHistory[0] === 1);
-    Expectation.expect(parsed.userInfo.colorHistory[1] === 2);
+    assert(parsed.userInfo.colorHistory[0] === 1);
+    assert(parsed.userInfo.colorHistory[1] === 2);
     assert(parsed.creditCards === original.creditCards);
     assert(parsed.creditCards.length === 3);
-    Expectation.expect(
-      parsed.creditCards.get(0) === original.creditCards.get(0)
-    );
-    Expectation.expect(parsed.creditCards.get(0).cardNumber === 2020);
-    Expectation.expect(
-      parsed.creditCards.get(1) === original.creditCards.get(1)
-    );
-    Expectation.expect(parsed.creditCards.get(1).cardNumber === 4040);
-    Expectation.expect(parsed.creditCards.get(2).cardNumber === 5050);
+    assert(parsed.creditCards.get(0) === original.creditCards.get(0));
+    assert(parsed.creditCards.get(0).cardNumber === 2020);
+    assert(parsed.creditCards.get(1) === original.creditCards.get(1));
+    assert(parsed.creditCards.get(1).cardNumber === 4040);
+    assert(parsed.creditCards.get(2).cardNumber === 5050);
   }
 }
 
