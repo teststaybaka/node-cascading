@@ -29,6 +29,6 @@ export interface MessageField {
 
 export interface MessageDescriptor<T> {
   name: string;
-  factoryFn?: () => T;
+  factoryFn: () => T;
   messageFields?: MessageField[];
 }
