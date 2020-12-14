@@ -1,14 +1,9 @@
-import {
-  MessageDescriptor,
-  PrimitiveType,
-} from "./message_descriptor";
+import { MessageDescriptor, PrimitiveType } from "selfage/message_descriptor";
 
 export interface UrlToModule {
-  // Without protocol or domain, starting with "/", and ending without "/". Only
-  // Applies to GET method.
+  /* Without protocol or domain, starting with '/', and ending without '/'. Only apples to GET method. */
   url?: string;
-  // TypeScript file path to be served to the url, ending without ".ts", which
-  // will be served inside an HTML file.
+  /* TypeScript file path to be served to the url, ending without '.ts', which will be served inside an HTML file. */
   modulePath?: string;
 }
 

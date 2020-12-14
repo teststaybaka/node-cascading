@@ -1,0 +1,23 @@
+[{
+  "message": {
+    "name": "UrlToModule",
+    "fields": [{
+      "name": "url",
+      "type": "string",
+      "comment": "Without protocol or domain, starting with '/', and ending without '/'. Only apples to GET method."
+    }, {
+      "name": "modulePath",
+      "type": "string",
+      "comment": "TypeScript file path to be served to the url, ending without '.ts', which will be served inside an HTML file."
+    }]
+  }
+}, {
+  "message": {
+    "name": "UrlToModuleMapping",
+    "fields": [{
+      "name": "urlToModules",
+      "type": "UrlToModule",
+      "isArray": true
+    }]
+  }
+}]
