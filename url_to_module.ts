@@ -1,4 +1,4 @@
-import { MessageDescriptor, PrimitiveType } from "selfage/message_descriptor";
+import { MessageDescriptor, PrimitiveType } from "./message_descriptor";
 
 export interface UrlToModule {
   /* Without protocol or domain, starting with '/', and ending without '/'. Only apples to GET method. */
