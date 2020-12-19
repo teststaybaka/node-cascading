@@ -102,8 +102,12 @@ export class DatastoreClient {
     } else {
       query = transaction.createQuery(descriptor.name);
     }
-    query.start(datastoreQuery.startToken);
-    query.limit(datastoreQuery.limit);
+    if (datastoreQuery.startToken) {
+      query.start(datastoreQuery.startToken);
+    }
+    if (datastoreQuery.limit) {
+      query.limit(datastoreQuery.limit);
+    }
     for (let filter of datastoreQuery.filters) {
       query.filter(filter.indexName, filter.operator, filter.indexValue);
       query.order(filter.indexName, { descending: filter.descending });

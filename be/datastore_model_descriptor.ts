@@ -9,8 +9,8 @@ export interface DatastoreFilter {
 }
 
 export interface DatastoreQuery<T> {
-  startToken: string;
-  limit: number;
+  startToken?: string;
+  limit?: number;
   filters: Array<DatastoreFilter>;
 }
 
