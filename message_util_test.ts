@@ -11,7 +11,7 @@ function testParseEnum(input: string | number, expected: number) {
   // Prepare
   let colorEnumDescriptor: EnumDescriptor<any> = {
     name: "Color",
-    enumValues: [
+    values: [
       { name: "RED", value: 10 },
       { name: "BLUE", value: 1 },
       { name: "GREEN", value: 2 },
@@ -64,7 +64,7 @@ function testParsingMessageWithPrimitiveTypes(raw: any, output?: any) {
     factoryFn: () => {
       return new Object();
     },
-    messageFields: [
+    fields: [
       { name: "id", primitiveType: PrimitiveType.NUMBER },
       { name: "isPaid", primitiveType: PrimitiveType.BOOLEAN },
       { name: "nickname", primitiveType: PrimitiveType.STRING },
@@ -192,7 +192,7 @@ function testParsingNestedMessages(raw: any, output?: any) {
   // Prepare
   let colorEnumDescriptor: EnumDescriptor<any> = {
     name: "Color",
-    enumValues: [
+    values: [
       { name: "RED", value: 10 },
       { name: "BLUE", value: 1 },
       { name: "GREEN", value: 2 },
@@ -203,7 +203,7 @@ function testParsingNestedMessages(raw: any, output?: any) {
     factoryFn: () => {
       return new Object();
     },
-    messageFields: [
+    fields: [
       {
         name: "intro",
         primitiveType: PrimitiveType.STRING,
@@ -230,16 +230,14 @@ function testParsingNestedMessages(raw: any, output?: any) {
     factoryFn: () => {
       return new Object();
     },
-    messageFields: [
-      { name: "cardNumber", primitiveType: PrimitiveType.NUMBER },
-    ],
+    fields: [{ name: "cardNumber", primitiveType: PrimitiveType.NUMBER }],
   };
   let userMessageDescriptor: MessageDescriptor<any> = {
     name: "User",
     factoryFn: () => {
       return new Object();
     },
-    messageFields: [
+    fields: [
       { name: "id", primitiveType: PrimitiveType.NUMBER },
       {
         name: "userInfo",

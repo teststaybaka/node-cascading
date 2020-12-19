@@ -7,7 +7,7 @@ export interface EnumValue {
 
 export interface EnumDescriptor<T> {
   name: string;
-  enumValues?: EnumValue[];
+  values?: EnumValue[];
 }
 
 export enum PrimitiveType {
@@ -30,5 +30,5 @@ export interface MessageField {
 export interface MessageDescriptor<T> {
   name: string;
   factoryFn: () => T;
-  messageFields?: MessageField[];
+  fields?: MessageField[];
 }

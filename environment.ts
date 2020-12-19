@@ -7,7 +7,7 @@ export enum Environment {
 
 export let ENVIRONMENT: EnumDescriptor<Environment> = {
   name: "Environment",
-  enumValues: [
+  values: [
     {
       name: "Local",
       value: 1,

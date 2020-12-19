@@ -12,7 +12,7 @@ export let URL_TO_MODULE: MessageDescriptor<UrlToModule> = {
   factoryFn: () => {
     return new Object();
   },
-  messageFields: [
+  fields: [
     {
       name: "url",
       primitiveType: PrimitiveType.STRING,
@@ -33,7 +33,7 @@ export let URL_TO_MODULE_MAPPING: MessageDescriptor<UrlToModuleMapping> = {
   factoryFn: () => {
     return new Object();
   },
-  messageFields: [
+  fields: [
     {
       name: "urlToModules",
       messageDescriptor: URL_TO_MODULE,

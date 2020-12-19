@@ -9,11 +9,11 @@ import {
 export function parseEnum<T>(raw: any, descriptor: EnumDescriptor<T>): any {
   let enumValueFound: EnumValue;
   if (typeof raw === "string") {
-    enumValueFound = descriptor.enumValues.find((enumValue): boolean => {
+    enumValueFound = descriptor.values.find((enumValue): boolean => {
       return enumValue.name === raw;
     });
   } else if (typeof raw === "number") {
-    enumValueFound = descriptor.enumValues.find((enumValue): boolean => {
+    enumValueFound = descriptor.values.find((enumValue): boolean => {
       return enumValue.value === raw;
     });
   }
@@ -37,7 +37,7 @@ export function parseMessage<T>(
   if (!ret) {
     ret = descriptor.factoryFn();
   }
-  for (let field of descriptor.messageFields) {
+  for (let field of descriptor.fields) {
     if (!field.arrayFactoryFn && !field.observableArrayFactoryFn) {
       ret[field.name] = parseField(raw[field.name], field, ret[field.name]);
     } else if (!Array.isArray(raw[field.name])) {
