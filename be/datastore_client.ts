@@ -108,9 +108,11 @@ export class DatastoreClient {
     if (datastoreQuery.limit) {
       query.limit(datastoreQuery.limit);
     }
+    for (let ordering of datastoreQuery.orderings) {
+      query.order(ordering.indexName, { descending: ordering.descending });
+    }
     for (let filter of datastoreQuery.filters) {
       query.filter(filter.indexName, filter.operator, filter.indexValue);
-      query.order(filter.indexName, { descending: filter.descending });
     }
     let response = await query.run();
     let values = new Array<T>();
