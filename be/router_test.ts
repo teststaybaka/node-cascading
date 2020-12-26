@@ -2,7 +2,8 @@ import http = require("http");
 import url = require("url");
 import { newInternalError } from "../errors";
 import { HttpMethod } from "../http_method";
-import { TestCase, TestSet, assert, assertContains } from "../test_base";
+import { TestCase, TestSet } from "../test_base";
+import { assertThat, containStr, eq } from "../test_matcher";
 import { HttpHandler, HttpResponse } from "./http_handler";
 import { Logger } from "./logger";
 import { Router } from "./router";
@@ -118,12 +119,24 @@ class MatchHandler implements TestCase {
     await mockHttpServer.triggerEvent();
 
     // Verify
-    assert(mockResponse.statusCode === 200);
-    assert(mockResponse.endData === "any content");
-    assert(!mockHandler.handleCalled);
-    assert(!mockHandler2.handleCalled);
-    assert(mockHandler3.handleCalled);
-    assert(!mockHandler4.handleCalled);
+    assertThat(mockResponse.statusCode, eq(200), "mockResponse.statusCode");
+    assertThat(mockResponse.endData, eq("any content"), "mockResponse.endData");
+    assertThat(mockHandler.handleCalled, eq(false), "mockHandler.handleCalled");
+    assertThat(
+      mockHandler2.handleCalled,
+      eq(false),
+      "mockHandler2.handleCalled"
+    );
+    assertThat(
+      mockHandler3.handleCalled,
+      eq(true),
+      "mockHandler3.handleCalled"
+    );
+    assertThat(
+      mockHandler4.handleCalled,
+      eq(false),
+      "mockHandler4.handleCalled"
+    );
   }
 }
 
@@ -152,9 +165,9 @@ class RejectHandler implements TestCase {
     await mockHttpServer.triggerEvent();
 
     // Verify
-    assert(mockResponse.statusCode === 500);
-    assertContains(mockResponse.endData, "Reject handle.");
-    assert(mockHandler.handleCalled);
+    assertThat(mockResponse.statusCode, eq(500), "statusCode");
+    assertThat(mockResponse.endData, containStr("Reject handle."), "endData");
+    assertThat(mockHandler.handleCalled, eq(true), "handleCalled");
   }
 }
 
@@ -182,9 +195,9 @@ class NotFound implements TestCase {
     await mockHttpServer.triggerEvent();
 
     // Verify
-    assert(mockResponse.statusCode === 500);
-    assertContains(mockResponse.endData, "Not Found");
-    assert(!mockHandler.handleCalled);
+    assertThat(mockResponse.statusCode, eq(500), "statusCode");
+    assertThat(mockResponse.endData, containStr("Not Found"), "endData");
+    assertThat(mockHandler.handleCalled, eq(false), "handleCalled");
   }
 }
 

@@ -1,9 +1,11 @@
 import { Observable } from "./observable";
 import { ObservableArray, ObservableNestedArray } from "./observable_array";
-import { TestCase, TestSet, assert } from "./test_base";
+import { eqObservableArray } from "./observable_array_test_util";
+import { TestCase, TestSet } from "./test_base";
+import { assertThat, eq } from "./test_matcher";
 
-class PushFirst implements TestCase {
-  public name = "PushFirst";
+class PushAndIterate implements TestCase {
+  public name = "PushAndIterate";
 
   public execute() {
     // Prepare
@@ -11,9 +13,9 @@ class PushFirst implements TestCase {
     let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
       elementChangeCount++;
-      assert(index === 0);
-      assert(newValue === 100);
-      assert(oldValue === undefined);
+      assertThat(index, eq(0), "index");
+      assertThat(newValue, eq(100), "newValue");
+      assertThat(oldValue, eq(undefined), "oldValue");
     };
     let changeCount = 0;
     arr.onChange = () => {
@@ -24,61 +26,38 @@ class PushFirst implements TestCase {
     arr.push(100);
 
     // Verify
-    assert(arr.get(0) === 100);
-    assert(elementChangeCount === 1);
-    assert(changeCount === 1);
-  }
-}
+    assertThat(arr, eqObservableArray([eq(100)]), "arr");
+    assertThat(elementChangeCount, eq(1), "elementChangeCount");
+    assertThat(changeCount, eq(1), "changeCount");
 
-class PushSecond implements TestCase {
-  public name = "PushSecond";
-
-  public execute() {
     // Prepare
-    let arr = new ObservableArray<number>();
-    arr.push(100);
-    let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
       elementChangeCount++;
-      assert(index === 1);
-      assert(newValue === 200);
-      assert(oldValue === undefined);
-    };
-    let changeCount = 0;
-    arr.onChange = () => {
-      changeCount++;
+      assertThat(index, eq(1), "index");
+      assertThat(newValue, eq(200), "newValue");
+      assertThat(oldValue, eq(undefined), "oldValue");
     };
 
     // Execute
     arr.push(200);
 
     // Verify
-    assert(arr.get(1) === 200);
-    assert(elementChangeCount === 1);
-    assert(changeCount === 1);
-  }
-}
-
-class Iterate implements TestCase {
-  public name = "Iterate";
-
-  public execute() {
-    // Prepare
-    let arr = new ObservableArray<number>();
-    arr.push(100, 200);
-    let i = 0;
+    assertThat(arr, eqObservableArray([eq(100), eq(200)]), "arr");
+    assertThat(elementChangeCount, eq(2), "elementChangeCount");
+    assertThat(changeCount, eq(2), "changeCount");
 
     // Execute
+    let i = 0;
     for (let element of arr) {
       // Verify
-      assert(element === arr.get(i));
+      assertThat(element, eq(arr.get(i)), `${i}th element of arr`);
       i++;
     }
   }
 }
 
-class SetFirst implements TestCase {
-  public name = "SetFirst";
+class SetElements implements TestCase {
+  public name = "SetElements";
 
   public execute() {
     // Prepare
@@ -87,9 +66,9 @@ class SetFirst implements TestCase {
     let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
       elementChangeCount++;
-      assert(index === 0);
-      assert(newValue === 1);
-      assert(oldValue === 100);
+      assertThat(index, eq(0), "index");
+      assertThat(newValue, eq(1), "newValue");
+      assertThat(oldValue, eq(100), "oldValue");
     };
     let changeCount = 0;
     arr.onChange = () => {
@@ -100,72 +79,30 @@ class SetFirst implements TestCase {
     arr.set(0, 1);
 
     // Verify
-    assert(arr.get(0) === 1);
-    assert(elementChangeCount === 1);
-    assert(changeCount === 1);
-  }
-}
+    assertThat(arr, eqObservableArray([eq(1), eq(200)]), "arr");
+    assertThat(elementChangeCount, eq(1), "elementChangeCount");
+    assertThat(changeCount, eq(1), "changeCount");
 
-class SetSecond implements TestCase {
-  public name = "SetSecond";
-
-  public execute() {
     // Prepare
-    let arr = new ObservableArray<number>();
-    arr.push(100, 200);
-    let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
       elementChangeCount++;
-      assert(index === 1);
-      assert(newValue === 2);
-      assert(oldValue === 200);
-    };
-    let changeCount = 0;
-    arr.onChange = () => {
-      changeCount++;
+      assertThat(index, eq(1), "index");
+      assertThat(newValue, eq(2), "newValue");
+      assertThat(oldValue, eq(200), "oldValue");
     };
 
     // Execute
     arr.set(1, 2);
 
     // Verify
-    assert(arr.get(1) === 2);
-    assert(elementChangeCount === 1);
-    assert(changeCount === 1);
+    assertThat(arr, eqObservableArray([eq(1), eq(2)]), "arr");
+    assertThat(elementChangeCount, eq(2), "elementChangeCount");
+    assertThat(changeCount, eq(2), "changeCount");
   }
 }
 
-class PopFirst implements TestCase {
-  public name = "PopFirst";
-
-  public execute() {
-    // Prepare
-    let arr = new ObservableArray<number>();
-    arr.push(100);
-    let elementChangeCount = 0;
-    arr.onElementChange = (index, newValue, oldValue) => {
-      elementChangeCount++;
-      assert(index === 0);
-      assert(newValue === undefined);
-      assert(oldValue === 100);
-    };
-    let changeCount = 0;
-    arr.onChange = () => {
-      changeCount++;
-    };
-
-    // Execute
-    let value = arr.pop();
-
-    // Verify
-    assert(value === 100);
-    assert(elementChangeCount === 1);
-    assert(changeCount === 1);
-  }
-}
-
-class PopSecond implements TestCase {
-  public name = "PopSecond";
+class PopElements implements TestCase {
+  public name = "PopElements";
 
   public execute() {
     // Prepare
@@ -174,9 +111,9 @@ class PopSecond implements TestCase {
     let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
       elementChangeCount++;
-      assert(index === 1);
-      assert(newValue === undefined);
-      assert(oldValue === 200);
+      assertThat(index, eq(1), "index");
+      assertThat(newValue, eq(undefined), "newValue");
+      assertThat(oldValue, eq(200), "oldValue");
     };
     let changeCount = 0;
     arr.onChange = () => {
@@ -187,9 +124,27 @@ class PopSecond implements TestCase {
     let value = arr.pop();
 
     // Verify
-    assert(value === 200);
-    assert(elementChangeCount === 1);
-    assert(changeCount === 1);
+    assertThat(arr, eqObservableArray([eq(100)]), "arr");
+    assertThat(value, eq(200), "value");
+    assertThat(elementChangeCount, eq(1), "elementChangeCount");
+    assertThat(changeCount, eq(1), "changeCount");
+
+    // Prepare
+    arr.onElementChange = (index, newValue, oldValue) => {
+      elementChangeCount++;
+      assertThat(index, eq(0), "index");
+      assertThat(newValue, eq(undefined), "newValue");
+      assertThat(oldValue, eq(100), "oldValue");
+    };
+
+    // Execute
+    value = arr.pop();
+
+    // Verify
+    assertThat(arr, eqObservableArray([]), "arr");
+    assertThat(value, eq(100), "value");
+    assertThat(elementChangeCount, eq(2), "elementChangeCount");
+    assertThat(changeCount, eq(2), "changeCount");
   }
 }
 
@@ -203,13 +158,13 @@ class EmitInitialEvents implements TestCase {
     let elementChangeCount = 0;
     arr.onElementChange = (index, newValue, oldValue) => {
       elementChangeCount++;
-      assert(index === 0 || index === 1);
+      // TODO: Refactor a counter.
       if (index === 0) {
-        assert(newValue === 100);
-        assert(oldValue === undefined);
+        assertThat(newValue, eq(100), "newValue");
+        assertThat(oldValue, eq(undefined), "oldValue");
       } else {
-        assert(newValue === 200);
-        assert(oldValue === undefined);
+        assertThat(newValue, eq(200), "newValue");
+        assertThat(oldValue, eq(undefined), "oldValue");
       }
     };
     let changeCount = 0;
@@ -221,8 +176,8 @@ class EmitInitialEvents implements TestCase {
     arr.emitInitialEvents();
 
     // Verify
-    assert(elementChangeCount === 2);
-    assert(changeCount === 0);
+    assertThat(elementChangeCount, eq(2), "elementChangeCount");
+    assertThat(changeCount, eq(0), "changeCount");
   }
 }
 
@@ -238,7 +193,7 @@ class JsonStringify implements TestCase {
     let serailzied = JSON.stringify(arr);
 
     // Verify
-    assert(serailzied === "[100,200]");
+    assertThat(serailzied, eq("[100,200]"), "serailzied");
   }
 }
 
@@ -252,8 +207,8 @@ class Fact implements Observable {
   }
 }
 
-class PushObservable implements TestCase {
-  public name = "PushObservable";
+class PushAndSetObservable implements TestCase {
+  public name = "PushAndSetObservable";
 
   public execute() {
     // Prepare
@@ -269,49 +224,35 @@ class PushObservable implements TestCase {
       changeCount++;
     };
     fact.onChange();
-    assert(arr.get(0) === fact);
-    assert(changeCount === 1);
-  }
-}
+    assertThat(arr, eqObservableArray([eq(fact)]), "arr");
+    assertThat(changeCount, eq(1), "changeCount");
 
-class SetObservable implements TestCase {
-  public name = "SetObservable";
-
-  public execute() {
     // Prepare
-    let arr = new ObservableNestedArray<Fact>();
-    let fact = new Fact();
-    arr.push(fact);
     let fact2 = new Fact();
+    arr.onChange = undefined;
 
     // Execute
     arr.set(0, fact2);
 
     // Verify
-    let changeCount = 0;
     arr.onChange = () => {
       changeCount++;
     };
     fact2.onChange();
-    assert(arr.get(0) === fact2);
-    assert(changeCount === 1);
-    assert(fact.onChange === undefined);
+    assertThat(arr, eqObservableArray([eq(fact2)]), "arr");
+    assertThat(changeCount, eq(2), "changeCount");
+    assertThat(fact.onChange, eq(undefined), "fact.onChange");
   }
 }
 
 export let OBSERVABLE_ARRAY_TEST: TestSet = {
   name: "ObservableArrayTest",
   cases: [
-    new PushFirst(),
-    new PushSecond(),
-    new Iterate(),
-    new SetFirst(),
-    new SetSecond(),
-    new PopFirst(),
-    new PopSecond(),
+    new PushAndIterate(),
+    new SetElements(),
+    new PopElements(),
     new EmitInitialEvents(),
     new JsonStringify(),
-    new PushObservable(),
-    new SetObservable(),
+    new PushAndSetObservable(),
   ],
 };

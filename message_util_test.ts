@@ -5,7 +5,9 @@ import {
 } from "./message_descriptor";
 import { parseEnum, parseMessage } from "./message_util";
 import { ObservableArray } from "./observable_array";
-import { TestCase, TestSet, assert } from "./test_base";
+import { eqObservableArray } from "./observable_array_test_util";
+import { TestCase, TestSet } from "./test_base";
+import { MatchFn, assertThat, eq, eqArray } from "./test_matcher";
 
 function testParseEnum(input: string | number, expected: number) {
   // Prepare
@@ -22,7 +24,7 @@ function testParseEnum(input: string | number, expected: number) {
   let parsed = parseEnum(input, colorEnumDescriptor);
 
   // Verify
-  assert(parsed === expected);
+  assertThat(parsed, eq(expected), "parsed");
 }
 
 class ParseEnumValueFromNumber implements TestCase {
@@ -107,6 +109,55 @@ function testParsingMessageWithPrimitiveTypes(raw: any, output?: any) {
   return parsed;
 }
 
+function eqUser(expected: any): MatchFn<any> {
+  return (actual) => {
+    assertThat(actual.id, eq(expected.id), "id field");
+    assertThat(actual.isPaid, eq(expected.isPaid), "isPaid field");
+    assertThat(actual.nickname, eq(expected.nickname), "nikcname field");
+    assertThat(actual.email, eq(expected.email), "email field");
+    let expectedIdHistory: Array<MatchFn<any>>;
+    if (expected.idHistory !== undefined) {
+      expectedIdHistory = expected.idHistory.map((value: any) => {
+        return eq(value);
+      });
+    }
+    assertThat(actual.idHistory, eqArray(expectedIdHistory), "idHistory field");
+    let expectedIsPaidHistory: Array<MatchFn<any>>;
+    if (expected.isPaidHistory !== undefined) {
+      expectedIsPaidHistory = expected.isPaidHistory.map((value: any) => {
+        return eq(value);
+      });
+    }
+    assertThat(
+      actual.isPaidHistory,
+      eqArray(expectedIsPaidHistory),
+      "isPaidHistory field"
+    );
+    let expectedNicknameHistory: Array<MatchFn<any>>;
+    if (expected.nicknameHistory !== undefined) {
+      expectedNicknameHistory = expected.nicknameHistory.map((value: any) => {
+        return eq(value);
+      });
+    }
+    assertThat(
+      actual.nicknameHistory,
+      eqArray(expectedNicknameHistory),
+      "nicknameHistory field"
+    );
+    let expectedEmailHistory: Array<MatchFn<any>>;
+    if (expected.emailHistory !== undefined) {
+      expectedEmailHistory = expected.emailHistory.map((value: any) => {
+        return eq(value);
+      });
+    }
+    assertThat(
+      actual.emailHistory,
+      eqObservableArray(expectedEmailHistory),
+      "emailHistory field"
+    );
+  };
+}
+
 class ParseMessagePrimtivesAllPopulated implements TestCase {
   public name = "ParseMessagePrimtivesAllPopulated";
 
@@ -123,28 +174,20 @@ class ParseMessagePrimtivesAllPopulated implements TestCase {
     });
 
     // Verify
-    assert(parsed.id === 12);
-    assert(parsed.isPaid === true);
-    assert(parsed.nickname === "jack");
-    assert(parsed.email === "test@gmail.com");
-    assert(parsed.idHistory.length === 5);
-    assert(parsed.idHistory[0] === 11);
-    assert(parsed.idHistory[1] === 20);
-    assert(parsed.idHistory[2] === undefined);
-    assert(parsed.idHistory[3] === undefined);
-    assert(parsed.idHistory[4] === 855);
-    assert(parsed.isPaidHistory.length === 4);
-    assert(parsed.isPaidHistory[0] === false);
-    assert(parsed.isPaidHistory[1] === true);
-    assert(parsed.isPaidHistory[2] === false);
-    assert(parsed.isPaidHistory[3] === false);
-    assert(parsed.nicknameHistory.length === 3);
-    assert(parsed.nicknameHistory[0] === "queen");
-    assert(parsed.nicknameHistory[1] === "king");
-    assert(parsed.nicknameHistory[2] === "ace");
-    assert(parsed.emailHistory.length === 2);
-    assert(parsed.emailHistory.get(0) === "test1@test.com");
-    assert(parsed.emailHistory.get(1) === "123@ttt.com");
+    assertThat(
+      parsed,
+      eqUser({
+        id: 12,
+        isPaid: true,
+        nickname: "jack",
+        email: "test@gmail.com",
+        idHistory: [11, 20, undefined, undefined, 855],
+        isPaidHistory: [false, true, false, false],
+        nicknameHistory: ["queen", "king", "ace"],
+        emailHistory: ["test1@test.com", "123@ttt.com"],
+      }),
+      "parsed"
+    );
   }
 }
 
@@ -172,19 +215,23 @@ class ParseMessagePrimtivesOverride implements TestCase {
     );
 
     // Verify
-    assert(parsed === original);
-    assert(parsed.id === undefined);
-    assert(parsed.nickname === "jack");
-    assert(parsed.email === "test@gmail.com");
-    assert(parsed.idHistory === original.idHistory);
-    assert(parsed.idHistory.length === 2);
-    assert(parsed.idHistory[0] === 11);
-    assert(parsed.idHistory[1] === 12);
-    assert(parsed.isPaidHistory === undefined);
-    assert(parsed.emailHistory === original.emailHistory);
-    assert(parsed.emailHistory.length === 2);
-    assert(parsed.emailHistory.get(0) === "test1@test.com");
-    assert(parsed.emailHistory.get(1) === "123@ttt.com");
+    assertThat(
+      parsed,
+      eqUser({
+        nickname: "jack",
+        email: "test@gmail.com",
+        idHistory: [11, 12],
+        emailHistory: ["test1@test.com", "123@ttt.com"],
+      }),
+      "parsed"
+    );
+    assertThat(parsed, eq(original), "parsed reference");
+    assertThat(parsed.idHistory, eq(original.idHistory), "idHistory reference");
+    assertThat(
+      parsed.emailHistory,
+      eq(original.emailHistory),
+      "emailHistory reference"
+    );
   }
 }
 
@@ -260,6 +307,65 @@ function testParsingNestedMessages(raw: any, output?: any) {
   return parsed;
 }
 
+function eqCreditCard(expected?: any): MatchFn<any> {
+  return (actual) => {
+    if (expected === undefined) {
+      assertThat(actual, eq(undefined), "nullity");
+    } else {
+      assertThat(
+        actual.cardNumber,
+        eq(expected.cardNumber),
+        "cardNumber field"
+      );
+    }
+  };
+}
+
+function eqNestedUser(expected: any): MatchFn<any> {
+  return (actual) => {
+    assertThat(actual.id, eq(expected.id), "id field");
+    assertThat(
+      actual.userInfo.intro,
+      eq(expected.userInfo.intro),
+      "userInfo.intro field"
+    );
+    assertThat(
+      actual.userInfo.backgroundColor,
+      eq(expected.userInfo.backgroundColor),
+      "userInfo.backgroundColor field"
+    );
+    assertThat(
+      actual.userInfo.preferredColor,
+      eq(expected.userInfo.preferredColor),
+      "userInfo.preferredColor field"
+    );
+    let expectedColorHistory: Array<MatchFn<any>>;
+    if (expected.userInfo.colorHistory !== undefined) {
+      expectedColorHistory = expected.userInfo.colorHistory.map(
+        (value: any) => {
+          return eq(value);
+        }
+      );
+    }
+    assertThat(
+      actual.userInfo.colorHistory,
+      eqArray(expectedColorHistory),
+      "userInfo.colorHistory field"
+    );
+    let expectedCreditCards: Array<MatchFn<any>>;
+    if (expected.creditCards !== undefined) {
+      expectedCreditCards = expected.creditCards.map((value: any) => {
+        return eqCreditCard(value);
+      });
+    }
+    assertThat(
+      actual.creditCards,
+      eqObservableArray(expectedCreditCards),
+      "creditCards field"
+    );
+  };
+}
+
 class ParseMessageNestedAllPopulated implements TestCase {
   public name = "ParseMessageNestedAllPopulated";
 
@@ -276,20 +382,20 @@ class ParseMessageNestedAllPopulated implements TestCase {
     });
 
     // Verify
-    assert(parsed.id === 25);
-    assert(parsed.userInfo.intro === "student");
-    assert(parsed.userInfo.backgroundColor === 10);
-    assert(parsed.userInfo.preferredColor === 1);
-    assert(parsed.userInfo.colorHistory.length === 4);
-    assert(parsed.userInfo.colorHistory[0] === undefined);
-    assert(parsed.userInfo.colorHistory[1] === 1);
-    assert(parsed.userInfo.colorHistory[2] === 2);
-    assert(parsed.userInfo.colorHistory[3] === 10);
-    assert(parsed.creditCards.length === 4);
-    assert(parsed.creditCards.get(0).cardNumber === undefined);
-    assert(parsed.creditCards.get(1) === undefined);
-    assert(parsed.creditCards.get(2).cardNumber === undefined);
-    assert(parsed.creditCards.get(3).cardNumber === 3030);
+    assertThat(
+      parsed,
+      eqNestedUser({
+        id: 25,
+        userInfo: {
+          intro: "student",
+          backgroundColor: 10,
+          preferredColor: 1,
+          colorHistory: [undefined, 1, 2, 10],
+        },
+        creditCards: [{}, undefined, {}, { cardNumber: 3030 }],
+      }),
+      "parsed"
+    );
   }
 }
 
@@ -323,21 +429,48 @@ class ParseMessageNestedOverride implements TestCase {
     );
 
     // Verify
-    assert(parsed === original);
-    assert(parsed.userInfo === original.userInfo);
-    assert(parsed.userInfo.backgroundColor === 10);
-    assert(parsed.userInfo.preferredColor === 1);
-    assert(parsed.userInfo.colorHistory === original.userInfo.colorHistory);
-    assert(parsed.userInfo.colorHistory.length === 2);
-    assert(parsed.userInfo.colorHistory[0] === 1);
-    assert(parsed.userInfo.colorHistory[1] === 2);
-    assert(parsed.creditCards === original.creditCards);
-    assert(parsed.creditCards.length === 3);
-    assert(parsed.creditCards.get(0) === original.creditCards.get(0));
-    assert(parsed.creditCards.get(0).cardNumber === 2020);
-    assert(parsed.creditCards.get(1) === original.creditCards.get(1));
-    assert(parsed.creditCards.get(1).cardNumber === 4040);
-    assert(parsed.creditCards.get(2).cardNumber === 5050);
+    assertThat(
+      parsed,
+      eqNestedUser({
+        userInfo: {
+          backgroundColor: 10,
+          preferredColor: 1,
+          colorHistory: [1, 2],
+        },
+        creditCards: [
+          { cardNumber: 2020 },
+          { cardNumber: 4040 },
+          { cardNumber: 5050 },
+        ],
+      }),
+      "parsed"
+    );
+    assertThat(parsed, eq(original), "parsed reference");
+    assertThat(
+      parsed.userInfo,
+      eq(original.userInfo),
+      "parsed.userInfo reference"
+    );
+    assertThat(
+      parsed.userInfo.colorHistory,
+      eq(original.userInfo.colorHistory),
+      "parsed.userInfo.colorHistory reference"
+    );
+    assertThat(
+      parsed.creditCards,
+      eq(original.creditCards),
+      "parsed.creditCards reference"
+    );
+    assertThat(
+      parsed.creditCards.get(0),
+      eq(original.creditCards.get(0)),
+      "parsed.creditCards.get(0) reference"
+    );
+    assertThat(
+      parsed.creditCards.get(1),
+      eq(original.creditCards.get(1)),
+      "parsed.creditCards.get(0) reference"
+    );
   }
 }
 

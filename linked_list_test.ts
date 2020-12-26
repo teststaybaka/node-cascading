@@ -1,88 +1,62 @@
 import { LinkedList } from "./linked_list";
-import { TestCase, TestSet, assert } from "./test_base";
+import { eqLinkedList } from "./linked_list_test_util";
+import { TestCase, TestSet } from "./test_base";
+import { MatchFn, assertThat, eq } from "./test_matcher";
 
-function verifyFromBothSides<T>(linkedList: LinkedList<T>, expectedList: T[]) {
-  assert(linkedList.getSize() === expectedList.length);
-  let iter = linkedList.createLeftIterator();
-  for (let i = 0; i < expectedList.length; i++, iter.next()) {
-    assert(!iter.isEnd());
-    assert(iter.getValue() === expectedList[i]);
-  }
-  assert(iter.isEnd());
-  iter = linkedList.createRightIterator();
-  for (let i = expectedList.length - 1; i >= 0; i--, iter.prev()) {
-    assert(!iter.isStart());
-    assert(iter.getValue() === expectedList[i]);
-  }
-  assert(iter.isStart());
+function eqLinkedListBilateral<T>(
+  expected: Array<MatchFn<T>>
+): MatchFn<LinkedList<T>> {
+  return (actual) => {
+    assertThat(actual, eqLinkedList(expected), "from left");
+    let iter = actual.createRightIterator();
+    for (let i = expected.length - 1; i >= 0; i--, iter.prev()) {
+      assertThat(
+        iter.isStart(),
+        eq(false),
+        `from right, isStart at ${i}th position`
+      );
+      assertThat(iter.getValue(), expected[i], `from right, ${i}th element`);
+    }
+    assertThat(iter.isStart(), eq(true), `from right, isStart after loop`);
+  };
 }
 
-class CreateEmptyList implements TestCase {
-  public name = "CreateEmptyList";
+class PushAndClear implements TestCase {
+  public name = "PushAndClear";
 
   public execute() {
     // Execute
     let linkedList = new LinkedList<number>();
 
     // Verify
-    assert(linkedList.getSize() === 0);
-    let iter = linkedList.createLeftIterator();
-    assert(iter.isEnd());
-    iter = linkedList.createRightIterator();
-    assert(iter.isStart());
-  }
-}
-
-class PushBackOneValue implements TestCase {
-  public name = "PushBackOneValue";
-
-  public execute() {
-    // Prepare
-    let linkedList = new LinkedList<number>();
+    assertThat(linkedList, eqLinkedListBilateral([]), "empty");
 
     // Execute
     linkedList.pushBack(12311);
 
     // Verify
-    verifyFromBothSides(linkedList, [12311]);
-  }
-}
-
-class PushBackTwoValues implements TestCase {
-  public name = "PushBackTwoValues";
-
-  public execute() {
-    // Prepare
-    let linkedList = new LinkedList<number>();
+    assertThat(linkedList, eqLinkedListBilateral([eq(12311)]), "one element");
 
     // Execute
-    linkedList.pushBack(12311);
     linkedList.pushBack(4332);
 
     // Verify
-    verifyFromBothSides(linkedList, [12311, 4332]);
-  }
-}
-
-class ClearWithTwoValues implements TestCase {
-  public name = "ClearWithTwoValues";
-
-  public execute() {
-    // Prepare
-    let linkedList = new LinkedList<number>();
-    linkedList.pushBack(12311);
-    linkedList.pushBack(4332);
+    assertThat(
+      linkedList,
+      eqLinkedListBilateral([eq(12311), eq(4332)]),
+      "two elements"
+    );
 
     // Execute
     linkedList.clear();
 
     // Verify
-    verifyFromBothSides(linkedList, []);
+    assertThat(linkedList, eqLinkedListBilateral([]), "cleared");
   }
 }
 
-class RemoveFirstOutOfTwo implements TestCase {
-  public name = "RemoveFirstOutOfTwo";
+class RemoveFromLeft implements TestCase {
+  public name = "RemoveFromLeft";
 
   public execute() {
     // Prepare
@@ -95,49 +69,41 @@ class RemoveFirstOutOfTwo implements TestCase {
     iter.removeAndNext();
 
     // Verify
-    verifyFromBothSides(linkedList, [31]);
+    assertThat(linkedList, eqLinkedListBilateral([eq(31)]), "removed one");
+
+    // Execute
+    iter.removeAndNext();
+
+    // Verify
+    assertThat(linkedList, eqLinkedListBilateral([]), "removed two");
   }
 }
 
-class RemoveSecondOutOfTwo implements TestCase {
-  public name = "RemoveSecondOutOfTwo";
+class RemoveFromRight implements TestCase {
+  public name = "RemoveFromRight";
 
   public execute() {
     // Prepare
     let linkedList = new LinkedList<number>();
+    linkedList.pushBack(132);
     linkedList.pushBack(31);
-    linkedList.pushBack(333);
-    let iter = linkedList.createLeftIterator();
+    let iter = linkedList.createRightIterator();
 
     // Execute
-    iter.next();
-    iter.removeAndNext();
+    iter.removeAndPrev();
 
     // Verify
-    verifyFromBothSides(linkedList, [31]);
+    assertThat(linkedList, eqLinkedListBilateral([eq(132)]), "removed one");
+
+    // Execute
+    iter.removeAndPrev();
+
+    // Verify
+    assertThat(linkedList, eqLinkedListBilateral([]), "removed two");
   }
 }
 
-class RemoveTwoOutOfTwo implements TestCase {
-  public name = "RemoveTwoOutOfTwo";
-
-  public execute() {
-    // Prepare
-    let linkedList = new LinkedList<number>();
-    linkedList.pushBack(12121);
-    linkedList.pushBack(333);
-    let iter = linkedList.createLeftIterator();
-
-    // Execute
-    iter.removeAndNext();
-    iter.removeAndNext();
-
-    // Verify
-    verifyFromBothSides(linkedList, []);
-  }
-}
-
-class PopFrontFirstOutOfTwo implements TestCase {
+class PopFront implements TestCase {
   public name = "PopFrontFirstOutOfTwo";
 
   public execute() {
@@ -150,32 +116,20 @@ class PopFrontFirstOutOfTwo implements TestCase {
     let value = linkedList.popFront();
 
     // Verify
-    assert(value === 132);
-    verifyFromBothSides(linkedList, [31]);
-  }
-}
-
-class PopFrontTwoOutOfTwo implements TestCase {
-  public name = "PopFrontTwoOutOfTwo";
-
-  public execute() {
-    // Prepare
-    let linkedList = new LinkedList<number>();
-    linkedList.pushBack(132);
-    linkedList.pushBack(31);
-    linkedList.popFront();
+    assertThat(value, eq(132), "first value");
+    assertThat(linkedList, eqLinkedListBilateral([eq(31)]), "popped one");
 
     // Execute
-    let value = linkedList.popFront();
+    value = linkedList.popFront();
 
     // Verify
-    assert(value === 31);
-    verifyFromBothSides(linkedList, []);
+    assertThat(value, eq(31), "second value");
+    assertThat(linkedList, eqLinkedListBilateral([]), "popped two");
   }
 }
 
-class PopBackLastOutOfTwo implements TestCase {
-  public name = "PopBackLastOutOfTwo";
+class PopBack implements TestCase {
+  public name = "PopBack";
 
   public execute() {
     // Prepare
@@ -187,27 +141,15 @@ class PopBackLastOutOfTwo implements TestCase {
     let value = linkedList.popBack();
 
     // Verify
-    assert(value === 31);
-    verifyFromBothSides(linkedList, [132]);
-  }
-}
-
-class PopBackTwoOutOfTwo implements TestCase {
-  public name = "PopBackTwoOutOfTwo";
-
-  public execute() {
-    // Prepare
-    let linkedList = new LinkedList<number>();
-    linkedList.pushBack(132);
-    linkedList.pushBack(31);
-    linkedList.popBack();
+    assertThat(value, eq(31), "first value");
+    assertThat(linkedList, eqLinkedListBilateral([eq(132)]), "popped one");
 
     // Execute
-    let value = linkedList.popBack();
+    value = linkedList.popBack();
 
     // Verify
-    assert(value === 132);
-    verifyFromBothSides(linkedList, []);
+    assertThat(value, eq(132), "second value");
+    assertThat(linkedList, eqLinkedListBilateral([]), "popped two");
   }
 }
 
@@ -223,7 +165,7 @@ class SortOneNumber implements TestCase {
     linkedList.sort();
 
     // Verify
-    verifyFromBothSides(linkedList, [1312]);
+    assertThat(linkedList, eqLinkedListBilateral([eq(1312)]), "linkedList");
   }
 }
 
@@ -240,7 +182,11 @@ class SortTwoNumbers implements TestCase {
     linkedList.sort();
 
     // Verify
-    verifyFromBothSides(linkedList, [132, 1312]);
+    assertThat(
+      linkedList,
+      eqLinkedListBilateral([eq(132), eq(1312)]),
+      "linkedList"
+    );
   }
 }
 
@@ -258,7 +204,11 @@ class SortThreeNumbers implements TestCase {
     linkedList.sort();
 
     // Verify
-    verifyFromBothSides(linkedList, [3, 4, 5]);
+    assertThat(
+      linkedList,
+      eqLinkedListBilateral([eq(3), eq(4), eq(5)]),
+      "linkedList"
+    );
   }
 }
 
@@ -277,7 +227,11 @@ class SortFourNumbers implements TestCase {
     linkedList.sort();
 
     // Verify
-    verifyFromBothSides(linkedList, [3, 4, 5, 9]);
+    assertThat(
+      linkedList,
+      eqLinkedListBilateral([eq(3), eq(4), eq(5), eq(9)]),
+      "linkedList"
+    );
   }
 }
 
@@ -297,7 +251,11 @@ class SortFiveNumbers implements TestCase {
     linkedList.sort();
 
     // Verify
-    verifyFromBothSides(linkedList, [1, 3, 4, 5, 9]);
+    assertThat(
+      linkedList,
+      eqLinkedListBilateral([eq(1), eq(3), eq(4), eq(5), eq(9)]),
+      "linkedList"
+    );
   }
 }
 
@@ -318,7 +276,11 @@ class SortSixNumbers implements TestCase {
     linkedList.sort();
 
     // Verify
-    verifyFromBothSides(linkedList, [1, 3, 4, 5, 7, 9]);
+    assertThat(
+      linkedList,
+      eqLinkedListBilateral([eq(1), eq(3), eq(4), eq(5), eq(7), eq(9)]),
+      "linkedList"
+    );
   }
 }
 
@@ -340,7 +302,11 @@ class SortSevenNumbers implements TestCase {
     linkedList.sort();
 
     // Verify
-    verifyFromBothSides(linkedList, [1, 2, 3, 4, 5, 7, 9]);
+    assertThat(
+      linkedList,
+      eqLinkedListBilateral([eq(1), eq(2), eq(3), eq(4), eq(5), eq(7), eq(9)]),
+      "linkedList"
+    );
   }
 }
 
@@ -365,7 +331,11 @@ class SortObjects implements TestCase {
     });
 
     // Verify
-    verifyFromBothSides(linkedList, [value2, value3, value, value4]);
+    assertThat(
+      linkedList,
+      eqLinkedListBilateral([eq(value2), eq(value3), eq(value), eq(value4)]),
+      "linkedList"
+    );
   }
 }
 
@@ -390,24 +360,22 @@ class SortObjectsStable implements TestCase {
     });
 
     // Verify
-    verifyFromBothSides(linkedList, [value2, value3, value, value4]);
+    assertThat(
+      linkedList,
+      eqLinkedListBilateral([eq(value2), eq(value3), eq(value), eq(value4)]),
+      "linkedList"
+    );
   }
 }
 
 export let LINKED_LIST_TEST: TestSet = {
   name: "LinkedListTest",
   cases: [
-    new CreateEmptyList(),
-    new PushBackOneValue(),
-    new PushBackTwoValues(),
-    new ClearWithTwoValues(),
-    new RemoveFirstOutOfTwo(),
-    new RemoveSecondOutOfTwo(),
-    new RemoveTwoOutOfTwo(),
-    new PopFrontFirstOutOfTwo(),
-    new PopFrontTwoOutOfTwo(),
-    new PopBackLastOutOfTwo(),
-    new PopBackTwoOutOfTwo(),
+    new PushAndClear(),
+    new RemoveFromLeft(),
+    new RemoveFromRight(),
+    new PopFront(),
+    new PopBack(),
     new SortOneNumber(),
     new SortTwoNumbers(),
     new SortThreeNumbers(),

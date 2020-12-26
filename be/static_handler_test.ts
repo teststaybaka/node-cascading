@@ -2,13 +2,8 @@ import fs = require("fs");
 import url = require("url");
 import { CONTENT_TYPE_BINARY_STREAM } from "../constants";
 import { newInternalError } from "../errors";
-import {
-  TestCase,
-  TestSet,
-  assert,
-  assertError,
-  assertRejection,
-} from "../test_base";
+import { TestCase, TestSet } from "../test_base";
+import { assertRejection, assertThat, eq, eqError } from "../test_matcher";
 import { StaticDirHandler, StaticFileHandler } from "./static_handler";
 
 class FileHandlerMatchJpgFile implements TestCase {
@@ -22,8 +17,8 @@ class FileHandlerMatchJpgFile implements TestCase {
     let response = await handler.handle(undefined, undefined, undefined);
 
     // Verify
-    assert(response.contentFile === "path.jpg");
-    assert(response.contentType === "image/jpeg");
+    assertThat(response.contentFile, eq("path.jpg"), "response.contentFile");
+    assertThat(response.contentType, eq("image/jpeg"), "response.contentType");
   }
 }
 
@@ -38,8 +33,12 @@ class FileHandlerBinaryType implements TestCase {
     let response = await handler.handle(undefined, undefined, undefined);
 
     // Verify
-    assert(response.contentFile === "path");
-    assert(response.contentType === CONTENT_TYPE_BINARY_STREAM);
+    assertThat(response.contentFile, eq("path"), "response.contentFile");
+    assertThat(
+      response.contentType,
+      eq(CONTENT_TYPE_BINARY_STREAM),
+      "response.contentType"
+    );
   }
 }
 
@@ -57,7 +56,7 @@ class DirHandlerUrlNotMatch implements TestCase {
     );
 
     // Verify
-    assertError(error, newInternalError("match url regex"));
+    assertThat(error, eqError(newInternalError("match url regex")), "error");
   }
 }
 
@@ -74,8 +73,8 @@ class DirHandlerMatchJpgFile implements TestCase {
 
     // Verify
     let stats = fs.statSync(response.contentFile);
-    assert(stats.isFile());
-    assert(response.contentType === "image/jpeg");
+    assertThat(stats.isFile(), eq(true), "isFile");
+    assertThat(response.contentType, eq("image/jpeg"), "contentType");
   }
 }
 
@@ -92,8 +91,12 @@ class DirHandlerMatchBinaryFile implements TestCase {
 
     // Verify
     let stats = fs.statSync(response.contentFile);
-    assert(stats.isFile());
-    assert(response.contentType === CONTENT_TYPE_BINARY_STREAM);
+    assertThat(stats.isFile(), eq(true), "isFile");
+    assertThat(
+      response.contentType,
+      eq(CONTENT_TYPE_BINARY_STREAM),
+      "contentType"
+    );
   }
 }
 
@@ -111,7 +114,11 @@ class DirHandlerPreventsParentDirectory implements TestCase {
     );
 
     // Verify
-    assertError(error, newInternalError("navigate to the parent directory"));
+    assertThat(
+      error,
+      eqError(newInternalError("navigate to the parent directory")),
+      "error"
+    );
   }
 }
 

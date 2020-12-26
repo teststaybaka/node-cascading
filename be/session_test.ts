@@ -1,16 +1,11 @@
 import { newUnauthenticatedError } from "../errors";
+import { TestCase, TestSet } from "../test_base";
+import { assertThat, assertThrow, eq, eqError } from "../test_matcher";
 import {
   SecureSessionGenerator,
   SecureSessionVerifier,
   Signer,
 } from "./session";
-import {
-  TestCase,
-  TestSet,
-  assert,
-  assertError,
-  assertThrow,
-} from "../test_base";
 
 class MockSigner extends Signer {
   public signature: string = null;
@@ -31,7 +26,11 @@ class InvalidRawSession implements TestCase {
     let error = assertThrow(() => verifier.verifyAndGetUserId("f|s|aa"));
 
     // Verify
-    assertError(error, newUnauthenticatedError("Invalid signed session"));
+    assertThat(
+      error,
+      eqError(newUnauthenticatedError("Invalid signed session")),
+      "error"
+    );
   }
 }
 
@@ -48,7 +47,11 @@ class InvalidSignature implements TestCase {
     let error = assertThrow(() => verifier.verifyAndGetUserId("f|s"));
 
     // Verify
-    assertError(error, newUnauthenticatedError("session signature"));
+    assertThat(
+      error,
+      eqError(newUnauthenticatedError("session signature")),
+      "error"
+    );
   }
 }
 
@@ -65,7 +68,7 @@ class InvalidSessionJsonData implements TestCase {
     let error = assertThrow(() => verifier.verifyAndGetUserId("--|xxxx"));
 
     // Verify
-    assertError(error, newUnauthenticatedError("json data"));
+    assertThat(error, eqError(newUnauthenticatedError("json data")), "error");
   }
 }
 
@@ -82,7 +85,11 @@ class NoTimestampInSession implements TestCase {
     let error = assertThrow(() => verifier.verifyAndGetUserId("{}|xxxx"));
 
     // Verify
-    assertError(error, newUnauthenticatedError("session data"));
+    assertThat(
+      error,
+      eqError(newUnauthenticatedError("session data")),
+      "error"
+    );
   }
 }
 
@@ -101,7 +108,11 @@ class NoUserIdInSession implements TestCase {
     );
 
     // Verify
-    assertError(error, newUnauthenticatedError("session data"));
+    assertThat(
+      error,
+      eqError(newUnauthenticatedError("session data")),
+      "error"
+    );
   }
 }
 
@@ -123,7 +134,11 @@ class SessionExpired implements TestCase {
     );
 
     // Verify
-    assertError(error, newUnauthenticatedError("Session expired"));
+    assertThat(
+      error,
+      eqError(newUnauthenticatedError("Session expired")),
+      "error"
+    );
   }
 }
 
@@ -144,7 +159,7 @@ class ExtractUserIdSuccess implements TestCase {
     );
 
     // Verify
-    assert(extractedId === userId);
+    assertThat(extractedId, eq(userId), "extractedId");
   }
 }
 
@@ -164,7 +179,7 @@ class GenerateSessionSuccess implements TestCase {
 
     // Verify
     let extractedId = verifier.verifyAndGetUserId(session);
-    assert(extractedId === userId);
+    assertThat(extractedId, eq(userId), "extractedId");
   }
 }
 
