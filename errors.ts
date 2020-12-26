@@ -8,9 +8,9 @@ export class TypedError extends Error {
   constructor(public errorType: number, message: string, err?: any) {
     super(message);
     if (err && err.message) {
-      this.message = `${message} ${err.message}`;
+      this.message = `${message}\n${err.message}`;
       if (err.stack) {
-        this.stack = `Error: ${message}\n${err.stack}`;
+        this.stack = err.stack;
       }
     }
   }

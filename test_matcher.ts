@@ -1,5 +1,3 @@
-import { newInternalError } from "./errors";
-
 export function assert(
   tested: boolean,
   expected: string,
@@ -33,12 +31,13 @@ export type MatchFn<T> = (actual: T) => void;
 export function assertThat<T>(
   actual: T,
   match: MatchFn<T>,
-  context: string
+  targetName: string
 ): void {
   try {
     match(actual);
   } catch (e) {
-    throw newInternalError(`When matching ${context}:`, e);
+    e.message = `When matching ${targetName}:\n${e.message}`;
+    throw e;
   }
 }
 
