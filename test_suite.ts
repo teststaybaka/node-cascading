@@ -1,18 +1,7 @@
-import { ROUTER_TEST } from "./be/router_test";
-import { SESSION_TEST } from "./be/session_test";
-import { STATIC_HTTP_HANDLER_TEST } from "./be/static_handler_test";
-import { NAVIGATION_ROUTER_TEST } from "./fe/navigation_router_test";
-import { LINKED_LIST_TEST } from "./linked_list_test";
-import { MESSAGE_UTIL_TEST } from "./message_util_test";
-import { OBSERVABLE_ARRAY_TEST } from "./observable_array_test";
-import { runTests } from "./test_runner";
-
-runTests([
-  LINKED_LIST_TEST,
-  MESSAGE_UTIL_TEST,
-  NAVIGATION_ROUTER_TEST,
-  ROUTER_TEST,
-  SESSION_TEST,
-  STATIC_HTTP_HANDLER_TEST,
-  OBSERVABLE_ARRAY_TEST,
-]);
+import "./be/router_test";
+import "./be/session_test";
+import "./be/static_handler_test";
+import "./fe/navigation_router_test";
+import "./linked_list_test";
+import "./message_util_test";
+import "./observable_array_test";
