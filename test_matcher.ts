@@ -66,6 +66,41 @@ export function eqArray<T>(expected?: Array<MatchFn<T>>): MatchFn<Array<T>> {
   };
 }
 
+// Match Set in insertion order.
+export function eqSet<T>(expected?: Array<MatchFn<T>>): MatchFn<Set<T>> {
+  return (actual) => {
+    if (expected === undefined) {
+      assertThat(actual, eq(undefined), "nullity");
+      return;
+    }
+    assertThat(actual.size, eq(expected.length), `set size`);
+    let i = 0;
+    for (let value of actual) {
+      assertThat(value, expected[i], `${i}th element`);
+      i++;
+    }
+  };
+}
+
+// Match Map in insertion order.
+export function eqMap<K, V>(
+  expected?: Array<[MatchFn<K>, MatchFn<V>]>
+): MatchFn<Map<K, V>> {
+  return (actual) => {
+    if (expected === undefined) {
+      assertThat(actual, eq(undefined), "nullity");
+      return;
+    }
+    assertThat(actual.size, eq(expected.length), `map size`);
+    let i = 0;
+    for (let [key, value] of actual) {
+      assertThat(key, expected[i][0], `${i}th key`);
+      assertThat(value, expected[i][1], `${i}th value`);
+      i++;
+    }
+  };
+}
+
 export function eqError(expected: Error): MatchFn<any> {
   return (actual) => {
     assert(actual instanceof Error, `to be an Error`, `${actual}`);
