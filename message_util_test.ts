@@ -4,10 +4,117 @@ import {
   PrimitiveType,
 } from "./message_descriptor";
 import { parseEnum, parseMessage } from "./message_util";
+import { eqMessage } from "./message_util_test_util";
 import { ObservableArray } from "./observable_array";
-import { eqObservableArray } from "./observable_array_test_util";
 import { TEST_RUNNER } from "./test_base";
-import { MatchFn, assertThat, eq, eqArray } from "./test_matcher";
+import { assertThat, eq } from "./test_matcher";
+
+let USER: MessageDescriptor<any> = {
+  name: "User",
+  factoryFn: () => {
+    return new Object();
+  },
+  fields: [
+    { name: "id", primitiveType: PrimitiveType.NUMBER },
+    { name: "isPaid", primitiveType: PrimitiveType.BOOLEAN },
+    { name: "nickname", primitiveType: PrimitiveType.STRING },
+    { name: "email", primitiveType: PrimitiveType.STRING },
+    {
+      name: "idHistory",
+      primitiveType: PrimitiveType.NUMBER,
+      arrayFactoryFn: () => {
+        return new Array<any>();
+      },
+    },
+    {
+      name: "isPaidHistory",
+      primitiveType: PrimitiveType.BOOLEAN,
+      arrayFactoryFn: () => {
+        return new Array<any>();
+      },
+    },
+    {
+      name: "nicknameHistory",
+      primitiveType: PrimitiveType.STRING,
+      arrayFactoryFn: () => {
+        return new Array<any>();
+      },
+    },
+    {
+      name: "emailHistory",
+      primitiveType: PrimitiveType.STRING,
+      observableArrayFactoryFn: () => {
+        return new ObservableArray<any>();
+      },
+    },
+  ],
+};
+
+let COLOR: EnumDescriptor<any> = {
+  name: "Color",
+  values: [
+    { name: "RED", value: 10 },
+    { name: "BLUE", value: 1 },
+    { name: "GREEN", value: 2 },
+  ],
+};
+
+let USER_INFO: MessageDescriptor<any> = {
+  name: "UserInfo",
+  factoryFn: () => {
+    return new Object();
+  },
+  fields: [
+    {
+      name: "intro",
+      primitiveType: PrimitiveType.STRING,
+    },
+    {
+      name: "backgroundColor",
+      enumDescriptor: COLOR,
+    },
+    {
+      name: "preferredColor",
+      enumDescriptor: COLOR,
+    },
+    {
+      name: "colorHistory",
+      enumDescriptor: COLOR,
+      arrayFactoryFn: () => {
+        return new Array<any>();
+      },
+    },
+  ],
+};
+
+let CREDIT_CARD: MessageDescriptor<any> = {
+  name: "CreditCard",
+  factoryFn: () => {
+    return new Object();
+  },
+  fields: [{ name: "cardNumber", primitiveType: PrimitiveType.NUMBER }],
+};
+
+let NESTED_USER: MessageDescriptor<any> = {
+  name: "User",
+  factoryFn: () => {
+    return new Object();
+  },
+  fields: [
+    { name: "id", primitiveType: PrimitiveType.NUMBER },
+    {
+      name: "userInfo",
+      messageDescriptor: USER_INFO,
+    },
+    {
+      name: "creditCards",
+      messageDescriptor: CREDIT_CARD,
+      observableArrayFactoryFn: () => {
+        return new ObservableArray<any>();
+      },
+    },
+  ],
+};
 
 function testParseEnum(input: string | number, expected: number) {
   // Prepare
@@ -25,236 +132,6 @@ function testParseEnum(input: string | number, expected: number) {
 
   // Verify
   assertThat(parsed, eq(expected), "parsed");
-}
-
-function testParsingMessageWithPrimitiveTypes(raw: any, output?: any) {
-  // Prepare
-  let userMessageDescriptor: MessageDescriptor<any> = {
-    name: "User",
-    factoryFn: () => {
-      return new Object();
-    },
-    fields: [
-      { name: "id", primitiveType: PrimitiveType.NUMBER },
-      { name: "isPaid", primitiveType: PrimitiveType.BOOLEAN },
-      { name: "nickname", primitiveType: PrimitiveType.STRING },
-      { name: "email", primitiveType: PrimitiveType.STRING },
-      {
-        name: "idHistory",
-        primitiveType: PrimitiveType.NUMBER,
-        arrayFactoryFn: () => {
-          return new Array<any>();
-        },
-      },
-      {
-        name: "isPaidHistory",
-        primitiveType: PrimitiveType.BOOLEAN,
-        arrayFactoryFn: () => {
-          return new Array<any>();
-        },
-      },
-      {
-        name: "nicknameHistory",
-        primitiveType: PrimitiveType.STRING,
-        arrayFactoryFn: () => {
-          return new Array<any>();
-        },
-      },
-      {
-        name: "emailHistory",
-        primitiveType: PrimitiveType.STRING,
-        observableArrayFactoryFn: () => {
-          return new ObservableArray<any>();
-        },
-      },
-    ],
-  };
-
-  // Execute
-  let parsed = parseMessage(raw, userMessageDescriptor, output);
-
-  // Verify
-  return parsed;
-}
-
-function eqUser(expected: any): MatchFn<any> {
-  return (actual) => {
-    assertThat(actual.id, eq(expected.id), "id field");
-    assertThat(actual.isPaid, eq(expected.isPaid), "isPaid field");
-    assertThat(actual.nickname, eq(expected.nickname), "nikcname field");
-    assertThat(actual.email, eq(expected.email), "email field");
-    let expectedIdHistory: Array<MatchFn<any>>;
-    if (expected.idHistory !== undefined) {
-      expectedIdHistory = expected.idHistory.map((value: any) => {
-        return eq(value);
-      });
-    }
-    assertThat(actual.idHistory, eqArray(expectedIdHistory), "idHistory field");
-    let expectedIsPaidHistory: Array<MatchFn<any>>;
-    if (expected.isPaidHistory !== undefined) {
-      expectedIsPaidHistory = expected.isPaidHistory.map((value: any) => {
-        return eq(value);
-      });
-    }
-    assertThat(
-      actual.isPaidHistory,
-      eqArray(expectedIsPaidHistory),
-      "isPaidHistory field"
-    );
-    let expectedNicknameHistory: Array<MatchFn<any>>;
-    if (expected.nicknameHistory !== undefined) {
-      expectedNicknameHistory = expected.nicknameHistory.map((value: any) => {
-        return eq(value);
-      });
-    }
-    assertThat(
-      actual.nicknameHistory,
-      eqArray(expectedNicknameHistory),
-      "nicknameHistory field"
-    );
-    let expectedEmailHistory: Array<MatchFn<any>>;
-    if (expected.emailHistory !== undefined) {
-      expectedEmailHistory = expected.emailHistory.map((value: any) => {
-        return eq(value);
-      });
-    }
-    assertThat(
-      actual.emailHistory,
-      eqObservableArray(expectedEmailHistory),
-      "emailHistory field"
-    );
-  };
-}
-
-function testParsingNestedMessages(raw: any, output?: any) {
-  // Prepare
-  let colorEnumDescriptor: EnumDescriptor<any> = {
-    name: "Color",
-    values: [
-      { name: "RED", value: 10 },
-      { name: "BLUE", value: 1 },
-      { name: "GREEN", value: 2 },
-    ],
-  };
-  let userInfoMessaeDescriptor: MessageDescriptor<any> = {
-    name: "UserInfo",
-    factoryFn: () => {
-      return new Object();
-    },
-    fields: [
-      {
-        name: "intro",
-        primitiveType: PrimitiveType.STRING,
-      },
-      {
-        name: "backgroundColor",
-        enumDescriptor: colorEnumDescriptor,
-      },
-      {
-        name: "preferredColor",
-        enumDescriptor: colorEnumDescriptor,
-      },
-      {
-        name: "colorHistory",
-        enumDescriptor: colorEnumDescriptor,
-        arrayFactoryFn: () => {
-          return new Array<any>();
-        },
-      },
-    ],
-  };
-  let creditCardMessageDescriptor: MessageDescriptor<any> = {
-    name: "CreditCard",
-    factoryFn: () => {
-      return new Object();
-    },
-    fields: [{ name: "cardNumber", primitiveType: PrimitiveType.NUMBER }],
-  };
-  let userMessageDescriptor: MessageDescriptor<any> = {
-    name: "User",
-    factoryFn: () => {
-      return new Object();
-    },
-    fields: [
-      { name: "id", primitiveType: PrimitiveType.NUMBER },
-      {
-        name: "userInfo",
-        messageDescriptor: userInfoMessaeDescriptor,
-      },
-      {
-        name: "creditCards",
-        messageDescriptor: creditCardMessageDescriptor,
-        observableArrayFactoryFn: () => {
-          return new ObservableArray<any>();
-        },
-      },
-    ],
-  };
-
-  // Execute
-  let parsed = parseMessage(raw, userMessageDescriptor, output);
-
-  // Verify
-  return parsed;
-}
-
-function eqCreditCard(expected?: any): MatchFn<any> {
-  return (actual) => {
-    if (expected === undefined) {
-      assertThat(actual, eq(undefined), "nullity");
-    } else {
-      assertThat(
-        actual.cardNumber,
-        eq(expected.cardNumber),
-        "cardNumber field"
-      );
-    }
-  };
-}
-
-function eqNestedUser(expected: any): MatchFn<any> {
-  return (actual) => {
-    assertThat(actual.id, eq(expected.id), "id field");
-    assertThat(
-      actual.userInfo.intro,
-      eq(expected.userInfo.intro),
-      "userInfo.intro field"
-    );
-    assertThat(
-      actual.userInfo.backgroundColor,
-      eq(expected.userInfo.backgroundColor),
-      "userInfo.backgroundColor field"
-    );
-    assertThat(
-      actual.userInfo.preferredColor,
-      eq(expected.userInfo.preferredColor),
-      "userInfo.preferredColor field"
-    );
-    let expectedColorHistory: Array<MatchFn<any>>;
-    if (expected.userInfo.colorHistory !== undefined) {
-      expectedColorHistory = expected.userInfo.colorHistory.map(
-        (value: any) => {
-          return eq(value);
-        }
-      );
-    }
-    assertThat(
-      actual.userInfo.colorHistory,
-      eqArray(expectedColorHistory),
-      "userInfo.colorHistory field"
-    );
-    let expectedCreditCards: Array<MatchFn<any>>;
-    if (expected.creditCards !== undefined) {
-      expectedCreditCards = expected.creditCards.map((value: any) => {
-        return eqCreditCard(value);
-      });
-    }
-    assertThat(
-      actual.creditCards,
-      eqObservableArray(expectedCreditCards),
-      "creditCards field"
-    );
-  };
 }
 
 TEST_RUNNER.run({
@@ -287,30 +164,37 @@ TEST_RUNNER.run({
     {
       name: "ParseMessagePrimtivesAllPopulated",
       execute: () => {
-        let parsed = testParsingMessageWithPrimitiveTypes({
-          id: 12,
-          isPaid: true,
-          nickname: "jack",
-          email: "test@gmail.com",
-          idHistory: [11, 20, "20", {}, 855],
-          isPaidHistory: [false, true, false, false],
-          nicknameHistory: ["queen", "king", "ace"],
-          emailHistory: ["test1@test.com", "123@ttt.com"],
-        });
-
-        // Verify
-        assertThat(
-          parsed,
-          eqUser({
+        // Execute
+        let parsed = parseMessage(
+          {
             id: 12,
             isPaid: true,
             nickname: "jack",
             email: "test@gmail.com",
-            idHistory: [11, 20, undefined, undefined, 855],
+            idHistory: [11, 20, "20", {}, 855],
             isPaidHistory: [false, true, false, false],
             nicknameHistory: ["queen", "king", "ace"],
             emailHistory: ["test1@test.com", "123@ttt.com"],
-          }),
+          },
+          USER
+        );
+
+        // Verify
+        assertThat(
+          parsed,
+          eqMessage(
+            {
+              id: 12,
+              isPaid: true,
+              nickname: "jack",
+              email: "test@gmail.com",
+              idHistory: [11, 20, undefined, undefined, 855],
+              isPaidHistory: [false, true, false, false],
+              nicknameHistory: ["queen", "king", "ace"],
+              emailHistory: ["test1@test.com", "123@ttt.com"],
+            },
+            USER
+          ),
           "parsed"
         );
       },
@@ -318,6 +202,7 @@ TEST_RUNNER.run({
     {
       name: "ParseMessagePrimtivesOverride",
       execute: () => {
+        // Prepare
         let emailHistory = new ObservableArray<string>();
         emailHistory.push(undefined, "test1@test.com", "123@ttt.com");
         let original: any = {
@@ -327,25 +212,31 @@ TEST_RUNNER.run({
           isPaidHistory: [false, true, false, false],
           emailHistory: emailHistory,
         };
-        let parsed = testParsingMessageWithPrimitiveTypes(
+
+        // Execute
+        let parsed = parseMessage(
           {
             nickname: "jack",
             email: "test@gmail.com",
             idHistory: [11, 12],
             emailHistory: ["test1@test.com", "123@ttt.com"],
           },
+          USER,
           original
         );
 
         // Verify
         assertThat(
           parsed,
-          eqUser({
-            nickname: "jack",
-            email: "test@gmail.com",
-            idHistory: [11, 12],
-            emailHistory: ["test1@test.com", "123@ttt.com"],
-          }),
+          eqMessage(
+            {
+              nickname: "jack",
+              email: "test@gmail.com",
+              idHistory: [11, 12],
+              emailHistory: ["test1@test.com", "123@ttt.com"],
+            },
+            USER
+          ),
           "parsed"
         );
         assertThat(parsed, eq(original), "parsed reference");
@@ -364,30 +255,42 @@ TEST_RUNNER.run({
     {
       name: "ParseMessageNestedAllPopulated",
       execute: () => {
-        let parsed = testParsingNestedMessages({
-          id: 25,
-          userInfo: {
-            intro: "student",
-            backgroundColor: "RED",
-            preferredColor: 1,
-            colorHistory: [true, "BLUE", "GREEN", 10],
+        // Execute
+        let parsed = parseMessage(
+          {
+            id: 25,
+            userInfo: {
+              intro: "student",
+              backgroundColor: "RED",
+              preferredColor: 1,
+              colorHistory: [true, "BLUE", "GREEN", 10],
+            },
+            creditCards: [
+              { cardNumber: "1010" },
+              2020,
+              {},
+              { cardNumber: 3030 },
+            ],
           },
-          creditCards: [{ cardNumber: "1010" }, 2020, {}, { cardNumber: 3030 }],
-        });
+          NESTED_USER
+        );
 
         // Verify
         assertThat(
           parsed,
-          eqNestedUser({
-            id: 25,
-            userInfo: {
-              intro: "student",
-              backgroundColor: 10,
-              preferredColor: 1,
-              colorHistory: [undefined, 1, 2, 10],
+          eqMessage(
+            {
+              id: 25,
+              userInfo: {
+                intro: "student",
+                backgroundColor: 10,
+                preferredColor: 1,
+                colorHistory: [undefined, 1, 2, 10],
+              },
+              creditCards: [{}, undefined, {}, { cardNumber: 3030 }],
             },
-            creditCards: [{}, undefined, {}, { cardNumber: 3030 }],
-          }),
+            NESTED_USER
+          ),
           "parsed"
         );
       },
@@ -395,6 +298,7 @@ TEST_RUNNER.run({
     {
       name: "ParseMessageNestedOverride",
       execute: () => {
+        // Prepare
         let creditCards = new ObservableArray<any>();
         creditCards.push({ cardNumber: 1010 }, { cardNumber: 3030 });
         let original: any = {
@@ -404,7 +308,9 @@ TEST_RUNNER.run({
           },
           creditCards: creditCards,
         };
-        let parsed = testParsingNestedMessages(
+
+        // Execute
+        let parsed = parseMessage(
           {
             userInfo: {
               backgroundColor: "RED",
@@ -417,24 +323,28 @@ TEST_RUNNER.run({
               { cardNumber: 5050 },
             ],
           },
+          NESTED_USER,
           original
         );
 
         // Verify
         assertThat(
           parsed,
-          eqNestedUser({
-            userInfo: {
-              backgroundColor: 10,
-              preferredColor: 1,
-              colorHistory: [1, 2],
+          eqMessage(
+            {
+              userInfo: {
+                backgroundColor: 10,
+                preferredColor: 1,
+                colorHistory: [1, 2],
+              },
+              creditCards: [
+                { cardNumber: 2020 },
+                { cardNumber: 4040 },
+                { cardNumber: 5050 },
+              ],
             },
-            creditCards: [
-              { cardNumber: 2020 },
-              { cardNumber: 4040 },
-              { cardNumber: 5050 },
-            ],
-          }),
+            NESTED_USER
+          ),
           "parsed"
         );
         assertThat(parsed, eq(original), "parsed reference");
