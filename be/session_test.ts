@@ -1,11 +1,16 @@
 import { newUnauthenticatedError } from "../errors";
-import { TEST_RUNNER } from "../test_base";
-import { assertThat, assertThrow, eq, eqError } from "../test_matcher";
 import {
   SecureSessionGenerator,
   SecureSessionVerifier,
   Signer,
 } from "./session";
+import {
+  assertThat,
+  assertThrow,
+  eq,
+  eqError,
+} from "@selfage/test_base/matcher";
+import { TEST_RUNNER } from "@selfage/test_base/runner";
 
 class MockSigner extends Signer {
   public signature: string = null;

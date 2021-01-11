@@ -1,5 +1,5 @@
 import { LinkedList } from "./linked_list";
-import { MatchFn, assertThat, eq } from "./test_matcher";
+import { MatchFn, assertThat, eq } from "@selfage/test_base/matcher";
 
 export function eqLinkedList<T>(
   expected: Array<MatchFn<T>>

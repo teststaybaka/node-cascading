@@ -1,8 +1,8 @@
 import { Observable } from "./observable";
 import { ObservableArray, ObservableNestedArray } from "./observable_array";
 import { eqObservableArray } from "./observable_array_test_util";
-import { TEST_RUNNER } from "./test_base";
-import { assertThat, eq } from "./test_matcher";
+import { assertThat, eq } from "@selfage/test_base/matcher";
+import { TEST_RUNNER } from "@selfage/test_base/runner";
 
 class Fact implements Observable {
   public onChange: () => void;

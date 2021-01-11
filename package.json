@@ -30,6 +30,7 @@
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
+    "@selfage/test_base": "^1.0.1",
     "typescript": "^3.9.2"
   },
   "scripts": {

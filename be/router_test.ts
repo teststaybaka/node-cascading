@@ -2,11 +2,11 @@ import http = require("http");
 import url = require("url");
 import { newInternalError } from "../errors";
 import { HttpMethod } from "../http_method";
-import { TEST_RUNNER } from "../test_base";
-import { assertThat, containStr, eq } from "../test_matcher";
 import { HttpHandler, HttpResponse } from "./http_handler";
 import { Logger } from "./logger";
 import { Router } from "./router";
+import { assertThat, containStr, eq } from "@selfage/test_base/matcher";
+import { TEST_RUNNER } from "@selfage/test_base/runner";
 
 class MockLogger extends Logger {
   public constructor() {

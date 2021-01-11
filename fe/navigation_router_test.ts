@@ -1,6 +1,6 @@
-import { TEST_RUNNER } from "../test_base";
-import { assertThat, eq } from "../test_matcher";
 import { NavigationRouter } from "./navigation_router";
+import { assertThat, eq } from "@selfage/test_base/matcher";
+import { TEST_RUNNER } from "@selfage/test_base/runner";
 
 async function testMatchCurrentUrl(
   currentPathname: string,

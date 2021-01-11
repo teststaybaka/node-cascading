@@ -1,5 +1,5 @@
 import { ObservableArray } from "./observable_array";
-import { MatchFn, assertThat, eq } from "./test_matcher";
+import { MatchFn, assertThat, eq } from "@selfage/test_base/matcher";
 
 export function eqObservableArray<T>(
   expected?: Array<MatchFn<T>>

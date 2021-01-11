@@ -1,7 +1,7 @@
 import { LinkedList } from "./linked_list";
 import { eqLinkedList } from "./linked_list_test_util";
-import { TEST_RUNNER } from "./test_base";
-import { MatchFn, assertThat, eq } from "./test_matcher";
+import { MatchFn, assertThat, eq } from "@selfage/test_base/matcher";
+import { TEST_RUNNER } from "@selfage/test_base/runner";
 
 function eqLinkedListBilateral<T>(
   expected: Array<MatchFn<T>>

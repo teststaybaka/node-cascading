@@ -2,9 +2,14 @@ import fs = require("fs");
 import url = require("url");
 import { CONTENT_TYPE_BINARY_STREAM } from "../constants";
 import { newInternalError } from "../errors";
-import { TEST_RUNNER } from "../test_base";
-import { assertRejection, assertThat, eq, eqError } from "../test_matcher";
 import { StaticDirHandler, StaticFileHandler } from "./static_handler";
+import {
+  assertRejection,
+  assertThat,
+  eq,
+  eqError,
+} from "@selfage/test_base/matcher";
+import { TEST_RUNNER } from "@selfage/test_base/runner";
 
 TEST_RUNNER.run({
   name: "StaticHttpHandlerTest",
